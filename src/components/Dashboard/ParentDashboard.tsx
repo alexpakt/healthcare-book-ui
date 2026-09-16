@@ -1,0 +1,159 @@
+import React, { useState } from 'react';
+import { Stack, Title, Text, Tabs, Alert, Button } from '@mantine/core';
+import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
+import { useAuth } from '../../hooks/useAuth';
+import { useParentDashboard } from '../../hooks/useParentData';
+import { QuickStats } from '../Parent/QuickStats';
+import { ChildrenList } from '../Parent/ChildrenList';
+import { UpcomingAppointments } from '../Parent/UpcomingAppointments';
+import { VaccinationReminders } from '../Parent/VaccinationReminders';
+import { ChildRegistrationForm } from '../Parent/ChildRegistrationForm';
+
+export const ParentDashboard: React.FC = () => {
+  const { user } = useAuth();
+  const [childFormOpened, setChildFormOpened] = useState(false);
+  const {
+    dashboardData,
+    children,
+    appointments,
+    vaccinations,
+    isLoading,
+    error,
+    refetch,
+  } = useParentDashboard();
+
+  if (!user) {
+    return (
+      <Stack gap="lg">
+        <Alert icon={<IconAlertCircle size={16} />} color="red" title="Not Authenticated">
+          Please log in to view your dashboard.
+        </Alert>
+      </Stack>
+    );
+  }
+
+  const handleAddChild = () => {
+    setChildFormOpened(true);
+  };
+
+  const handleViewChildDetails = (childId: number) => {
+    // TODO: Navigate to child details page
+    console.log('View child details:', childId);
+  };
+
+  const handleViewAllAppointments = () => {
+    // TODO: Navigate to appointments page
+    console.log('View all appointments');
+  };
+
+  const handleViewVaccinationHistory = () => {
+    // TODO: Navigate to vaccination history page
+    console.log('View vaccination history');
+  };
+
+  return (
+    <Stack gap="lg">
+      {/* Welcome Section */}
+      <div>
+        <Title order={2}>Καλώς ήρθατε!</Title>
+        <Text c="dimmed">
+          Εδώ μπορείτε να διαχειριστείτε το ηλεκτρονικό αρχείο υγείας των παιδιών σας
+        </Text>
+      </div>
+
+      {/* Error Alert */}
+      {error && (
+        <Alert
+          icon={<IconAlertCircle size={16} />}
+          color="red"
+          title="Σφάλμα κατά τη φόρτωση δεδομένων"
+        >
+          <Stack gap="sm">
+            <Text size="sm">
+              Σφάλμα φόρτωσης δεδομένων. Παρακαλώ δοκιμάστε ξανά.
+            </Text>
+            <Button
+              size="xs"
+              onClick={refetch}
+              leftSection={<IconRefresh size={14} />}
+              variant="light"
+            >
+              Δοκιμάστε ξανά
+            </Button>
+          </Stack>
+        </Alert>
+      )}
+
+      {/* Quick Stats */}
+      <QuickStats
+        stats={dashboardData?.quickStats || null}
+        isLoading={isLoading}
+      />
+
+      {/* Tabs for different sections */}
+      <Tabs defaultValue="children" orientation="horizontal">
+        <Tabs.List>
+          <Tabs.Tab value="children">
+            Τα παιδιά μου
+          </Tabs.Tab>
+          <Tabs.Tab value="appointments">
+            Ραντεβού
+          </Tabs.Tab>
+          <Tabs.Tab value="vaccinations">
+            Εμβολιασμοί
+          </Tabs.Tab>
+        </Tabs.List>
+
+        {/* Children Tab */}
+        <Tabs.Panel value="children" pt="md">
+          <ChildrenList
+            children={children}
+            isLoading={isLoading}
+            onViewDetails={handleViewChildDetails}
+            onAddChild={handleAddChild}
+          />
+        </Tabs.Panel>
+
+        {/* Appointments Tab */}
+        <Tabs.Panel value="appointments" pt="md">
+          <UpcomingAppointments
+            appointments={appointments as any}
+            isLoading={isLoading}
+            onViewDetails={handleViewAllAppointments}
+          />
+        </Tabs.Panel>
+
+        {/* Vaccinations Tab */}
+        <Tabs.Panel value="vaccinations" pt="md">
+          <VaccinationReminders
+            vaccinations={vaccinations as any}
+            isLoading={isLoading}
+            onViewDetails={handleViewVaccinationHistory}
+          />
+        </Tabs.Panel>
+      </Tabs>
+
+      {/* Quick action buttons */}
+      {!isLoading && !error && (
+        <div style={{ display: 'flex', gap: 12 }}>
+          <Button variant="light" onClick={handleAddChild}>
+            Προσθήκη νέου παιδιού
+          </Button>
+          <Button variant="light" onClick={refetch} leftSection={<IconRefresh size={16} />}>
+            Ανανέωση δεδομένων
+          </Button>
+        </div>
+      )}
+
+      {/* Child Registration Form Modal */}
+      <ChildRegistrationForm
+        opened={childFormOpened}
+        onClose={() => setChildFormOpened(false)}
+        onSuccess={() => {
+          setChildFormOpened(false);
+          refetch();
+        }}
+      />
+    </Stack>
+  );
+};
