@@ -1,4 +1,4 @@
-import apiClient from './apiClient';
+import { apiClient } from './apiClient';
 import type {
   AuthResponse,
   LoginRequest,
@@ -6,16 +6,14 @@ import type {
   RegisterDoctorRequest,
 } from '../types/auth';
 
-const client = apiClient.getInstance();
-
 export const authService = {
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await client.post<AuthResponse>('/api/auth/login', credentials);
+    const response = await apiClient.post<AuthResponse>('/api/auth/login', credentials);
     return response.data;
   },
 
   async registerParent(data: RegisterParentRequest): Promise<AuthResponse> {
-    const response = await client.post<AuthResponse>(
+    const response = await apiClient.post<AuthResponse>(
       '/api/auth/register/parent',
       data
     );
@@ -23,7 +21,7 @@ export const authService = {
   },
 
   async registerDoctor(data: RegisterDoctorRequest): Promise<AuthResponse> {
-    const response = await client.post<AuthResponse>(
+    const response = await apiClient.post<AuthResponse>(
       '/api/auth/register/doctor',
       data
     );

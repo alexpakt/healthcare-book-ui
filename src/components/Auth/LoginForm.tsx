@@ -12,7 +12,7 @@ export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
