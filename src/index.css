@@ -1,5 +1,15 @@
 /* Mantine styles are imported in main.tsx */
 
+:root {
+  --accent: #1f77b4;
+  --accent-bg: #e7f5ff;
+  --accent-border: #1f77b4;
+  --border: #dee2e6;
+  --text-h: #212529;
+  --social-bg: #f1f3f5;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 body {
   margin: 0;
   padding: 0;
