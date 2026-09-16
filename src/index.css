@@ -1,0 +1,10 @@
+/* Mantine styles are imported in main.tsx */
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+code {
+  font-family: ui-monospace, 'Courier New', monospace;
+}
