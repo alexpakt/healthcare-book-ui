@@ -17,7 +17,6 @@ export interface Appointment {
   doctorId: number;
   doctorName: string;
   appointmentDate: string;
-  appointmentTime: string;
   reason: string;
   status: AppointmentStatus;
   notes?: string;

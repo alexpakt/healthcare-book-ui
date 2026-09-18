@@ -23,7 +23,7 @@ export type UserRole = 'ROLE_PARENT' | 'ROLE_DOCTOR' | 'ROLE_ADMIN';
 
 export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'BLOCKED';
 
-export type AppointmentStatus = 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+export type AppointmentStatus = 'REQUESTED' | 'SCHEDULED' | 'DECLINED' | 'COMPLETED' | 'CANCELLED';
 
 export type VaccinationStatus = 'COMPLETED' | 'PENDING' | 'OVERDUE';
 

@@ -16,7 +16,6 @@ export interface DoctorAppointment {
   doctorId: number;
   doctorName: string;
   appointmentDate: string;
-  appointmentTime: string;
   reason: string;
   status: AppointmentStatus;
   notes?: string;
@@ -69,11 +68,13 @@ export interface DoctorQuickStats {
   todayAppointmentsCount: number;
   upcomingAppointmentsCount: number;
   completedAppointmentsCount: number;
+  pendingRequestsCount: number;
 }
 
 export interface DoctorDashboardData {
   assignedChildren: AssignedChild[];
   todayAppointments: DoctorAppointment[];
   upcomingAppointments: DoctorAppointment[];
+  pendingAppointments: DoctorAppointment[];
   quickStats: DoctorQuickStats;
 }

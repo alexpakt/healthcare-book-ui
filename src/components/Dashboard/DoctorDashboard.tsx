@@ -14,6 +14,7 @@ export const DoctorDashboard: React.FC = () => {
     assignedChildren,
     todayAppointments,
     upcomingAppointments,
+    pendingAppointments,
     isLoading,
     error,
     refetch,
@@ -37,6 +38,16 @@ export const DoctorDashboard: React.FC = () => {
 
   const handleMarkCompleted = async (appointmentId: number) => {
     await updateStatus.mutate({ appointmentId, status: 'COMPLETED' });
+    refetch();
+  };
+
+  const handleAccept = async (appointmentId: number) => {
+    await updateStatus.mutate({ appointmentId, status: 'SCHEDULED' });
+    refetch();
+  };
+
+  const handleDecline = async (appointmentId: number) => {
+    await updateStatus.mutate({ appointmentId, status: 'DECLINED' });
     refetch();
   };
 
@@ -66,10 +77,24 @@ export const DoctorDashboard: React.FC = () => {
 
       <Tabs defaultValue="patients" orientation="horizontal">
         <Tabs.List>
+          <Tabs.Tab value="requests">
+            Αιτήματα{pendingAppointments && pendingAppointments.length > 0 ? ` (${pendingAppointments.length})` : ''}
+          </Tabs.Tab>
           <Tabs.Tab value="patients">Ασθενείς</Tabs.Tab>
           <Tabs.Tab value="today">Σημερινά Ραντεβού</Tabs.Tab>
           <Tabs.Tab value="upcoming">Προσεχή Ραντεβού</Tabs.Tab>
         </Tabs.List>
+
+        <Tabs.Panel value="requests" pt="md">
+          <AppointmentsTable
+            title="Αιτήματα Ραντεβού"
+            emptyMessage="Δεν υπάρχουν εκκρεμή αιτήματα"
+            appointments={pendingAppointments}
+            isLoading={isLoading}
+            onAccept={handleAccept}
+            onDecline={handleDecline}
+          />
+        </Tabs.Panel>
 
         <Tabs.Panel value="patients" pt="md">
           <PatientsList

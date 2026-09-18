@@ -7,6 +7,7 @@ interface UpcomingAppointmentsProps {
   appointments: Appointment[] | null;
   isLoading: boolean;
   onViewDetails?: (appointmentId: number) => void;
+  onCancel?: (appointmentId: number) => void;
   title?: string;
   emptyMessage?: string;
   showViewAllButton?: boolean;
@@ -14,10 +15,14 @@ interface UpcomingAppointmentsProps {
 
 const getStatusColor = (status: string): string => {
   switch (status) {
+    case 'REQUESTED':
+      return 'orange';
     case 'SCHEDULED':
       return 'blue';
     case 'COMPLETED':
       return 'green';
+    case 'DECLINED':
+      return 'gray';
     case 'CANCELLED':
       return 'red';
     default:
@@ -27,10 +32,14 @@ const getStatusColor = (status: string): string => {
 
 const getStatusLabel = (status: string): string => {
   switch (status) {
+    case 'REQUESTED':
+      return 'Σε αναμονή';
     case 'SCHEDULED':
       return 'Προγραμματισμένο';
     case 'COMPLETED':
       return 'Ολοκληρωμένο';
+    case 'DECLINED':
+      return 'Απορρίφθηκε';
     case 'CANCELLED':
       return 'Ακυρώθηκε';
     default:
@@ -42,6 +51,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
   appointments,
   isLoading,
   onViewDetails,
+  onCancel,
   title = 'Προσεχή Ραντεβού',
   emptyMessage = 'Δεν υπάρχουν προσεχή ραντεβού',
   showViewAllButton = true,
@@ -89,6 +99,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                 <Table.Th>Ώρα</Table.Th>
                 <Table.Th>Λόγος</Table.Th>
                 <Table.Th>Κατάσταση</Table.Th>
+                {onCancel && <Table.Th />}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -108,7 +119,12 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm">{appointment.appointmentTime}</Text>
+                    <Text size="sm">
+                      {new Date(appointment.appointmentDate).toLocaleTimeString('el-GR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm" c="dimmed">
@@ -120,6 +136,15 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                       {getStatusLabel(appointment.status)}
                     </Badge>
                   </Table.Td>
+                  {onCancel && (
+                    <Table.Td>
+                      {(appointment.status === 'REQUESTED' || appointment.status === 'SCHEDULED') && (
+                        <Button size="xs" variant="subtle" color="red" onClick={() => onCancel(appointment.id)}>
+                          Ακύρωση
+                        </Button>
+                      )}
+                    </Table.Td>
+                  )}
                 </Table.Tr>
               ))}
             </Table.Tbody>

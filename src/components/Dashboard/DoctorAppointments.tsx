@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Stack, Title, Text, Alert, Button, Pagination, Group, Center, Loader } from '@mantine/core';
-import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
+import { IconAlertCircle, IconRefresh, IconPlus } from '@tabler/icons-react';
 import { useDoctorAppointments, useDoctorUpdateAppointmentStatus } from '../../hooks/useDoctorData';
 import { AppointmentsTable } from '../Doctor/AppointmentsTable';
+import { NewAppointmentForm } from '../Doctor/NewAppointmentForm';
 
 const PAGE_SIZE = 10;
 
@@ -10,18 +11,29 @@ export const DoctorAppointments: React.FC = () => {
   const [page, setPage] = useState(1);
   const { data, loading, error, refetch } = useDoctorAppointments(page, PAGE_SIZE);
   const updateStatus = useDoctorUpdateAppointmentStatus();
+  const [formOpened, setFormOpened] = useState(false);
 
   const handleMarkCompleted = async (appointmentId: number) => {
     await updateStatus.mutate({ appointmentId, status: 'COMPLETED' });
     refetch();
   };
 
+  const handleAccept = async (appointmentId: number) => {
+    await updateStatus.mutate({ appointmentId, status: 'SCHEDULED' });
+    refetch();
+  };
+
+  const handleDecline = async (appointmentId: number) => {
+    await updateStatus.mutate({ appointmentId, status: 'DECLINED' });
+    refetch();
+  };
+
   return (
     <Stack gap="lg">
-      <div>
+      <Stack gap="xs">
         <Title order={2}>Όλα τα Ραντεβού</Title>
         <Text c="dimmed">Πλήρης λίστα των ραντεβού σας</Text>
-      </div>
+      </Stack>
 
       {error && (
         <Alert
@@ -38,6 +50,12 @@ export const DoctorAppointments: React.FC = () => {
         </Alert>
       )}
 
+      <div>
+        <Button leftSection={<IconPlus size={16} />} onClick={() => setFormOpened(true)}>
+          Νέο Ραντεβού
+        </Button>
+      </div>
+
       {loading && !data ? (
         <Center py="xl">
           <Loader />
@@ -50,6 +68,8 @@ export const DoctorAppointments: React.FC = () => {
             appointments={data?.content || null}
             isLoading={loading}
             onMarkCompleted={handleMarkCompleted}
+            onAccept={handleAccept}
+            onDecline={handleDecline}
           />
 
           {data && data.totalPages > 1 && (
@@ -59,6 +79,15 @@ export const DoctorAppointments: React.FC = () => {
           )}
         </>
       )}
+
+      <NewAppointmentForm
+        opened={formOpened}
+        onClose={() => setFormOpened(false)}
+        onSuccess={() => {
+          setFormOpened(false);
+          refetch();
+        }}
+      />
     </Stack>
   );
 };

@@ -1,0 +1,115 @@
+import React, { useState } from 'react';
+import { Modal, Button, TextInput, Select, Stack, Alert, Group } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
+import { useAuth } from '../../hooks/useAuth';
+import { useDoctorAssignedChildren, useDoctorCreateAppointment } from '../../hooks/useDoctorData';
+
+interface NewAppointmentFormProps {
+  opened: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+const EMPTY_FORM = {
+  childId: '',
+  appointmentDate: '',
+  reason: '',
+};
+
+export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
+  opened,
+  onClose,
+  onSuccess,
+}) => {
+  const { user } = useAuth();
+  const [formData, setFormData] = useState(EMPTY_FORM);
+  const { data: patients } = useDoctorAssignedChildren();
+  const { mutate, loading, error, reset } = useDoctorCreateAppointment();
+
+  const handleChange = (field: keyof typeof EMPTY_FORM, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleClose = () => {
+    setFormData(EMPTY_FORM);
+    reset();
+    onClose();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.childId || !formData.appointmentDate || !user?.profileId) {
+      return;
+    }
+
+    try {
+      await mutate({
+        childId: Number(formData.childId),
+        doctorId: user.profileId,
+        appointmentDate:
+          formData.appointmentDate.length === 16 ? `${formData.appointmentDate}:00` : formData.appointmentDate,
+        reason: formData.reason || undefined,
+      });
+      setFormData(EMPTY_FORM);
+      reset();
+      onSuccess?.();
+      onClose();
+    } catch (err) {
+      console.error('Error creating appointment:', err);
+    }
+  };
+
+  return (
+    <Modal opened={opened} onClose={handleClose} title="Νέο Ραντεβού" size="md" centered>
+      <form onSubmit={handleSubmit}>
+        <Stack gap="md">
+          {error && (
+            <Alert icon={<IconAlertCircle size={16} />} color="red" title="Σφάλμα">
+              {error.message || 'Αποτυχία δημιουργίας ραντεβού. Προσπαθήστε ξανά.'}
+            </Alert>
+          )}
+
+          <Select
+            label="Ασθενής"
+            placeholder="Επιλέξτε ασθενή"
+            data={(patients || []).map((p) => ({ value: String(p.id), label: `${p.firstName} ${p.lastName}` }))}
+            value={formData.childId}
+            onChange={(value) => handleChange('childId', value || '')}
+            required
+            disabled={loading}
+          />
+
+          <TextInput
+            label="Ημερομηνία & Ώρα"
+            type="datetime-local"
+            value={formData.appointmentDate}
+            onChange={(e) => handleChange('appointmentDate', e.target.value)}
+            required
+            disabled={loading}
+          />
+
+          <TextInput
+            label="Λόγος (Προαιρετικό)"
+            placeholder="π.χ. Τακτικός έλεγχος"
+            value={formData.reason}
+            onChange={(e) => handleChange('reason', e.target.value)}
+            disabled={loading}
+          />
+
+          <Group justify="flex-end">
+            <Button variant="light" onClick={handleClose} disabled={loading}>
+              Ακύρωση
+            </Button>
+            <Button
+              type="submit"
+              loading={loading}
+              disabled={!formData.childId || !formData.appointmentDate}
+            >
+              {loading ? 'Αποθήκευση...' : 'Δημιουργία Ραντεβού'}
+            </Button>
+          </Group>
+        </Stack>
+      </form>
+    </Modal>
+  );
+};

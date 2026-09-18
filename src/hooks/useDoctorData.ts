@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { doctorService } from '../services/doctorService';
+import type { CreateAppointmentRequest } from '../services/doctorService';
 import type { AppointmentStatus } from '../types/common';
 
 export function useDoctorDashboardData() {
@@ -26,6 +27,12 @@ export function useDoctorUpcomingAppointments(limit?: number) {
 export function useDoctorAppointments(page: number = 1, pageSize: number = 10) {
   const fetchFn = useCallback(() => doctorService.getAppointments(page, pageSize), [page, pageSize]);
   return useApi(fetchFn);
+}
+
+export function useDoctorCreateAppointment() {
+  return useMutation((request?: CreateAppointmentRequest) =>
+    doctorService.createAppointment(request!)
+  );
 }
 
 export function useDoctorUpdateAppointmentStatus() {
@@ -69,6 +76,7 @@ export function useDoctorDashboard() {
     assignedChildren: dashboardData.data?.assignedChildren || null,
     todayAppointments: dashboardData.data?.todayAppointments || null,
     upcomingAppointments: dashboardData.data?.upcomingAppointments || null,
+    pendingAppointments: dashboardData.data?.pendingAppointments || null,
     isLoading,
     error: hasError,
     refetch,

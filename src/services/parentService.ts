@@ -1,5 +1,14 @@
 import { apiClient } from './apiClient';
 import type { Child, Appointment, VaccinationRecord, MedicalRecord, ParentDashboardData } from '../types/parent';
+import type { AppointmentStatus } from '../types/common';
+
+export interface CreateAppointmentRequest {
+  childId: number;
+  doctorId: number;
+  appointmentDate: string;
+  reason?: string;
+  notes?: string;
+}
 
 /**
  * Parent service - Fetches data from resource endpoints
@@ -58,6 +67,26 @@ export const parentService = {
     const response = await apiClient.get<Appointment[]>(
       `/api/appointments/child/${childId}`
     );
+    return response.data;
+  },
+
+  /**
+   * Request a new appointment for a child. Created with status REQUESTED
+   * until the doctor accepts or declines it.
+   */
+  async createAppointment(request: CreateAppointmentRequest): Promise<Appointment> {
+    const response = await apiClient.post<Appointment>('/api/appointments', request);
+    return response.data;
+  },
+
+  /**
+   * Update an appointment's status. Parents may only cancel their own
+   * REQUESTED or SCHEDULED appointments (enforced server-side).
+   */
+  async updateAppointmentStatus(appointmentId: number, status: AppointmentStatus): Promise<Appointment> {
+    const response = await apiClient.patch<Appointment>(`/api/appointments/${appointmentId}/status`, {
+      status,
+    });
     return response.data;
   },
 

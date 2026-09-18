@@ -1,7 +1,9 @@
 import { useCallback } from 'react';
-import { useApi } from './useApi';
+import { useApi, useMutation } from './useApi';
 import { parentService } from '../services/parentService';
+import type { CreateAppointmentRequest } from '../services/parentService';
 import type { Appointment, VaccinationRecord } from '../types/parent';
+import type { AppointmentStatus } from '../types/common';
 
 /**
  * Hook for fetching parent dashboard data
@@ -57,6 +59,25 @@ export function useParentChildVaccinations(childId: number) {
 export function useParentChildMedicalRecords(childId: number) {
   const fetchFn = useCallback(() => parentService.getChildMedicalRecords(childId), [childId]);
   return useApi(fetchFn);
+}
+
+/**
+ * Hook for requesting a new appointment (mutation)
+ */
+export function useParentCreateAppointment() {
+  return useMutation((request?: CreateAppointmentRequest) =>
+    parentService.createAppointment(request!)
+  );
+}
+
+/**
+ * Hook for updating an appointment's status, e.g. cancelling (mutation)
+ */
+export function useParentUpdateAppointmentStatus() {
+  return useMutation(
+    (payload?: { appointmentId: number; status: AppointmentStatus }) =>
+      parentService.updateAppointmentStatus(payload!.appointmentId, payload!.status)
+  );
 }
 
 /**

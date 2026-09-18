@@ -1,6 +1,6 @@
 import React from 'react';
 import { Group, Paper, Stack, Text, ThemeIcon } from '@mantine/core';
-import { IconUsers, IconCalendarEvent, IconClipboardCheck, IconCircleCheck } from '@tabler/icons-react';
+import { IconUsers, IconCalendarEvent, IconClipboardCheck, IconCircleCheck, IconHourglass } from '@tabler/icons-react';
 import type { DoctorQuickStats } from '../../types/doctor';
 
 interface QuickStatsProps {
@@ -37,7 +37,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ stats, isLoading }) => {
   if (isLoading || !stats) {
     return (
       <Group grow>
-        {[1, 2, 3, 4].map((i) => (
+        {[1, 2, 3, 4, 5].map((i) => (
           <Paper key={i} p="md" radius="md" withBorder>
             <div style={{ height: 60, backgroundColor: '#f0f0f0', borderRadius: 4 }} />
           </Paper>
@@ -48,6 +48,12 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ stats, isLoading }) => {
 
   return (
     <Group grow>
+      <StatCard
+        icon={<IconHourglass size={20} />}
+        label="Σε αναμονή"
+        value={stats.pendingRequestsCount}
+        color={stats.pendingRequestsCount > 0 ? 'orange' : 'gray'}
+      />
       <StatCard
         icon={<IconUsers size={20} />}
         label="Ασθενείς"

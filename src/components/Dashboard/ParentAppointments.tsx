@@ -1,18 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Stack, Title, Text, Alert, Button } from '@mantine/core';
-import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
-import { useParentAppointments } from '../../hooks/useParentData';
+import { IconAlertCircle, IconRefresh, IconPlus } from '@tabler/icons-react';
+import { useParentAppointments, useParentUpdateAppointmentStatus } from '../../hooks/useParentData';
 import { UpcomingAppointments } from '../Parent/UpcomingAppointments';
+import { AppointmentRequestForm } from '../Parent/AppointmentRequestForm';
 
 export const ParentAppointments: React.FC = () => {
   const { data, loading, error, refetch } = useParentAppointments();
+  const updateStatus = useParentUpdateAppointmentStatus();
+  const [formOpened, setFormOpened] = useState(false);
+
+  const handleCancel = async (appointmentId: number) => {
+    await updateStatus.mutate({ appointmentId, status: 'CANCELLED' });
+    refetch();
+  };
 
   return (
     <Stack gap="lg">
-      <div>
+      <Stack gap="xs">
         <Title order={2}>Όλα τα Ραντεβού</Title>
         <Text c="dimmed">Τα ραντεβού των παιδιών σας</Text>
-      </div>
+      </Stack>
 
       {error && (
         <Alert
@@ -29,12 +37,28 @@ export const ParentAppointments: React.FC = () => {
         </Alert>
       )}
 
+      <div>
+        <Button leftSection={<IconPlus size={16} />} onClick={() => setFormOpened(true)}>
+          Αίτημα Ραντεβού
+        </Button>
+      </div>
+
       <UpcomingAppointments
         title="Ραντεβού"
         emptyMessage="Δεν υπάρχουν ραντεβού"
         appointments={data}
         isLoading={loading}
         showViewAllButton={false}
+        onCancel={handleCancel}
+      />
+
+      <AppointmentRequestForm
+        opened={formOpened}
+        onClose={() => setFormOpened(false)}
+        onSuccess={() => {
+          setFormOpened(false);
+          refetch();
+        }}
       />
     </Stack>
   );

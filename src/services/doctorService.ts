@@ -9,7 +9,26 @@ import type {
 } from '../types/doctor';
 import type { AppointmentStatus, PaginatedResponse } from '../types/common';
 
+export interface CreateAppointmentRequest {
+  childId: number;
+  doctorId: number;
+  appointmentDate: string; // ISO local datetime, e.g. "2026-09-25T14:30:00"
+  reason?: string;
+  notes?: string;
+}
+
 export const doctorService = {
+  async createAppointment(request: CreateAppointmentRequest): Promise<DoctorAppointment> {
+    try {
+      const response = await apiClient.post<DoctorAppointment>('/api/appointments', request);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      throw error;
+    }
+  },
+
+
   async getAssignedChildren(): Promise<AssignedChild[]> {
     try {
       const children = await childService.getMyChildren();
@@ -43,6 +62,16 @@ export const doctorService = {
       });
     } catch (error) {
       console.error('Error fetching today appointments:', error);
+      throw error;
+    }
+  },
+
+  async getPendingAppointments(): Promise<DoctorAppointment[]> {
+    try {
+      const allAppointments = await apiClient.get<any[]>('/api/appointments');
+      return allAppointments.data.filter((apt) => apt.status === 'REQUESTED');
+    } catch (error) {
+      console.error('Error fetching pending appointments:', error);
       throw error;
     }
   },
@@ -88,9 +117,9 @@ export const doctorService = {
   async updateAppointmentStatus(
     appointmentId: number,
     status: AppointmentStatus
-  ): Promise<any> {
+  ): Promise<DoctorAppointment> {
     try {
-      const response = await apiClient.patch(`/api/appointments/${appointmentId}/status`, {
+      const response = await apiClient.patch<DoctorAppointment>(`/api/appointments/${appointmentId}/status`, {
         status,
       });
       return response.data;
@@ -148,21 +177,24 @@ export const doctorService = {
 
   async getDashboardData(): Promise<DoctorDashboardData> {
     try {
-      const [assignedChildren, todayAppointments, upcomingAppointments] = await Promise.all([
+      const [assignedChildren, todayAppointments, upcomingAppointments, pendingAppointments] = await Promise.all([
         this.getAssignedChildren(),
         this.getTodayAppointments(),
         this.getUpcomingAppointments(5),
+        this.getPendingAppointments(),
       ]);
 
       return {
         assignedChildren,
         todayAppointments,
         upcomingAppointments,
+        pendingAppointments,
         quickStats: {
           totalPatients: assignedChildren.length,
           todayAppointmentsCount: todayAppointments.length,
           upcomingAppointmentsCount: upcomingAppointments.length,
           completedAppointmentsCount: 0,
+          pendingRequestsCount: pendingAppointments.length,
         },
       };
     } catch (error) {

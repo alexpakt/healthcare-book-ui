@@ -1,6 +1,6 @@
 import React from 'react';
-import { Stack, Table, Text, Badge, Button, Center, Loader, Paper } from '@mantine/core';
-import { IconCalendarEvent, IconCircleCheck } from '@tabler/icons-react';
+import { Stack, Table, Text, Badge, Button, Center, Loader, Paper, Group } from '@mantine/core';
+import { IconCalendarEvent, IconCircleCheck, IconCheck, IconX } from '@tabler/icons-react';
 import type { DoctorAppointment } from '../../types/doctor';
 
 interface AppointmentsTableProps {
@@ -9,14 +9,20 @@ interface AppointmentsTableProps {
   appointments: DoctorAppointment[] | null;
   isLoading: boolean;
   onMarkCompleted?: (appointmentId: number) => void;
+  onAccept?: (appointmentId: number) => void;
+  onDecline?: (appointmentId: number) => void;
 }
 
 const getStatusColor = (status: string): string => {
   switch (status) {
+    case 'REQUESTED':
+      return 'orange';
     case 'SCHEDULED':
       return 'blue';
     case 'COMPLETED':
       return 'green';
+    case 'DECLINED':
+      return 'gray';
     case 'CANCELLED':
       return 'red';
     default:
@@ -26,10 +32,14 @@ const getStatusColor = (status: string): string => {
 
 const getStatusLabel = (status: string): string => {
   switch (status) {
+    case 'REQUESTED':
+      return 'Σε αναμονή';
     case 'SCHEDULED':
       return 'Προγραμματισμένο';
     case 'COMPLETED':
       return 'Ολοκληρωμένο';
+    case 'DECLINED':
+      return 'Απορρίφθηκε';
     case 'CANCELLED':
       return 'Ακυρώθηκε';
     default:
@@ -43,7 +53,10 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
   appointments,
   isLoading,
   onMarkCompleted,
+  onAccept,
+  onDecline,
 }) => {
+  const showActionsColumn = Boolean(onMarkCompleted || onAccept || onDecline);
   if (isLoading) {
     return (
       <Center py="xl">
@@ -87,7 +100,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                 <Table.Th>Ώρα</Table.Th>
                 <Table.Th>Λόγος</Table.Th>
                 <Table.Th>Κατάσταση</Table.Th>
-                {onMarkCompleted && <Table.Th />}
+                {showActionsColumn && <Table.Th />}
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
@@ -107,7 +120,12 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm">{appointment.appointmentTime}</Text>
+                    <Text size="sm">
+                      {new Date(appointment.appointmentDate).toLocaleTimeString('el-GR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </Text>
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm" c="dimmed">
@@ -119,19 +137,43 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                       {getStatusLabel(appointment.status)}
                     </Badge>
                   </Table.Td>
-                  {onMarkCompleted && (
+                  {showActionsColumn && (
                     <Table.Td>
-                      {appointment.status === 'SCHEDULED' && (
-                        <Button
-                          size="xs"
-                          variant="light"
-                          color="green"
-                          leftSection={<IconCircleCheck size={14} />}
-                          onClick={() => onMarkCompleted(appointment.id)}
-                        >
-                          Ολοκλήρωση
-                        </Button>
-                      )}
+                      <Group gap={4} wrap="nowrap">
+                        {appointment.status === 'REQUESTED' && onAccept && (
+                          <Button
+                            size="xs"
+                            variant="light"
+                            color="green"
+                            leftSection={<IconCheck size={14} />}
+                            onClick={() => onAccept(appointment.id)}
+                          >
+                            Αποδοχή
+                          </Button>
+                        )}
+                        {appointment.status === 'REQUESTED' && onDecline && (
+                          <Button
+                            size="xs"
+                            variant="subtle"
+                            color="red"
+                            leftSection={<IconX size={14} />}
+                            onClick={() => onDecline(appointment.id)}
+                          >
+                            Απόρριψη
+                          </Button>
+                        )}
+                        {appointment.status === 'SCHEDULED' && onMarkCompleted && (
+                          <Button
+                            size="xs"
+                            variant="light"
+                            color="green"
+                            leftSection={<IconCircleCheck size={14} />}
+                            onClick={() => onMarkCompleted(appointment.id)}
+                          >
+                            Ολοκλήρωση
+                          </Button>
+                        )}
+                      </Group>
                     </Table.Td>
                   )}
                 </Table.Tr>
