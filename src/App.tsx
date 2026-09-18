@@ -9,6 +9,7 @@ import { LoginForm } from './components/Auth/LoginForm';
 import { RegisterForm } from './components/Auth/RegisterForm';
 import Dashboard from './pages/Dashboard';
 import AppointmentsPage from './pages/AppointmentsPage';
+import ParentChildrenPage from './pages/ParentChildrenPage';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -31,6 +32,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AppointmentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/children"
+            element={
+              <ProtectedRoute requiredRole="ROLE_PARENT">
+                <ParentChildrenPage />
               </ProtectedRoute>
             }
           />
