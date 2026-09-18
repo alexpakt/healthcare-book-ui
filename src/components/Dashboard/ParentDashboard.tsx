@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Stack, Title, Text, Tabs, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -11,6 +12,7 @@ import { ChildRegistrationForm } from '../Parent/ChildRegistrationForm';
 
 export const ParentDashboard: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [childFormOpened, setChildFormOpened] = useState(false);
   const {
     dashboardData,
@@ -42,8 +44,7 @@ export const ParentDashboard: React.FC = () => {
   };
 
   const handleViewAllAppointments = () => {
-    // TODO: Navigate to appointments page
-    console.log('View all appointments');
+    navigate('/appointments');
   };
 
   const handleViewVaccinationHistory = () => {

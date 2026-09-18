@@ -7,6 +7,9 @@ interface UpcomingAppointmentsProps {
   appointments: Appointment[] | null;
   isLoading: boolean;
   onViewDetails?: (appointmentId: number) => void;
+  title?: string;
+  emptyMessage?: string;
+  showViewAllButton?: boolean;
 }
 
 const getStatusColor = (status: string): string => {
@@ -39,6 +42,9 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
   appointments,
   isLoading,
   onViewDetails,
+  title = 'Προσεχή Ραντεβού',
+  emptyMessage = 'Δεν υπάρχουν προσεχή ραντεβού',
+  showViewAllButton = true,
 }) => {
   if (isLoading) {
     return (
@@ -54,7 +60,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
         <Center py="xl">
           <Stack align="center" gap="md">
             <IconCalendarEvent size={40} color="var(--mantine-color-gray-3)" />
-            <Text c="dimmed">Δεν υπάρχουν προσεχή ραντεβού</Text>
+            <Text c="dimmed">{emptyMessage}</Text>
           </Stack>
         </Center>
       </Paper>
@@ -66,7 +72,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
       <Stack gap="md">
         <div>
           <Text fw={600} size="lg">
-            Προσεχή Ραντεβού
+            {title}
           </Text>
           <Text size="sm" c="dimmed">
             {appointments.length} {appointments.length === 1 ? 'ραντεβού' : 'ραντεβού'}
@@ -120,12 +126,14 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
           </Table>
         </div>
 
-        <Button
-          variant="light"
-          onClick={() => onViewDetails?.(0)}
-        >
-          Προβολή όλων των ραντεβού
-        </Button>
+        {showViewAllButton && (
+          <Button
+            variant="light"
+            onClick={() => onViewDetails?.(0)}
+          >
+            Προβολή όλων των ραντεβού
+          </Button>
+        )}
       </Stack>
     </Paper>
   );

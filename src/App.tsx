@@ -8,6 +8,7 @@ import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { LoginForm } from './components/Auth/LoginForm';
 import { RegisterForm } from './components/Auth/RegisterForm';
 import Dashboard from './pages/Dashboard';
+import AppointmentsPage from './pages/AppointmentsPage';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -22,6 +23,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/appointments"
+            element={
+              <ProtectedRoute>
+                <AppointmentsPage />
               </ProtectedRoute>
             }
           />
