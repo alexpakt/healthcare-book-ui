@@ -3,11 +3,22 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Paper, TextInput, PasswordInput, Button, Group, Text, Stack, Center, Anchor, Alert, Select } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
-import type { RegisterParentRequest } from '../../types/auth';
+
+interface RegisterFormData {
+  username: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  specialization: string;
+  licenseNumber: string;
+}
 
 export const RegisterForm: React.FC = () => {
   const [userType, setUserType] = useState<'parent' | 'doctor'>('parent');
-  const [formData, setFormData] = useState<RegisterParentRequest>({
+  const [formData, setFormData] = useState<RegisterFormData>({
     username: '',
     password: '',
     firstName: '',
@@ -15,11 +26,13 @@ export const RegisterForm: React.FC = () => {
     email: '',
     phoneNumber: '',
     address: '',
+    specialization: '',
+    licenseNumber: '',
   });
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { registerParent } = useAuth();
+  const { registerParent, registerDoctor } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -36,11 +49,26 @@ export const RegisterForm: React.FC = () => {
 
     try {
       if (userType === 'parent') {
-        await registerParent(formData);
+        await registerParent({
+          username: formData.username,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber || undefined,
+          address: formData.address || undefined,
+        });
       } else {
-        setError('Doctor registration coming soon');
-        setIsLoading(false);
-        return;
+        await registerDoctor({
+          username: formData.username,
+          password: formData.password,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber || undefined,
+          specialization: formData.specialization,
+          licenseNumber: formData.licenseNumber,
+        });
       }
       navigate('/');
     } catch (err: any) {
@@ -113,6 +141,29 @@ export const RegisterForm: React.FC = () => {
                 onChange={(e) => handleChange({ target: { name: 'email', value: e.target.value } } as any)}
                 required
               />
+
+              {userType === 'doctor' && (
+                <Group grow>
+                  <TextInput
+                    label="Ειδικότητα"
+                    placeholder="π.χ. Παιδίατρος"
+                    value={formData.specialization}
+                    onChange={(e) =>
+                      handleChange({ target: { name: 'specialization', value: e.target.value } } as any)
+                    }
+                    required
+                  />
+                  <TextInput
+                    label="Αριθμός άδειας"
+                    placeholder="Αριθμός άδειας ασκήσεως επαγγέλματος"
+                    value={formData.licenseNumber}
+                    onChange={(e) =>
+                      handleChange({ target: { name: 'licenseNumber', value: e.target.value } } as any)
+                    }
+                    required
+                  />
+                </Group>
+              )}
 
               <TextInput
                 label="Όνομα χρήστη"
