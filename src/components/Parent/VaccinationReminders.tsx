@@ -2,6 +2,7 @@ import React from 'react';
 import { Stack, Table, Text, Badge, Alert, Center, Loader, Paper, Button } from '@mantine/core';
 import { IconAlertCircle, IconVaccine } from '@tabler/icons-react';
 import type { VaccinationRecord } from '../../types/parent';
+import { getVaccinationStatus } from '../../utils/vaccinationStatus';
 
 interface VaccinationRemindersProps {
   vaccinations: VaccinationRecord[] | null;
@@ -48,8 +49,8 @@ export const VaccinationReminders: React.FC<VaccinationRemindersProps> = ({
     );
   }
 
-  const overdueVaccinations = vaccinations?.filter((v) => v.status === 'OVERDUE') || [];
-  const pendingVaccinations = vaccinations?.filter((v) => v.status === 'PENDING') || [];
+  const overdueVaccinations = vaccinations?.filter((v) => getVaccinationStatus(v) === 'OVERDUE') || [];
+  const pendingVaccinations = vaccinations?.filter((v) => getVaccinationStatus(v) === 'PENDING') || [];
 
   if (!vaccinations || vaccinations.length === 0) {
     return (
@@ -108,33 +109,38 @@ export const VaccinationReminders: React.FC<VaccinationRemindersProps> = ({
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {vaccinations.map((vaccination) => (
-                <Table.Tr key={vaccination.id}>
-                  <Table.Td>
-                    <Text size="sm" fw={500}>
-                      {/* childName would need to be added to VaccinationRecord type */}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm">{vaccination.vaccineName}</Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm">
-                      {new Date(vaccination.vaccinationDate).toLocaleDateString('el-GR')}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Text size="sm">
-                      {new Date(vaccination.nextDueDate).toLocaleDateString('el-GR')}
-                    </Text>
-                  </Table.Td>
-                  <Table.Td>
-                    <Badge size="sm" color={getStatusColor(vaccination.status)}>
-                      {getStatusLabel(vaccination.status)}
-                    </Badge>
-                  </Table.Td>
-                </Table.Tr>
-              ))}
+              {vaccinations.map((vaccination) => {
+                const status = getVaccinationStatus(vaccination);
+                return (
+                  <Table.Tr key={vaccination.id}>
+                    <Table.Td>
+                      <Text size="sm" fw={500}>
+                        {vaccination.childName}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm">{vaccination.vaccineName}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm">
+                        {new Date(vaccination.administeredDate).toLocaleDateString('el-GR')}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm">
+                        {vaccination.nextDoseDate
+                          ? new Date(vaccination.nextDoseDate).toLocaleDateString('el-GR')
+                          : '—'}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge size="sm" color={getStatusColor(status)}>
+                        {getStatusLabel(status)}
+                      </Badge>
+                    </Table.Td>
+                  </Table.Tr>
+                );
+              })}
             </Table.Tbody>
           </Table>
         </div>

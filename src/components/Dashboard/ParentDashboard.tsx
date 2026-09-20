@@ -39,8 +39,7 @@ export const ParentDashboard: React.FC = () => {
   };
 
   const handleViewChildDetails = (childId: number) => {
-    // TODO: Navigate to child details page
-    console.log('View child details:', childId);
+    navigate(`/children/${childId}`);
   };
 
   const handleViewAllAppointments = () => {

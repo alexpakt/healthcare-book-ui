@@ -1,6 +1,7 @@
 import { apiClient } from './apiClient';
 import type { Child, Appointment, VaccinationRecord, MedicalRecord, ParentDashboardData } from '../types/parent';
 import type { AppointmentStatus } from '../types/common';
+import { getVaccinationStatus } from '../utils/vaccinationStatus';
 
 export interface CreateAppointmentRequest {
   childId: number;
@@ -118,9 +119,9 @@ export const parentService = {
         return aptDate >= today && aptDate <= thirtyDaysLater && apt.status === 'SCHEDULED';
       });
 
-      // Find overdue vaccinations
+      // Find overdue vaccinations (no server-side status; derive from nextDoseDate)
       const overdueVaccinations = allVaccinations.filter(
-        (v) => v.status === 'OVERDUE'
+        (v) => getVaccinationStatus(v) === 'OVERDUE'
       );
 
       return {

@@ -1,4 +1,4 @@
-import type { AppointmentStatus, VaccinationStatus, Gender } from './common';
+import type { AppointmentStatus, Gender } from './common';
 
 export interface Child {
   id: number;
@@ -25,20 +25,26 @@ export interface Appointment {
 export interface VaccinationRecord {
   id: number;
   childId: number;
+  childName: string;
   vaccineName: string;
-  vaccinationDate: string;
-  nextDueDate: string;
-  status: VaccinationStatus;
-  doctorId: number;
-  doctorName: string;
+  administeredDate: string;
+  nextDoseDate?: string;
+  batchNumber?: string;
+  administeredByDoctorName: string;
+  notes?: string;
 }
 
 export interface MedicalRecord {
   id: number;
   childId: number;
-  recordType: string;
+  childName: string;
+  doctorId: number;
+  doctorName: string;
+  appointmentId?: number;
   recordDate: string;
-  content: string;
+  diagnosis: string;
+  notes?: string;
+  prescription?: string;
 }
 
 export interface ParentQuickStats {

@@ -1,4 +1,5 @@
 import type { AppointmentStatus } from './common';
+import type { MedicalRecord, VaccinationRecord } from './parent';
 
 export interface AssignedChild {
   id: number;
@@ -20,16 +21,6 @@ export interface DoctorAppointment {
   status: AppointmentStatus;
   notes?: string;
   parentName: string;
-  parentContactInfo?: string;
-}
-
-export interface MedicalNotes {
-  id: number;
-  appointmentId: number;
-  childId: number;
-  notes: string;
-  createdAt: string;
-  updatedAt?: string;
 }
 
 export interface PatientMedicalHistory {
@@ -40,27 +31,20 @@ export interface PatientMedicalHistory {
   allergies: AllergyRecord[];
 }
 
-export interface MedicalHistory {
-  id: number;
-  recordType: string;
-  recordDate: string;
-  content: string;
-}
-
-export interface VaccinationHistory {
-  id: number;
-  vaccineName: string;
-  vaccinationDate: string;
-  nextDueDate: string;
-  doctorName: string;
-}
+// Same shape as the backend sends to parents (MedicalRecordResponse/VaccinationResponse) —
+// reused rather than duplicated with (previously incorrect) doctor-specific field names.
+export type MedicalHistory = MedicalRecord;
+export type VaccinationHistory = VaccinationRecord;
 
 export interface AllergyRecord {
   id: number;
-  allergyName: string;
+  childId: number;
+  childName: string;
+  allergen: string;
   severity: 'MILD' | 'MODERATE' | 'SEVERE';
   reaction?: string;
-  dateIdentified: string;
+  diagnosedDate: string;
+  notes?: string;
 }
 
 export interface DoctorQuickStats {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Stack, Title, Text, Tabs, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -9,6 +10,7 @@ import { AppointmentsTable } from '../Doctor/AppointmentsTable';
 
 export const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const {
     dashboardData,
     assignedChildren,
@@ -32,8 +34,7 @@ export const DoctorDashboard: React.FC = () => {
   }
 
   const handleViewHistory = (childId: number) => {
-    // TODO: Navigate to patient medical history page
-    console.log('View patient history:', childId);
+    navigate(`/patients/${childId}`);
   };
 
   const handleMarkCompleted = async (appointmentId: number) => {

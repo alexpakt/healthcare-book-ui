@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { doctorService } from '../services/doctorService';
-import type { CreateAppointmentRequest } from '../services/doctorService';
+import type { CreateAppointmentRequest, MedicalRecordRequest } from '../services/doctorService';
 import type { AppointmentStatus } from '../types/common';
 
 export function useDoctorDashboardData() {
@@ -47,17 +47,16 @@ export function useDoctorPatientMedicalHistory(childId: number) {
   return useApi(fetchFn);
 }
 
-export function useDoctorAddMedicalNotes() {
-  return useMutation(
-    (payload?: { appointmentId: number; notes: string }) =>
-      doctorService.addMedicalNotes(payload!.appointmentId, payload!.notes)
+export function useDoctorCreateMedicalRecord() {
+  return useMutation((request?: MedicalRecordRequest) =>
+    doctorService.createMedicalRecord(request!)
   );
 }
 
-export function useDoctorUpdateMedicalNotes() {
+export function useDoctorUpdateMedicalRecord() {
   return useMutation(
-    (payload?: { notesId: number; notes: string }) =>
-      doctorService.updateMedicalNotes(payload!.notesId, payload!.notes)
+    (payload?: { recordId: number; request: MedicalRecordRequest }) =>
+      doctorService.updateMedicalRecord(payload!.recordId, payload!.request)
   );
 }
 

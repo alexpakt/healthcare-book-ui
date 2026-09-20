@@ -26,6 +26,16 @@ export const childService = {
     }
   },
 
+  async getById(childId: number): Promise<ChildRecord> {
+    try {
+      const response = await apiClient.get<ChildRecord>(`/api/children/${childId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching child:', error);
+      throw error;
+    }
+  },
+
   async createChild(childData: CreateChildRequest): Promise<Child> {
     try {
       const response = await apiClient.post<Child>('/api/children', childData);

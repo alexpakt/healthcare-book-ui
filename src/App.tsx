@@ -10,6 +10,8 @@ import { RegisterForm } from './components/Auth/RegisterForm';
 import Dashboard from './pages/Dashboard';
 import AppointmentsPage from './pages/AppointmentsPage';
 import ParentChildrenPage from './pages/ParentChildrenPage';
+import ChildDetailPage from './pages/ChildDetailPage';
+import PatientHistoryPage from './pages/PatientHistoryPage';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -40,6 +42,22 @@ function App() {
             element={
               <ProtectedRoute requiredRole="ROLE_PARENT">
                 <ParentChildrenPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/children/:childId"
+            element={
+              <ProtectedRoute requiredRole="ROLE_PARENT">
+                <ChildDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/patients/:childId"
+            element={
+              <ProtectedRoute requiredRole="ROLE_DOCTOR">
+                <PatientHistoryPage />
               </ProtectedRoute>
             }
           />

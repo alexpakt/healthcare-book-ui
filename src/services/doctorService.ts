@@ -4,7 +4,9 @@ import type {
   AssignedChild,
   DoctorAppointment,
   PatientMedicalHistory,
-  MedicalNotes,
+  MedicalHistory,
+  VaccinationHistory,
+  AllergyRecord,
   DoctorDashboardData,
 } from '../types/doctor';
 import type { AppointmentStatus, PaginatedResponse } from '../types/common';
@@ -17,7 +19,52 @@ export interface CreateAppointmentRequest {
   notes?: string;
 }
 
+export interface MedicalRecordRequest {
+  childId: number;
+  appointmentId?: number;
+  recordDate: string; // YYYY-MM-DD
+  diagnosis: string;
+  notes?: string;
+  prescription?: string;
+}
+
+const filterToday = (appointments: DoctorAppointment[]): DoctorAppointment[] => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return appointments.filter((apt) => {
+    const aptDate = new Date(apt.appointmentDate);
+    aptDate.setHours(0, 0, 0, 0);
+    return aptDate.getTime() === today.getTime() && apt.status === 'SCHEDULED';
+  });
+};
+
+const filterUpcoming = (appointments: DoctorAppointment[], limit?: number): DoctorAppointment[] => {
+  const today = new Date();
+  const upcoming = appointments.filter((apt) => {
+    const aptDate = new Date(apt.appointmentDate);
+    return aptDate >= today && apt.status === 'SCHEDULED';
+  });
+  return limit ? upcoming.slice(0, limit) : upcoming;
+};
+
+const filterPending = (appointments: DoctorAppointment[]): DoctorAppointment[] =>
+  appointments.filter((apt) => apt.status === 'REQUESTED');
+
 export const doctorService = {
+  /**
+   * Fetches the doctor's full appointment list once. Today's/upcoming/pending
+   * views and getDashboardData() all derive from this instead of each
+   * independently re-fetching the same /api/appointments list.
+   */
+  async getAllAppointments(): Promise<DoctorAppointment[]> {
+    try {
+      const response = await apiClient.get<DoctorAppointment[]>('/api/appointments');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
+      throw error;
+    }
+  },
   async createAppointment(request: CreateAppointmentRequest): Promise<DoctorAppointment> {
     try {
       const response = await apiClient.post<DoctorAppointment>('/api/appointments', request);
@@ -27,7 +74,6 @@ export const doctorService = {
       throw error;
     }
   },
-
 
   async getAssignedChildren(): Promise<AssignedChild[]> {
     try {
@@ -48,70 +94,32 @@ export const doctorService = {
   },
 
   async getTodayAppointments(): Promise<DoctorAppointment[]> {
-    try {
-      const allAppointments = await apiClient.get<any[]>('/api/appointments');
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-
-      return allAppointments.data.filter((apt) => {
-        const aptDate = new Date(apt.appointmentDate);
-        aptDate.setHours(0, 0, 0, 0);
-        return aptDate.getTime() === today.getTime() && apt.status === 'SCHEDULED';
-      });
-    } catch (error) {
-      console.error('Error fetching today appointments:', error);
-      throw error;
-    }
+    return filterToday(await this.getAllAppointments());
   },
 
   async getPendingAppointments(): Promise<DoctorAppointment[]> {
-    try {
-      const allAppointments = await apiClient.get<any[]>('/api/appointments');
-      return allAppointments.data.filter((apt) => apt.status === 'REQUESTED');
-    } catch (error) {
-      console.error('Error fetching pending appointments:', error);
-      throw error;
-    }
+    return filterPending(await this.getAllAppointments());
   },
 
   async getUpcomingAppointments(limit?: number): Promise<DoctorAppointment[]> {
-    try {
-      const allAppointments = await apiClient.get<any[]>('/api/appointments');
-      const today = new Date();
-      const upcoming = allAppointments.data.filter((apt) => {
-        const aptDate = new Date(apt.appointmentDate);
-        return aptDate >= today && apt.status === 'SCHEDULED';
-      });
-
-      return limit ? upcoming.slice(0, limit) : upcoming;
-    } catch (error) {
-      console.error('Error fetching upcoming appointments:', error);
-      throw error;
-    }
+    return filterUpcoming(await this.getAllAppointments(), limit);
   },
 
   async getAppointments(
     page: number = 1,
     pageSize: number = 10
   ): Promise<PaginatedResponse<DoctorAppointment>> {
-    try {
-      const allAppointments = await apiClient.get<any[]>('/api/appointments');
-      const start = (page - 1) * pageSize;
-      const end = start + pageSize;
+    const allAppointments = await this.getAllAppointments();
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
 
-      return {
-        content: allAppointments.data.slice(start, end),
-        totalElements: allAppointments.data.length,
-        totalPages: Math.ceil(allAppointments.data.length / pageSize),
-        currentPage: page,
-        pageSize: pageSize,
-      };
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-      throw error;
-    }
+    return {
+      content: allAppointments.slice(start, end),
+      totalElements: allAppointments.length,
+      totalPages: Math.ceil(allAppointments.length / pageSize),
+      currentPage: page,
+      pageSize: pageSize,
+    };
   },
 
   async updateAppointmentStatus(
@@ -131,17 +139,19 @@ export const doctorService = {
 
   async getPatientMedicalHistory(childId: number): Promise<PatientMedicalHistory> {
     try {
-      const [medicalRecords, vaccinations] = await Promise.all([
+      const [child, medicalRecords, vaccinations, allergies] = await Promise.all([
+        childService.getById(childId),
         apiClient.get<MedicalHistory[]>(`/api/medical-records/child/${childId}`),
-        apiClient.get<any[]>(`/api/vaccinations/child/${childId}`),
+        apiClient.get<VaccinationHistory[]>(`/api/vaccinations/child/${childId}`),
+        apiClient.get<AllergyRecord[]>(`/api/allergies/child/${childId}`),
       ]);
 
       return {
         childId,
-        childName: '',
+        childName: `${child.firstName} ${child.lastName}`,
         medicalRecords: medicalRecords.data || [],
         vaccinations: vaccinations.data || [],
-        allergies: [],
+        allergies: allergies.data || [],
       };
     } catch (error) {
       console.error('Error fetching patient medical history:', error);
@@ -149,40 +159,35 @@ export const doctorService = {
     }
   },
 
-  async addMedicalNotes(_appointmentId: number, notes: string): Promise<MedicalNotes> {
+  async createMedicalRecord(request: MedicalRecordRequest): Promise<MedicalHistory> {
     try {
-      const response = await apiClient.post('/api/medical-records', {
-        content: notes,
-        recordType: 'APPOINTMENT_NOTES',
-      });
+      const response = await apiClient.post<MedicalHistory>('/api/medical-records', request);
       return response.data;
     } catch (error) {
-      console.error('Error adding medical notes:', error);
+      console.error('Error creating medical record:', error);
       throw error;
     }
   },
 
-  async updateMedicalNotes(notesId: number, notes: string): Promise<MedicalNotes> {
+  async updateMedicalRecord(recordId: number, request: MedicalRecordRequest): Promise<MedicalHistory> {
     try {
-      const response = await apiClient.put(`/api/medical-records/${notesId}`, {
-        content: notes,
-        recordType: 'APPOINTMENT_NOTES',
-      });
+      const response = await apiClient.put<MedicalHistory>(`/api/medical-records/${recordId}`, request);
       return response.data;
     } catch (error) {
-      console.error('Error updating medical notes:', error);
+      console.error('Error updating medical record:', error);
       throw error;
     }
   },
 
   async getDashboardData(): Promise<DoctorDashboardData> {
     try {
-      const [assignedChildren, todayAppointments, upcomingAppointments, pendingAppointments] = await Promise.all([
+      const [assignedChildren, allAppointments] = await Promise.all([
         this.getAssignedChildren(),
-        this.getTodayAppointments(),
-        this.getUpcomingAppointments(5),
-        this.getPendingAppointments(),
+        this.getAllAppointments(),
       ]);
+      const todayAppointments = filterToday(allAppointments);
+      const upcomingAppointments = filterUpcoming(allAppointments, 5);
+      const pendingAppointments = filterPending(allAppointments);
 
       return {
         assignedChildren,
@@ -203,10 +208,3 @@ export const doctorService = {
     }
   },
 };
-
-interface MedicalHistory {
-  id: number;
-  recordType: string;
-  recordDate: string;
-  content: string;
-}
