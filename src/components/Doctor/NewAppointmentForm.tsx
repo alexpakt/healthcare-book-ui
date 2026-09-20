@@ -3,6 +3,7 @@ import { Modal, Button, TextInput, Select, Stack, Alert, Group } from '@mantine/
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useDoctorAssignedChildren, useDoctorCreateAppointment } from '../../hooks/useDoctorData';
+import { getMinDateTimeLocal, isNotInFuture } from '../../utils/dateTime';
 
 interface NewAppointmentFormProps {
   opened: boolean;
@@ -23,6 +24,7 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
 }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [dateError, setDateError] = useState('');
   const { data: patients } = useDoctorAssignedChildren();
   const { mutate, loading, error, reset } = useDoctorCreateAppointment();
 
@@ -32,6 +34,7 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
 
   const handleClose = () => {
     setFormData(EMPTY_FORM);
+    setDateError('');
     reset();
     onClose();
   };
@@ -41,6 +44,11 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
     if (!formData.childId || !formData.appointmentDate || !user?.profileId) {
       return;
     }
+    if (isNotInFuture(formData.appointmentDate)) {
+      setDateError('Επιλέξτε μια μελλοντική ημερομηνία και ώρα.');
+      return;
+    }
+    setDateError('');
 
     try {
       await mutate({
@@ -82,8 +90,13 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
           <TextInput
             label="Ημερομηνία & Ώρα"
             type="datetime-local"
+            min={getMinDateTimeLocal()}
             value={formData.appointmentDate}
-            onChange={(e) => handleChange('appointmentDate', e.target.value)}
+            onChange={(e) => {
+              setDateError('');
+              handleChange('appointmentDate', e.target.value);
+            }}
+            error={dateError}
             required
             disabled={loading}
           />

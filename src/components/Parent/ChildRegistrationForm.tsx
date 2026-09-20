@@ -43,7 +43,6 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validation
     if (!formData.firstName.trim()) {
       alert('Το όνομα του παιδιού είναι υποχρεωτικό');
       return;
@@ -54,6 +53,14 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
     }
     if (!formData.dateOfBirth) {
       alert('Η ημερομηνία γέννησης είναι υποχρεωτική');
+      return;
+    }
+
+    const birthDate = new Date(formData.dateOfBirth);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (birthDate > today) {
+      alert('Η ημερομηνία γέννησης δεν μπορεί να είναι στο μέλλον');
       return;
     }
 
@@ -142,6 +149,7 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             type="date"
             value={formData.dateOfBirth}
             onChange={(e) => handleChange('dateOfBirth', e.target.value)}
+            max={new Date().toISOString().split('T')[0]}
             required
             disabled={loading}
           />

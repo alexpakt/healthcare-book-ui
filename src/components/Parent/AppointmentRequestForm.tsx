@@ -3,6 +3,7 @@ import { Modal, Button, TextInput, Select, Stack, Alert, Group } from '@mantine/
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useParentChildren, useParentCreateAppointment } from '../../hooks/useParentData';
 import { useDirectoryDoctors } from '../../hooks/useDirectoryData';
+import { getMinDateTimeLocal, isNotInFuture } from '../../utils/dateTime';
 
 interface AppointmentRequestFormProps {
   opened: boolean;
@@ -23,6 +24,7 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
   onSuccess,
 }) => {
   const [formData, setFormData] = useState(EMPTY_FORM);
+  const [dateError, setDateError] = useState('');
   const { data: children } = useParentChildren();
   const { data: doctors } = useDirectoryDoctors();
   const { mutate, loading, error, reset } = useParentCreateAppointment();
@@ -33,6 +35,7 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
 
   const handleClose = () => {
     setFormData(EMPTY_FORM);
+    setDateError('');
     reset();
     onClose();
   };
@@ -42,6 +45,11 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
     if (!formData.childId || !formData.doctorId || !formData.appointmentDate) {
       return;
     }
+    if (isNotInFuture(formData.appointmentDate)) {
+      setDateError('Επιλέξτε μια μελλοντική ημερομηνία και ώρα.');
+      return;
+    }
+    setDateError('');
 
     try {
       await mutate({
@@ -97,8 +105,13 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
           <TextInput
             label="Ημερομηνία & Ώρα"
             type="datetime-local"
+            min={getMinDateTimeLocal()}
             value={formData.appointmentDate}
-            onChange={(e) => handleChange('appointmentDate', e.target.value)}
+            onChange={(e) => {
+              setDateError('');
+              handleChange('appointmentDate', e.target.value);
+            }}
+            error={dateError}
             required
             disabled={loading}
           />
