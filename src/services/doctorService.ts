@@ -9,6 +9,7 @@ import type {
   AllergyRecord,
   DoctorDashboardData,
 } from '../types/doctor';
+import type { GrowthMeasurement } from '../types/parent';
 import type { AppointmentStatus, PaginatedResponse } from '../types/common';
 
 export interface CreateAppointmentRequest {
@@ -26,6 +27,15 @@ export interface MedicalRecordRequest {
   diagnosis: string;
   notes?: string;
   prescription?: string;
+}
+
+export interface GrowthMeasurementRequest {
+  childId: number;
+  measurementDate: string; // YYYY-MM-DD
+  heightCm?: number | null;
+  weightKg?: number | null;
+  headCircumferenceCm?: number | null;
+  notes?: string;
 }
 
 const filterToday = (appointments: DoctorAppointment[]): DoctorAppointment[] => {
@@ -175,6 +185,43 @@ export const doctorService = {
       return response.data;
     } catch (error) {
       console.error('Error updating medical record:', error);
+      throw error;
+    }
+  },
+
+  async getChildGrowthMeasurements(childId: number): Promise<GrowthMeasurement[]> {
+    try {
+      const response = await apiClient.get<GrowthMeasurement[]>(
+        `/api/growth-measurements/child/${childId}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching growth measurements:', error);
+      throw error;
+    }
+  },
+
+  async createGrowthMeasurement(request: GrowthMeasurementRequest): Promise<GrowthMeasurement> {
+    try {
+      const response = await apiClient.post<GrowthMeasurement>(
+        '/api/growth-measurements',
+        request
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error creating growth measurement:', error);
+      throw error;
+    }
+  },
+
+  async getGrowthReferenceCurves(childId: number, measurementType: string) {
+    try {
+      const response = await apiClient.get<any[]>(
+        `/api/growth-measurements/references/child/${childId}/type/${measurementType}`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching reference curves:', error);
       throw error;
     }
   },

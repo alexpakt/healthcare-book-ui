@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Stack, Title, Text, Tabs, Alert, Button, Center, Loader } from '@mantine/core';
+import { Stack, Title, Text, Tabs, Alert, Button, Center, Loader, Group } from '@mantine/core';
 import { IconAlertCircle, IconArrowLeft, IconPlus } from '@tabler/icons-react';
-import { useDoctorPatientMedicalHistory } from '../../hooks/useDoctorData';
+import {
+  useDoctorPatientMedicalHistory,
+  useDoctorChildGrowthMeasurements,
+  useDoctorCreateGrowthMeasurement,
+} from '../../hooks/useDoctorData';
 import { MedicalRecordsList } from '../Shared/MedicalRecordsList';
 import { ChildVaccinationsList } from '../Shared/ChildVaccinationsList';
 import { AllergiesList } from '../Shared/AllergiesList';
+import { GrowthChart } from '../Shared/GrowthChart';
+import { GrowthMeasurementsList } from '../Shared/GrowthMeasurementsList';
 import { MedicalRecordForm } from '../Doctor/MedicalRecordForm';
+import { GrowthMeasurementForm, type GrowthMeasurementFormData } from '../Doctor/GrowthMeasurementForm';
 import type { MedicalHistory } from '../../types/doctor';
 
 export const PatientHistory: React.FC = () => {
@@ -15,8 +22,12 @@ export const PatientHistory: React.FC = () => {
   const id = Number(childId);
 
   const { data, loading, error, refetch } = useDoctorPatientMedicalHistory(id);
+  const growthMeasurementsQuery = useDoctorChildGrowthMeasurements(id);
+  const { mutate: createGrowthMeasurement, loading: growthFormLoading, error: growthError } = useDoctorCreateGrowthMeasurement();
+
   const [formOpened, setFormOpened] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MedicalHistory | null>(null);
+  const [growthFormOpened, setGrowthFormOpened] = useState(false);
 
   const handleAddRecord = () => {
     setEditingRecord(null);
@@ -26,6 +37,16 @@ export const PatientHistory: React.FC = () => {
   const handleEditRecord = (record: MedicalHistory) => {
     setEditingRecord(record);
     setFormOpened(true);
+  };
+
+  const handleAddGrowthMeasurement = async (formData: GrowthMeasurementFormData) => {
+    try {
+      await createGrowthMeasurement(formData);
+      await growthMeasurementsQuery.refetch();
+      setGrowthFormOpened(false);
+    } catch (err) {
+      console.error('Error creating growth measurement:', err);
+    }
   };
 
   if (loading && !data) {
@@ -70,6 +91,7 @@ export const PatientHistory: React.FC = () => {
           <Tabs.Tab value="records">Ιατρικό Ιστορικό</Tabs.Tab>
           <Tabs.Tab value="vaccinations">Εμβολιασμοί</Tabs.Tab>
           <Tabs.Tab value="allergies">Αλλεργίες</Tabs.Tab>
+          <Tabs.Tab value="growth">Ανάπτυξη</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="records" pt="md">
@@ -92,6 +114,31 @@ export const PatientHistory: React.FC = () => {
         <Tabs.Panel value="allergies" pt="md">
           <AllergiesList allergies={data.allergies} isLoading={false} />
         </Tabs.Panel>
+
+        <Tabs.Panel value="growth" pt="md">
+          <Stack gap="md">
+            <Group justify="space-between">
+              <Title order={3}>Ανάπτυξη</Title>
+              <Button
+                leftSection={<IconPlus size={16} />}
+                onClick={() => setGrowthFormOpened(true)}
+                size="sm"
+              >
+                Νέα μέτρηση
+              </Button>
+            </Group>
+            <GrowthChart
+              measurements={growthMeasurementsQuery.data}
+              isLoading={growthMeasurementsQuery.loading}
+              childName={data.childName}
+              childId={id}
+            />
+            <GrowthMeasurementsList
+              measurements={growthMeasurementsQuery.data}
+              isLoading={growthMeasurementsQuery.loading}
+            />
+          </Stack>
+        </Tabs.Panel>
       </Tabs>
 
       <MedicalRecordForm
@@ -103,6 +150,16 @@ export const PatientHistory: React.FC = () => {
           setFormOpened(false);
           refetch();
         }}
+      />
+
+      <GrowthMeasurementForm
+        opened={growthFormOpened}
+        childId={id}
+        childName={data?.childName || ''}
+        onClose={() => setGrowthFormOpened(false)}
+        onSubmit={handleAddGrowthMeasurement}
+        isLoading={growthFormLoading}
+        error={growthError?.message || null}
       />
     </Stack>
   );

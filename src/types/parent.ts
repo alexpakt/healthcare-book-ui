@@ -47,6 +47,34 @@ export interface MedicalRecord {
   prescription?: string;
 }
 
+export interface AllergyRecord {
+  id: number;
+  childId: number;
+  childName: string;
+  allergen: string;
+  severity: 'MILD' | 'MODERATE' | 'SEVERE';
+  reaction?: string;
+  diagnosedDate: string;
+  notes?: string;
+}
+
+export interface GrowthMeasurement {
+  id: number;
+  childId: number;
+  childName: string;
+  doctorId: number;
+  doctorName: string;
+  measurementDate: string;
+  ageInMonths: number;
+  heightCm?: number;
+  weightKg?: number;
+  headCircumferenceCm?: number;
+  percentileHeight?: number;
+  percentileWeight?: number;
+  percentileHeadCircumference?: number;
+  notes?: string;
+}
+
 export interface ParentQuickStats {
   totalChildren: number;
   upcomingAppointmentsCount: number;

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { doctorService } from '../services/doctorService';
-import type { CreateAppointmentRequest, MedicalRecordRequest } from '../services/doctorService';
+import type { CreateAppointmentRequest, MedicalRecordRequest, GrowthMeasurementRequest } from '../services/doctorService';
 import type { AppointmentStatus } from '../types/common';
 
 export function useDoctorDashboardData() {
@@ -47,6 +47,11 @@ export function useDoctorPatientMedicalHistory(childId: number) {
   return useApi(fetchFn);
 }
 
+export function useDoctorChildGrowthMeasurements(childId: number) {
+  const fetchFn = useCallback(() => doctorService.getChildGrowthMeasurements(childId), [childId]);
+  return useApi(fetchFn);
+}
+
 export function useDoctorCreateMedicalRecord() {
   return useMutation((request?: MedicalRecordRequest) =>
     doctorService.createMedicalRecord(request!)
@@ -57,6 +62,12 @@ export function useDoctorUpdateMedicalRecord() {
   return useMutation(
     (payload?: { recordId: number; request: MedicalRecordRequest }) =>
       doctorService.updateMedicalRecord(payload!.recordId, payload!.request)
+  );
+}
+
+export function useDoctorCreateGrowthMeasurement() {
+  return useMutation((request?: GrowthMeasurementRequest) =>
+    doctorService.createGrowthMeasurement(request!)
   );
 }
 

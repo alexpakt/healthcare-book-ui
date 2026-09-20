@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import type { Child, Appointment, VaccinationRecord, MedicalRecord, ParentDashboardData } from '../types/parent';
+import type { Child, Appointment, VaccinationRecord, MedicalRecord, AllergyRecord, GrowthMeasurement, ParentDashboardData } from '../types/parent';
 import type { AppointmentStatus } from '../types/common';
 import { getVaccinationStatus } from '../utils/vaccinationStatus';
 
@@ -49,6 +49,31 @@ export const parentService = {
   async getChildMedicalRecords(childId: number): Promise<MedicalRecord[]> {
     const response = await apiClient.get<MedicalRecord[]>(
       `/api/medical-records/child/${childId}`
+    );
+    return response.data;
+  },
+
+  /**
+   * Get allergies for a specific child
+   */
+  async getChildAllergies(childId: number): Promise<AllergyRecord[]> {
+    const response = await apiClient.get<AllergyRecord[]>(`/api/allergies/child/${childId}`);
+    return response.data;
+  },
+
+  /**
+   * Get growth measurements for a specific child
+   */
+  async getChildGrowthMeasurements(childId: number): Promise<GrowthMeasurement[]> {
+    const response = await apiClient.get<GrowthMeasurement[]>(
+      `/api/growth-measurements/child/${childId}`
+    );
+    return response.data;
+  },
+
+  async getGrowthReferenceCurves(childId: number, measurementType: string) {
+    const response = await apiClient.get<any[]>(
+      `/api/growth-measurements/references/child/${childId}/type/${measurementType}`
     );
     return response.data;
   },

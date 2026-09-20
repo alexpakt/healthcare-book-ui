@@ -7,11 +7,16 @@ import {
   useParentChildAppointments,
   useParentChildVaccinations,
   useParentChildMedicalRecords,
+  useParentChildAllergies,
+  useParentChildGrowthMeasurements,
   useParentUpdateAppointmentStatus,
 } from '../../hooks/useParentData';
 import { UpcomingAppointments } from '../Parent/UpcomingAppointments';
 import { ChildVaccinationsList } from '../Shared/ChildVaccinationsList';
 import { MedicalRecordsList } from '../Shared/MedicalRecordsList';
+import { AllergiesList } from '../Shared/AllergiesList';
+import { GrowthChart } from '../Shared/GrowthChart';
+import { GrowthMeasurementsList } from '../Shared/GrowthMeasurementsList';
 
 const calculateAge = (dateOfBirth: string): number => {
   const today = new Date();
@@ -37,6 +42,8 @@ export const ChildDetail: React.FC = () => {
   const appointmentsQuery = useParentChildAppointments(id);
   const vaccinationsQuery = useParentChildVaccinations(id);
   const medicalRecordsQuery = useParentChildMedicalRecords(id);
+  const allergiesQuery = useParentChildAllergies(id);
+  const growthMeasurementsQuery = useParentChildGrowthMeasurements(id);
   const updateStatus = useParentUpdateAppointmentStatus();
 
   const handleCancelAppointment = async (appointmentId: number) => {
@@ -110,6 +117,8 @@ export const ChildDetail: React.FC = () => {
           <Tabs.Tab value="appointments">Ραντεβού</Tabs.Tab>
           <Tabs.Tab value="vaccinations">Εμβολιασμοί</Tabs.Tab>
           <Tabs.Tab value="medical-records">Ιατρικό Ιστορικό</Tabs.Tab>
+          <Tabs.Tab value="allergies">Αλλεργίες</Tabs.Tab>
+          <Tabs.Tab value="growth">Ανάπτυξη</Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="appointments" pt="md">
@@ -135,6 +144,25 @@ export const ChildDetail: React.FC = () => {
             records={medicalRecordsQuery.data}
             isLoading={medicalRecordsQuery.loading}
           />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="allergies" pt="md">
+          <AllergiesList allergies={allergiesQuery.data} isLoading={allergiesQuery.loading} />
+        </Tabs.Panel>
+
+        <Tabs.Panel value="growth" pt="md">
+          <Stack gap="lg">
+            <GrowthChart
+              measurements={growthMeasurementsQuery.data}
+              isLoading={growthMeasurementsQuery.loading}
+              childName={`${child?.firstName} ${child?.lastName}`}
+              childId={id}
+            />
+            <GrowthMeasurementsList
+              measurements={growthMeasurementsQuery.data}
+              isLoading={growthMeasurementsQuery.loading}
+            />
+          </Stack>
         </Tabs.Panel>
       </Tabs>
     </Stack>

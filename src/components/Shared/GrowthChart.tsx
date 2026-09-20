@@ -1,0 +1,274 @@
+import React, {useEffect, useState} from 'react';
+import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,} from 'recharts';
+import {Alert, Center, Loader, SegmentedControl, Stack, Text, Title} from '@mantine/core';
+import {IconAlertCircle} from '@tabler/icons-react';
+import {parentService} from '../../services/parentService';
+import type {GrowthMeasurement} from '../../types/parent';
+
+interface GrowthChartProps {
+  measurements: GrowthMeasurement[] | null;
+  isLoading: boolean;
+  error?: unknown;
+  childName?: string;
+  childId?: number;
+}
+
+type MeasurementType = 'height' | 'weight' | 'head';
+
+interface ChartDataPoint {
+  ageInMonths: number;
+  measurementDate?: string;
+  value?: number;
+  percentile?: number;
+  [key: string]: any;
+}
+
+interface ReferencePoint {
+  ageInMonths: number;
+  percentile: number;
+  value: number;
+}
+
+export const GrowthChart: React.FC<GrowthChartProps> = ({
+  measurements,
+  isLoading,
+  error,
+  childName,
+  childId,
+}) => {
+  const [type, setType] = useState<MeasurementType>('height');
+  const [references, setReferences] = useState<ReferencePoint[]>([]);
+  const [loadingReferences, setLoadingReferences] = useState(false);
+
+  useEffect(() => {
+    if (!childId) return;
+
+    const fetchReferences = async () => {
+      try {
+        setLoadingReferences(true);
+        const measurementTypeKey = type === 'height' ? 'HEIGHT' : type === 'weight' ? 'WEIGHT' : 'HEAD_CIRCUMFERENCE';
+        const data = await parentService.getGrowthReferenceCurves(childId, measurementTypeKey);
+        setReferences(data);
+      } catch (err) {
+        console.error('Error fetching reference curves:', err);
+      } finally {
+        setLoadingReferences(false);
+      }
+    };
+
+    fetchReferences();
+  }, [childId, type]);
+
+  if (isLoading || loadingReferences) {
+    return (
+      <Center py="xl">
+        <Loader />
+      </Center>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert icon={<IconAlertCircle size={16} />} color="red" title="Error loading data">
+        Failed to load growth measurements
+      </Alert>
+    );
+  }
+
+  const sortedMeasurements = (measurements || []).sort(
+    (a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime()
+  );
+
+  const getChartData = () => {
+    const measurementData = sortedMeasurements
+      .map((m) => {
+        if (type === 'height') {
+          return m.heightCm
+            ? {
+                ageInMonths: m.ageInMonths,
+                measurementDate: m.measurementDate,
+                value: m.heightCm,
+                percentile: m.percentileHeight,
+              }
+            : null;
+        } else if (type === 'weight') {
+          return m.weightKg
+            ? {
+                ageInMonths: m.ageInMonths,
+                measurementDate: m.measurementDate,
+                value: m.weightKg,
+                percentile: m.percentileWeight,
+              }
+            : null;
+        } else {
+          return m.headCircumferenceCm
+            ? {
+                ageInMonths: m.ageInMonths,
+                measurementDate: m.measurementDate,
+                value: m.headCircumferenceCm,
+                percentile: m.percentileHeadCircumference,
+              }
+            : null;
+        }
+      })
+      .filter((d) => d !== null) as ChartDataPoint[];
+
+    const ageSet = new Set<number>();
+    measurementData.forEach(m => ageSet.add(m.ageInMonths));
+    references.forEach(r => ageSet.add(r.ageInMonths));
+
+    return Array.from(ageSet).sort((a, b) => a - b).map(age => {
+      const refData = references.filter(r => r.ageInMonths === age);
+      const measureData = measurementData.find(m => m.ageInMonths === age);
+
+      const point: ChartDataPoint = {
+        ageInMonths: age,
+        ...(measureData && {
+          measurementDate: measureData.measurementDate,
+          value: measureData.value,
+          percentile: measureData.percentile,
+        }),
+      };
+
+      refData.forEach(ref => {
+        const key = ref.percentile === 3 ? 'p03' : `p${ref.percentile}`;
+        (point as any)[key] = ref.value;
+      });
+
+      return point;
+    });
+  };
+
+  const data = getChartData();
+
+  const getTitle = () => {
+    if (type === 'height') return 'Ύψος (cm)';
+    if (type === 'weight') return 'Βάρος (kg)';
+    return 'Περίμετρος κεφαλής (cm)';
+  };
+
+  const getYAxisLabel = () => {
+    if (type === 'height') return 'cm';
+    if (type === 'weight') return 'kg';
+    return 'cm';
+  };
+
+  const CustomTooltip = (props: any) => {
+    const { active, payload, label } = props;
+    if (active && payload && payload.length) {
+      const percentileOrder = ['p03', 'p10', 'p25', 'p50', 'p75', 'p90', 'p97'];
+      const percentileLabels: Record<string, string> = {
+        p03: '3η εκατοστιαία',
+        p10: '10η εκατοστιαία',
+        p25: '25η εκατοστιαία',
+        p50: '50η εκατοστιαία (διάμεσος)',
+        p75: '75η εκατοστιαία',
+        p90: '90η εκατοστιαία',
+        p97: '97η εκατοστιαία',
+        value: 'Μετρούμενη τιμή',
+      };
+
+      const sortedPayload = [...payload].sort((a, b) => {
+        const aIndex = percentileOrder.indexOf(a.dataKey as string);
+        const bIndex = percentileOrder.indexOf(b.dataKey as string);
+
+        if (aIndex === -1) return 1;
+        if (bIndex === -1) return -1;
+        return bIndex - aIndex;
+      });
+
+      return (
+        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #ccc', padding: '8px', borderRadius: '4px' }}>
+          <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>Ηλικία: {label} μήνες</p>
+          {sortedPayload.map((entry, index) => (
+            <p key={index} style={{ margin: '2px 0', color: entry.color }}>
+              {percentileLabels[entry.dataKey as string] || entry.name}: {typeof entry.value === 'number' ? entry.value.toFixed(1) : entry.value} {getYAxisLabel()}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <Stack gap="lg">
+      <Stack gap="xs">
+        <Title order={3}>Καμπύλες ανάπτυξης</Title>
+        {childName && <Text c="dimmed">{childName}</Text>}
+      </Stack>
+
+      <SegmentedControl
+        value={type}
+        onChange={(value) => setType(value as MeasurementType)}
+        data={[
+          { label: 'Ύψος', value: 'height' },
+          { label: 'Βάρος', value: 'weight' },
+          { label: 'Περίμετρος κεφαλής', value: 'head' },
+        ]}
+      />
+
+      {(!measurements || measurements.length === 0) && (
+        <Alert color="blue" title="Πρότυπα ανάπτυξης κατά τον ΠΟΥ">
+          Δεν έχουν καταγραφεί ακόμη μετρήσεις. Το παρακάτω διάγραμμα παρουσιάζει τις καμπύλες αναφοράς ανάπτυξης του Παγκόσμιου Οργανισμού Υγείας.
+        </Alert>
+      )}
+
+      {references.length === 0 ? (
+        <Alert color="gray">Δεν υπάρχουν διαθέσιμα δεδομένα αναφοράς για την ανάπτυξη.</Alert>
+      ) : (
+        <ResponsiveContainer width="100%" height={400}>
+          <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis
+              dataKey="ageInMonths"
+              label={{ value: 'Ηλικία (μήνες)', position: 'insideBottomRight', offset: -5 }}
+            />
+            <YAxis label={{ value: getYAxisLabel(), angle: -90, position: 'insideLeft' }} />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend itemSorter="dataKey"/>
+
+            {references.length > 0 && (
+              <>
+                <Line type="monotone" dataKey="p03" stroke="#ef5350" strokeDasharray="5 5" name="3η εκατοστιαία" isAnimationActive={false} dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="p10" stroke="#ff9800" strokeDasharray="5 5" name="10η εκατοστιαία" isAnimationActive={false} dot={false} />
+                <Line type="monotone" dataKey="p25" stroke="#b0bec5" strokeDasharray="5 5" name="25η εκατοστιαία" isAnimationActive={false} dot={false} />
+                <Line type="monotone" dataKey="p50" stroke="#4caf50" strokeDasharray="5 5" name="50η εκατοστιαία (διάμεσος)" isAnimationActive={false} dot={false} strokeWidth={2} />
+                <Line type="monotone" dataKey="p75" stroke="#b0bec5" strokeDasharray="5 5" name="75η εκατοστιαία" isAnimationActive={false} dot={false} />
+                <Line type="monotone" dataKey="p90" stroke="#ff9800" strokeDasharray="5 5" name="90η εκατοστιαία" isAnimationActive={false} dot={false} />
+                <Line type="monotone" dataKey="p97" stroke="#ef5350" strokeDasharray="5 5" name="97η εκατοστιαία" isAnimationActive={false} dot={false} strokeWidth={2} />
+              </>
+            )}
+
+            {/* Child's measurements */}
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke="#1f77b4"
+              dot={{ fill: '#1f77b4', r: 4 }}
+              activeDot={{ r: 6 }}
+              name={`${getTitle()} (μετρήθηκε)`}
+              isAnimationActive={true}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      )}
+
+      {data.length > 0 && (
+        <Stack gap="sm" style={{ fontSize: '0.875rem' }}>
+          <Text fw={500}>Εκατοστιαίες:</Text>
+          <Stack gap={4}>
+            {data
+              .filter(d => d.measurementDate && d.value)
+              .map((d, idx) => (
+                <Text key={idx} c="dimmed">
+                  {d.measurementDate && new Date(d.measurementDate).toLocaleDateString('el-GR')}: {d.value?.toFixed(1)} {getYAxisLabel()}
+                  {d.percentile && ` (${d.percentile}η εκατοστιαία)`}
+                </Text>
+              ))}
+          </Stack>
+        </Stack>
+      )}
+    </Stack>
+  );
+};

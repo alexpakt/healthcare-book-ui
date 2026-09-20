@@ -62,6 +62,22 @@ export function useParentChildMedicalRecords(childId: number) {
 }
 
 /**
+ * Hook for fetching child allergies
+ */
+export function useParentChildAllergies(childId: number) {
+  const fetchFn = useCallback(() => parentService.getChildAllergies(childId), [childId]);
+  return useApi(fetchFn);
+}
+
+/**
+ * Hook for fetching child growth measurements
+ */
+export function useParentChildGrowthMeasurements(childId: number) {
+  const fetchFn = useCallback(() => parentService.getChildGrowthMeasurements(childId), [childId]);
+  return useApi(fetchFn);
+}
+
+/**
  * Hook for requesting a new appointment (mutation)
  */
 export function useParentCreateAppointment() {

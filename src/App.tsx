@@ -12,6 +12,7 @@ import AppointmentsPage from './pages/AppointmentsPage';
 import ParentChildrenPage from './pages/ParentChildrenPage';
 import ChildDetailPage from './pages/ChildDetailPage';
 import PatientHistoryPage from './pages/PatientHistoryPage';
+import ParentMedicalHistoryPage from './pages/ParentMedicalHistoryPage';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -58,6 +59,14 @@ function App() {
             element={
               <ProtectedRoute requiredRole="ROLE_DOCTOR">
                 <PatientHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/medical-history"
+            element={
+              <ProtectedRoute requiredRole="ROLE_PARENT">
+                <ParentMedicalHistoryPage />
               </ProtectedRoute>
             }
           />

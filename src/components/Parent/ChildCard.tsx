@@ -6,6 +6,7 @@ import type { Child } from '../../types/parent';
 interface ChildCardProps {
   child: Child;
   onViewDetails?: (childId: number) => void;
+  actionLabel?: string;
 }
 
 const calculateAge = (dateOfBirth: string): number => {
@@ -25,7 +26,11 @@ const getGenderLabel = (gender: string): string => {
   return gender === 'MALE' ? 'Αγόρι' : 'Κορίτσι';
 };
 
-export const ChildCard: React.FC<ChildCardProps> = ({ child, onViewDetails }) => {
+export const ChildCard: React.FC<ChildCardProps> = ({
+  child,
+  onViewDetails,
+  actionLabel = 'Περισσότερες πληροφορίες',
+}) => {
   const age = calculateAge(child.dateOfBirth);
   const genderLabel = getGenderLabel(child.gender);
 
@@ -85,7 +90,7 @@ export const ChildCard: React.FC<ChildCardProps> = ({ child, onViewDetails }) =>
           rightSection={<IconArrowRight size={14} />}
           onClick={() => onViewDetails?.(child.id)}
         >
-          Περισσότερες πληροφορίες
+          {actionLabel}
         </Button>
       </Card.Section>
     </Card>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Stack, Text, Badge, Center, Loader, Paper, Group } from '@mantine/core';
 import { IconAlertTriangle } from '@tabler/icons-react';
-import type { AllergyRecord } from '../../types/doctor';
+import type { AllergyRecord } from '../../types/parent';
 
 interface AllergiesListProps {
   allergies: AllergyRecord[] | null;
