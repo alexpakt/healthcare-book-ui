@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Text, Badge, Group, Stack, Button, Avatar } from '@mantine/core';
 import { IconArrowRight } from '@tabler/icons-react';
+import { getAgeDisplay } from '../../utils/ageCalculator';
 import type { Child } from '../../types/parent';
 
 interface ChildCardProps {
@@ -8,19 +9,6 @@ interface ChildCardProps {
   onViewDetails?: (childId: number) => void;
   actionLabel?: string;
 }
-
-const calculateAge = (dateOfBirth: string): number => {
-  const today = new Date();
-  const birthDate = new Date(dateOfBirth);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-
-  return age;
-};
 
 const getGenderLabel = (gender: string): string => {
   return gender === 'MALE' ? 'Αγόρι' : 'Κορίτσι';
@@ -31,7 +19,7 @@ export const ChildCard: React.FC<ChildCardProps> = ({
   onViewDetails,
   actionLabel = 'Περισσότερες πληροφορίες',
 }) => {
-  const age = calculateAge(child.dateOfBirth);
+  const ageDisplay = getAgeDisplay(child.dateOfBirth);
   const genderLabel = getGenderLabel(child.gender);
 
   const fullName = `${child.firstName} ${child.lastName}`;
@@ -55,7 +43,7 @@ export const ChildCard: React.FC<ChildCardProps> = ({
                 {fullName}
               </Text>
               <Text size="sm" c="dimmed">
-                {age} {age === 1 ? 'ετών' : 'ετών'} • {genderLabel}
+                {ageDisplay} • {genderLabel}
               </Text>
             </Stack>
           </Group>

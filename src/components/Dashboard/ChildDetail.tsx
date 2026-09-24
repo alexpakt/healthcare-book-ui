@@ -2,6 +2,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Stack, Title, Text, Tabs, Alert, Button, Paper, Group, Avatar, Badge, Center, Loader } from '@mantine/core';
 import { IconAlertCircle, IconArrowLeft } from '@tabler/icons-react';
+import { getAgeDisplay } from '../../utils/ageCalculator';
 import {
   useParentChild,
   useParentChildAppointments,
@@ -17,19 +18,6 @@ import { MedicalRecordsList } from '../Shared/MedicalRecordsList';
 import { AllergiesList } from '../Shared/AllergiesList';
 import { GrowthChart } from '../Shared/GrowthChart';
 import { GrowthMeasurementsList } from '../Shared/GrowthMeasurementsList';
-
-const calculateAge = (dateOfBirth: string): number => {
-  const today = new Date();
-  const birthDate = new Date(dateOfBirth);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-
-  return age;
-};
 
 const getGenderLabel = (gender: string): string => (gender === 'MALE' ? 'Αγόρι' : 'Κορίτσι');
 
@@ -76,7 +64,7 @@ export const ChildDetail: React.FC = () => {
     );
   }
 
-  const age = calculateAge(child.dateOfBirth);
+  const ageDisplay = getAgeDisplay(child.dateOfBirth);
   const initials = `${child.firstName.charAt(0)}${child.lastName.charAt(0)}`.toUpperCase();
 
   return (
@@ -100,7 +88,7 @@ export const ChildDetail: React.FC = () => {
               {child.firstName} {child.lastName}
             </Title>
             <Text c="dimmed">
-              {age} {age === 1 ? 'έτος' : 'ετών'} • {getGenderLabel(child.gender)}
+              {ageDisplay} • {getGenderLabel(child.gender)}
             </Text>
             <Group gap="xs">
               <Text size="sm" c="dimmed">
