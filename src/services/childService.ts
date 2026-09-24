@@ -17,6 +17,18 @@ export interface ChildRecord extends Child {
 }
 
 export const childService = {
+  async searchByAmka(amka: string): Promise<ChildRecord> {
+    try {
+      const response = await apiClient.get<ChildRecord>('/api/children/search', {
+        params: { amka },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error searching child by AMKA:', error);
+      throw error;
+    }
+  },
+
   async getMyChildren(): Promise<ChildRecord[]> {
     try {
       const response = await apiClient.get<ChildRecord[]>('/api/children');

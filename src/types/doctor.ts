@@ -26,6 +26,7 @@ export interface DoctorAppointment {
 export interface PatientMedicalHistory {
   childId: number;
   childName: string;
+  child: any;
   medicalRecords: MedicalHistory[];
   vaccinations: VaccinationHistory[];
   allergies: AllergyRecord[];

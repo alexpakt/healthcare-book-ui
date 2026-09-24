@@ -1,6 +1,7 @@
 import React from 'react';
 import { Grid, Text, Stack, Center, Loader } from '@mantine/core';
 import { PatientCard } from './PatientCard';
+import { SearchChildForm } from './SearchChildForm';
 import type { AssignedChild } from '../../types/doctor';
 
 interface PatientsListProps {
@@ -35,12 +36,16 @@ export const PatientsList: React.FC<PatientsListProps> = ({
   }
 
   return (
-    <Grid>
-      {patients.map((patient) => (
-        <Grid.Col key={patient.id} span={{ base: 12, sm: 6, md: 4 }}>
-          <PatientCard patient={patient} onViewHistory={onViewHistory} />
-        </Grid.Col>
-      ))}
-    </Grid>
+    <Stack gap="lg">
+      <SearchChildForm />
+
+      <Grid>
+        {patients.map((patient) => (
+          <Grid.Col key={patient.id} span={{ base: 12, sm: 6, md: 4 }}>
+            <PatientCard patient={patient} onViewHistory={onViewHistory} />
+          </Grid.Col>
+        ))}
+      </Grid>
+    </Stack>
   );
 };

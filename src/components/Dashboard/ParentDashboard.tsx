@@ -8,6 +8,7 @@ import { QuickStats } from '../Parent/QuickStats';
 import { ChildrenList } from '../Parent/ChildrenList';
 import { UpcomingAppointments } from '../Parent/UpcomingAppointments';
 import { VaccinationReminders } from '../Parent/VaccinationReminders';
+import { DoctorRequestsNotification } from '../Parent/DoctorRequestsNotification';
 import { ChildRegistrationForm } from '../Parent/ChildRegistrationForm';
 
 export const ParentDashboard: React.FC = () => {
@@ -89,6 +90,11 @@ export const ParentDashboard: React.FC = () => {
         stats={dashboardData?.quickStats || null}
         isLoading={isLoading}
       />
+
+      {/* Doctor Requests Notification */}
+      <div>
+        <DoctorRequestsNotification />
+      </div>
 
       {/* Tabs for different sections */}
       <Tabs defaultValue="children" orientation="horizontal">

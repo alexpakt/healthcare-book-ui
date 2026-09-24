@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Stack, Title, Text, Tabs, Alert, Button, Center, Loader, Group } from '@mantine/core';
+import { Stack, Title, Tabs, Alert, Button, Center, Loader, Group } from '@mantine/core';
 import { IconAlertCircle, IconArrowLeft, IconPlus } from '@tabler/icons-react';
 import {
   useDoctorPatientMedicalHistory,
@@ -10,6 +10,7 @@ import {
   useDoctorUpdateAllergy,
   useDoctorDeleteAllergy,
 } from '../../hooks/useDoctorData';
+import { PatientCard } from '../Shared/PatientCard';
 import { MedicalRecordsList } from '../Shared/MedicalRecordsList';
 import { ChildVaccinationsList } from '../Shared/ChildVaccinationsList';
 import { AllergiesList } from '../Shared/AllergiesList';
@@ -135,10 +136,7 @@ export const PatientHistory: React.FC = () => {
         Πίσω στο ταμπλό
       </Button>
 
-      <div>
-        <Title order={2}>{data.childName}</Title>
-        <Text c="dimmed">Ιατρικό ιστορικό ασθενή</Text>
-      </div>
+      {data.child && <PatientCard child={data.child} showAmka={true} />}
 
       <Tabs defaultValue="records" orientation="horizontal">
         <Tabs.List>

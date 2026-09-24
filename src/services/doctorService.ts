@@ -169,6 +169,7 @@ export const doctorService = {
       return {
         childId,
         childName: `${child.firstName} ${child.lastName}`,
+        child,
         medicalRecords: medicalRecords.data || [],
         vaccinations: vaccinations.data || [],
         allergies: allergies.data || [],
