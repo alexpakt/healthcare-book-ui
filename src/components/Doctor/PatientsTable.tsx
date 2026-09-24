@@ -45,13 +45,14 @@ export const PatientsTable: React.FC<PatientsTableProps> = ({
 
   if ((!patients || patients.length === 0) && pendingRequests.length === 0) {
     return (
-      <Center py="xl">
-        <Stack align="center" gap="md">
+      <Stack gap="lg">
+        <Center py="xl">
           <Text c="dimmed" size="lg">
             Δεν έχετε ασθενείς
           </Text>
-        </Stack>
-      </Center>
+        </Center>
+        <SearchChildForm />
+      </Stack>
     );
   }
 
