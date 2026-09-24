@@ -71,6 +71,40 @@ export function useDoctorCreateGrowthMeasurement() {
   );
 }
 
+export function useDoctorCreateAllergy() {
+  return useMutation(
+    (payload?: {
+      childId: number;
+      request: {
+        allergen: string;
+        severity: 'MILD' | 'MODERATE' | 'SEVERE';
+        reaction?: string;
+        diagnosedDate: string;
+        notes?: string;
+      };
+    }) => doctorService.createAllergy(payload!.childId, payload!.request)
+  );
+}
+
+export function useDoctorUpdateAllergy() {
+  return useMutation(
+    (payload?: {
+      allergyId: number;
+      request: {
+        allergen: string;
+        severity: 'MILD' | 'MODERATE' | 'SEVERE';
+        reaction?: string;
+        diagnosedDate: string;
+        notes?: string;
+      };
+    }) => doctorService.updateAllergy(payload!.allergyId, payload!.request)
+  );
+}
+
+export function useDoctorDeleteAllergy() {
+  return useMutation((allergyId?: number) => doctorService.deleteAllergy(allergyId!));
+}
+
 export function useDoctorDashboard() {
   const dashboardData = useDoctorDashboardData();
 

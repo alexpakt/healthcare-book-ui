@@ -38,6 +38,16 @@ export interface GrowthMeasurementRequest {
   notes?: string;
 }
 
+export interface CreateVaccinationRequest {
+  childId: number;
+  administeredByDoctorId?: number;
+  vaccineName: string;
+  administeredDate: string; // YYYY-MM-DD
+  nextDoseDate?: string;
+  batchNumber?: string;
+  notes?: string;
+}
+
 const filterToday = (appointments: DoctorAppointment[]): DoctorAppointment[] => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -222,6 +232,60 @@ export const doctorService = {
       return response.data;
     } catch (error) {
       console.error('Error fetching reference curves:', error);
+      throw error;
+    }
+  },
+
+  async createAllergy(childId: number, request: {
+    allergen: string;
+    severity: 'MILD' | 'MODERATE' | 'SEVERE';
+    reaction?: string;
+    diagnosedDate: string;
+    notes?: string;
+  }): Promise<AllergyRecord> {
+    try {
+      const response = await apiClient.post<AllergyRecord>('/api/allergies', {
+        childId,
+        ...request,
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error creating allergy:', error);
+      throw error;
+    }
+  },
+
+  async updateAllergy(allergyId: number, request: {
+    allergen: string;
+    severity: 'MILD' | 'MODERATE' | 'SEVERE';
+    reaction?: string;
+    diagnosedDate: string;
+    notes?: string;
+  }): Promise<AllergyRecord> {
+    try {
+      const response = await apiClient.put<AllergyRecord>(`/api/allergies/${allergyId}`, request);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating allergy:', error);
+      throw error;
+    }
+  },
+
+  async deleteAllergy(allergyId: number): Promise<void> {
+    try {
+      await apiClient.delete(`/api/allergies/${allergyId}`);
+    } catch (error) {
+      console.error('Error deleting allergy:', error);
+      throw error;
+    }
+  },
+
+  async createVaccination(request: CreateVaccinationRequest): Promise<any> {
+    try {
+      const response = await apiClient.post('/api/vaccinations', request);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating vaccination:', error);
       throw error;
     }
   },

@@ -27,10 +27,20 @@ export interface VaccinationRecord {
   childId: number;
   childName: string;
   vaccineName: string;
+  doseNumber?: number;
   administeredDate: string;
   nextDoseDate?: string;
   batchNumber?: string;
   administeredByDoctorName: string;
+  notes?: string;
+}
+
+export interface VaccinationSchedule {
+  id: number;
+  vaccineName: string;
+  vaccineNameGr: string;
+  recommendedAgeMonths: number;
+  doseNumber?: number;
   notes?: string;
 }
 

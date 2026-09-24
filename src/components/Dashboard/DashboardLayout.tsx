@@ -131,9 +131,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Item disabled>
-                  <Text size="xs" c="dimmed">
-                    {user?.profileId}
-                  </Text>
+                    Ρυθμίσεις
                 </Menu.Item>
                 <Menu.Divider />
                 <Menu.Item

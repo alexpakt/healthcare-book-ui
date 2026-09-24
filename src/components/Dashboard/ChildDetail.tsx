@@ -12,7 +12,7 @@ import {
   useParentUpdateAppointmentStatus,
 } from '../../hooks/useParentData';
 import { UpcomingAppointments } from '../Parent/UpcomingAppointments';
-import { ChildVaccinationsList } from '../Shared/ChildVaccinationsList';
+import { VaccinationStatusWithHistory } from '../Shared/VaccinationStatusWithHistory';
 import { MedicalRecordsList } from '../Shared/MedicalRecordsList';
 import { AllergiesList } from '../Shared/AllergiesList';
 import { GrowthChart } from '../Shared/GrowthChart';
@@ -133,7 +133,8 @@ export const ChildDetail: React.FC = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="vaccinations" pt="md">
-          <ChildVaccinationsList
+          <VaccinationStatusWithHistory
+            child={child}
             vaccinations={vaccinationsQuery.data}
             isLoading={vaccinationsQuery.loading}
           />

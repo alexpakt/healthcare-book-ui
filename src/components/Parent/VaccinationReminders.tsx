@@ -58,7 +58,7 @@ export const VaccinationReminders: React.FC<VaccinationRemindersProps> = ({
         <Center py="xl">
           <Stack align="center" gap="md">
             <IconVaccine size={40} color="var(--mantine-color-green-6)" />
-            <Text c="dimmed">Όλοι οι εμβολιασμοί είναι ενημερωμένοι</Text>
+            <Text c="dimmed">Δεν υπάρχει ιστορικό εμβολιασμών</Text>
           </Stack>
         </Center>
       </Paper>
@@ -73,7 +73,7 @@ export const VaccinationReminders: React.FC<VaccinationRemindersProps> = ({
             Εμβολιασμοί
           </Text>
           <Text size="sm" c="dimmed">
-            {vaccinations.length} {vaccinations.length === 1 ? 'εμβολιασμός' : 'εμβολιασμοί'}
+            {vaccinations?.length} {vaccinations?.length === 1 ? 'εμβολιασμός' : 'εμβολιασμοί'}
           </Text>
         </div>
 
@@ -109,7 +109,7 @@ export const VaccinationReminders: React.FC<VaccinationRemindersProps> = ({
               </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-              {vaccinations.map((vaccination) => {
+              {vaccinations?.map((vaccination) => {
                 const status = getVaccinationStatus(vaccination);
                 return (
                   <Table.Tr key={vaccination.id}>

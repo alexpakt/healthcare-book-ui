@@ -6,6 +6,9 @@ import {
   useDoctorPatientMedicalHistory,
   useDoctorChildGrowthMeasurements,
   useDoctorCreateGrowthMeasurement,
+  useDoctorCreateAllergy,
+  useDoctorUpdateAllergy,
+  useDoctorDeleteAllergy,
 } from '../../hooks/useDoctorData';
 import { MedicalRecordsList } from '../Shared/MedicalRecordsList';
 import { ChildVaccinationsList } from '../Shared/ChildVaccinationsList';
@@ -14,7 +17,10 @@ import { GrowthChart } from '../Shared/GrowthChart';
 import { GrowthMeasurementsList } from '../Shared/GrowthMeasurementsList';
 import { MedicalRecordForm } from '../Doctor/MedicalRecordForm';
 import { GrowthMeasurementForm, type GrowthMeasurementFormData } from '../Doctor/GrowthMeasurementForm';
+import { AllergyForm, type AllergyFormData } from '../Doctor/AllergyForm';
+import { NewVaccinationForm } from '../Doctor/NewVaccinationForm';
 import type { MedicalHistory } from '../../types/doctor';
+import type { AllergyRecord } from '../../types/parent';
 
 export const PatientHistory: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
@@ -24,10 +30,16 @@ export const PatientHistory: React.FC = () => {
   const { data, loading, error, refetch } = useDoctorPatientMedicalHistory(id);
   const growthMeasurementsQuery = useDoctorChildGrowthMeasurements(id);
   const { mutate: createGrowthMeasurement, loading: growthFormLoading, error: growthError } = useDoctorCreateGrowthMeasurement();
+  const { mutate: createAllergy, loading: allergyFormLoading, error: allergyError } = useDoctorCreateAllergy();
+  const { mutate: updateAllergy, loading: updateAllergyLoading } = useDoctorUpdateAllergy();
+  const { mutate: deleteAllergy } = useDoctorDeleteAllergy();
 
   const [formOpened, setFormOpened] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MedicalHistory | null>(null);
   const [growthFormOpened, setGrowthFormOpened] = useState(false);
+  const [allergyFormOpened, setAllergyFormOpened] = useState(false);
+  const [editingAllergy, setEditingAllergy] = useState<AllergyRecord | null>(null);
+  const [vaccinationFormOpened, setVaccinationFormOpened] = useState(false);
 
   const handleAddRecord = () => {
     setEditingRecord(null);
@@ -46,6 +58,48 @@ export const PatientHistory: React.FC = () => {
       setGrowthFormOpened(false);
     } catch (err) {
       console.error('Error creating growth measurement:', err);
+    }
+  };
+
+  const handleAddAllergy = () => {
+    setEditingAllergy(null);
+    setAllergyFormOpened(true);
+  };
+
+  const handleEditAllergy = (allergy: AllergyRecord) => {
+    setEditingAllergy(allergy);
+    setAllergyFormOpened(true);
+  };
+
+  const handleSaveAllergy = async (formData: AllergyFormData) => {
+    try {
+      if (editingAllergy) {
+        await updateAllergy({
+          allergyId: editingAllergy.id,
+          request: formData,
+        });
+      } else {
+        await createAllergy({
+          childId: id,
+          request: formData,
+        });
+      }
+      await refetch();
+      setAllergyFormOpened(false);
+      setEditingAllergy(null);
+    } catch (err) {
+      console.error('Error saving allergy:', err);
+    }
+  };
+
+  const handleDeleteAllergy = async (allergyId: number) => {
+    if (confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την αλλεργία;')) {
+      try {
+        await deleteAllergy(allergyId);
+        await refetch();
+      } catch (err) {
+        console.error('Error deleting allergy:', err);
+      }
     }
   };
 
@@ -108,11 +162,34 @@ export const PatientHistory: React.FC = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="vaccinations" pt="md">
-          <ChildVaccinationsList vaccinations={data.vaccinations} isLoading={false} />
+          <Stack gap="md">
+            <Button
+              leftSection={<IconPlus size={16} />}
+              onClick={() => setVaccinationFormOpened(true)}
+              style={{ alignSelf: 'flex-start' }}
+            >
+              Νέος Εμβολιασμός
+            </Button>
+            <ChildVaccinationsList vaccinations={data.vaccinations} isLoading={false} />
+          </Stack>
         </Tabs.Panel>
 
         <Tabs.Panel value="allergies" pt="md">
-          <AllergiesList allergies={data.allergies} isLoading={false} />
+          <Stack gap="md">
+            <Button
+              leftSection={<IconPlus size={16} />}
+              onClick={handleAddAllergy}
+              style={{ alignSelf: 'flex-start' }}
+            >
+              Νέα Αλλεργία
+            </Button>
+            <AllergiesList
+              allergies={data.allergies}
+              isLoading={false}
+              onEdit={handleEditAllergy}
+              onDelete={handleDeleteAllergy}
+            />
+          </Stack>
         </Tabs.Panel>
 
         <Tabs.Panel value="growth" pt="md">
@@ -160,6 +237,30 @@ export const PatientHistory: React.FC = () => {
         onSubmit={handleAddGrowthMeasurement}
         isLoading={growthFormLoading}
         error={growthError?.message || null}
+      />
+
+      <AllergyForm
+        opened={allergyFormOpened}
+        onClose={() => {
+          setAllergyFormOpened(false);
+          setEditingAllergy(null);
+        }}
+        childName={data?.childName || ''}
+        onSubmit={handleSaveAllergy}
+        isLoading={allergyFormLoading || updateAllergyLoading}
+        error={allergyError?.message || null}
+        initialData={editingAllergy || undefined}
+      />
+
+      <NewVaccinationForm
+        opened={vaccinationFormOpened}
+        childId={id}
+        childName={data?.childName || ''}
+        onClose={() => setVaccinationFormOpened(false)}
+        onSuccess={() => {
+          setVaccinationFormOpened(false);
+          refetch();
+        }}
       />
     </Stack>
   );

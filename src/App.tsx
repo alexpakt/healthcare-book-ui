@@ -12,6 +12,7 @@ import AppointmentsPage from './pages/AppointmentsPage';
 import ParentChildrenPage from './pages/ParentChildrenPage';
 import ChildDetailPage from './pages/ChildDetailPage';
 import PatientHistoryPage from './pages/PatientHistoryPage';
+import PatientsPage from './pages/PatientsPage';
 import ParentMedicalHistoryPage from './pages/ParentMedicalHistoryPage';
 import NotFound from './pages/NotFound';
 
@@ -35,6 +36,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AppointmentsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/patients"
+            element={
+              <ProtectedRoute>
+                <PatientsPage />
               </ProtectedRoute>
             }
           />

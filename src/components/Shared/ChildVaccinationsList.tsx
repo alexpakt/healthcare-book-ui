@@ -67,6 +67,7 @@ export const ChildVaccinationsList: React.FC<ChildVaccinationsListProps> = ({
           <Table.Thead>
             <Table.Tr>
               <Table.Th>Εμβόλιο</Table.Th>
+              <Table.Th>Δόση</Table.Th>
               <Table.Th>Ημερομηνία</Table.Th>
               <Table.Th>Επόμενη δόση</Table.Th>
               <Table.Th>Γιατρός</Table.Th>
@@ -81,6 +82,11 @@ export const ChildVaccinationsList: React.FC<ChildVaccinationsListProps> = ({
                   <Table.Td>
                     <Text size="sm" fw={500}>
                       {vaccination.vaccineName}
+                    </Text>
+                  </Table.Td>
+                  <Table.Td>
+                    <Text size="sm">
+                      {vaccination.doseNumber ? `Δόση ${vaccination.doseNumber}` : '—'}
                     </Text>
                   </Table.Td>
                   <Table.Td>

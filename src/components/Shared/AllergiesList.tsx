@@ -1,11 +1,13 @@
 import React from 'react';
-import { Stack, Text, Badge, Center, Loader, Paper, Group } from '@mantine/core';
-import { IconAlertTriangle } from '@tabler/icons-react';
+import { Stack, Text, Badge, Center, Loader, Paper, Group, Button } from '@mantine/core';
+import { IconAlertTriangle, IconEdit, IconTrash } from '@tabler/icons-react';
 import type { AllergyRecord } from '../../types/parent';
 
 interface AllergiesListProps {
   allergies: AllergyRecord[] | null;
   isLoading: boolean;
+  onEdit?: (allergy: AllergyRecord) => void;
+  onDelete?: (allergyId: number) => void;
 }
 
 const getSeverityColor = (severity: string): string => {
@@ -34,7 +36,12 @@ const getSeverityLabel = (severity: string): string => {
   }
 };
 
-export const AllergiesList: React.FC<AllergiesListProps> = ({ allergies, isLoading }) => {
+export const AllergiesList: React.FC<AllergiesListProps> = ({
+  allergies,
+  isLoading,
+  onEdit,
+  onDelete,
+}) => {
   if (isLoading) {
     return (
       <Center py="xl">
@@ -63,9 +70,36 @@ export const AllergiesList: React.FC<AllergiesListProps> = ({ allergies, isLoadi
           <Stack gap="sm">
             <Group justify="space-between">
               <Text fw={600}>{allergy.allergen}</Text>
-              <Badge size="sm" color={getSeverityColor(allergy.severity)}>
-                {getSeverityLabel(allergy.severity)}
-              </Badge>
+              <Group gap="xs">
+                <Badge size="sm" color={getSeverityColor(allergy.severity)}>
+                  {getSeverityLabel(allergy.severity)}
+                </Badge>
+                {(onEdit || onDelete) && (
+                  <Group gap={4}>
+                    {onEdit && (
+                      <Button
+                        size="xs"
+                        variant="default"
+                        onClick={() => onEdit(allergy)}
+                        leftSection={<IconEdit size={14} />}
+                      >
+                        Επεξεργασία
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button
+                        size="xs"
+                        variant="default"
+                        color="red"
+                        onClick={() => onDelete(allergy.id)}
+                        leftSection={<IconTrash size={14} />}
+                      >
+                        Διαγραφή
+                      </Button>
+                    )}
+                  </Group>
+                )}
+              </Group>
             </Group>
             {allergy.reaction && (
               <Text size="sm" c="dimmed">

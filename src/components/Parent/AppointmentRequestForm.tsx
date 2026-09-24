@@ -9,6 +9,8 @@ interface AppointmentRequestFormProps {
   opened: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialChildId?: number;
+  initialReason?: string;
 }
 
 const EMPTY_FORM = {
@@ -22,12 +24,24 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
   opened,
   onClose,
   onSuccess,
+  initialChildId,
+  initialReason,
 }) => {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [dateError, setDateError] = useState('');
   const { data: children } = useParentChildren();
   const { data: doctors } = useDirectoryDoctors();
   const { mutate, loading, error, reset } = useParentCreateAppointment();
+
+  React.useEffect(() => {
+    if (opened && (initialChildId || initialReason)) {
+      setFormData({
+        ...EMPTY_FORM,
+        childId: initialChildId ? String(initialChildId) : '',
+        reason: initialReason || '',
+      });
+    }
+  }, [opened, initialChildId, initialReason]);
 
   const handleChange = (field: keyof typeof EMPTY_FORM, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
