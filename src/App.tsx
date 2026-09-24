@@ -3,18 +3,27 @@ import {
   Routes,
   Route,
 } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { Center, Loader } from '@mantine/core';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/Auth/ProtectedRoute';
 import { LoginForm } from './components/Auth/LoginForm';
 import { RegisterForm } from './components/Auth/RegisterForm';
-import Dashboard from './pages/Dashboard';
-import AppointmentsPage from './pages/AppointmentsPage';
-import ParentChildrenPage from './pages/ParentChildrenPage';
-import ChildDetailPage from './pages/ChildDetailPage';
-import PatientHistoryPage from './pages/PatientHistoryPage';
-import PatientsPage from './pages/PatientsPage';
-import ParentMedicalHistoryPage from './pages/ParentMedicalHistoryPage';
 import NotFound from './pages/NotFound';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const AppointmentsPage = lazy(() => import('./pages/AppointmentsPage'));
+const ParentChildrenPage = lazy(() => import('./pages/ParentChildrenPage'));
+const ChildDetailPage = lazy(() => import('./pages/ChildDetailPage'));
+const PatientHistoryPage = lazy(() => import('./pages/PatientHistoryPage'));
+const PatientsPage = lazy(() => import('./pages/PatientsPage'));
+const ParentMedicalHistoryPage = lazy(() => import('./pages/ParentMedicalHistoryPage'));
+
+const PageLoader = () => (
+  <Center py="xl">
+    <Loader />
+  </Center>
+);
 
 function App() {
   return (
@@ -27,7 +36,9 @@ function App() {
             path="/"
             element={
               <ProtectedRoute>
-                <Dashboard />
+                <Suspense fallback={<PageLoader />}>
+                  <Dashboard />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -35,7 +46,9 @@ function App() {
             path="/appointments"
             element={
               <ProtectedRoute>
-                <AppointmentsPage />
+                <Suspense fallback={<PageLoader />}>
+                  <AppointmentsPage />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -43,7 +56,9 @@ function App() {
             path="/patients"
             element={
               <ProtectedRoute>
-                <PatientsPage />
+                <Suspense fallback={<PageLoader />}>
+                  <PatientsPage />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -51,7 +66,9 @@ function App() {
             path="/children"
             element={
               <ProtectedRoute requiredRole="ROLE_PARENT">
-                <ParentChildrenPage />
+                <Suspense fallback={<PageLoader />}>
+                  <ParentChildrenPage />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -59,7 +76,9 @@ function App() {
             path="/children/:childId"
             element={
               <ProtectedRoute requiredRole="ROLE_PARENT">
-                <ChildDetailPage />
+                <Suspense fallback={<PageLoader />}>
+                  <ChildDetailPage />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -67,7 +86,9 @@ function App() {
             path="/patients/:childId"
             element={
               <ProtectedRoute requiredRole="ROLE_DOCTOR">
-                <PatientHistoryPage />
+                <Suspense fallback={<PageLoader />}>
+                  <PatientHistoryPage />
+                </Suspense>
               </ProtectedRoute>
             }
           />
@@ -75,7 +96,9 @@ function App() {
             path="/medical-history"
             element={
               <ProtectedRoute requiredRole="ROLE_PARENT">
-                <ParentMedicalHistoryPage />
+                <Suspense fallback={<PageLoader />}>
+                  <ParentMedicalHistoryPage />
+                </Suspense>
               </ProtectedRoute>
             }
           />
