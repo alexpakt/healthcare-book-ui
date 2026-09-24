@@ -4,6 +4,7 @@ export interface Child {
   id: number;
   firstName: string;
   lastName: string;
+  amka: string;
   dateOfBirth: string;
   gender: Gender;
   bloodType?: string;

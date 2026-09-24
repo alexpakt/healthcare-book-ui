@@ -12,6 +12,7 @@ interface RegisterFormData {
   email: string;
   phoneNumber: string;
   address: string;
+  amka: string;
   specialization: string;
   licenseNumber: string;
 }
@@ -26,6 +27,7 @@ export const RegisterForm: React.FC = () => {
     email: '',
     phoneNumber: '',
     address: '',
+    amka: '',
     specialization: '',
     licenseNumber: '',
   });
@@ -36,9 +38,16 @@ export const RegisterForm: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    let processedValue = value;
+
+    // Only allow digits for AMKA
+    if (name === 'amka') {
+      processedValue = value.replace(/\D/g, '').slice(0, 11);
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: processedValue,
     }));
   };
 
@@ -64,6 +73,7 @@ export const RegisterForm: React.FC = () => {
           password: formData.password,
           firstName: formData.firstName,
           lastName: formData.lastName,
+          amka: formData.amka || '',
           email: formData.email,
           phoneNumber: formData.phoneNumber || undefined,
           specialization: formData.specialization,
@@ -143,26 +153,38 @@ export const RegisterForm: React.FC = () => {
               />
 
               {userType === 'doctor' && (
-                <Group grow>
+                <>
                   <TextInput
-                    label="Ειδικότητα"
-                    placeholder="π.χ. Παιδίατρος"
-                    value={formData.specialization}
-                    onChange={(e) =>
-                      handleChange({ target: { name: 'specialization', value: e.target.value } } as any)
-                    }
+                    label="AMKA (Αριθμός Μητρώου Κοινωνικής Ασφάλισης)"
+                    placeholder="11 ψηφία"
+                    description="Εισάγετε 11 ψηφία (μόνο αριθμούς)"
+                    value={formData.amka || ''}
+                    onChange={(e) => handleChange({ target: { name: 'amka', value: e.target.value } } as any)}
+                    maxLength={11}
                     required
+                    error={formData.amka && !/^\d{11}$/.test(formData.amka) ? 'Πρέπει να είναι ακριβώς 11 ψηφία' : false}
                   />
-                  <TextInput
-                    label="Αριθμός άδειας"
-                    placeholder="Αριθμός άδειας ασκήσεως επαγγέλματος"
-                    value={formData.licenseNumber}
-                    onChange={(e) =>
-                      handleChange({ target: { name: 'licenseNumber', value: e.target.value } } as any)
-                    }
-                    required
-                  />
-                </Group>
+                  <Group grow>
+                    <TextInput
+                      label="Ειδικότητα"
+                      placeholder="π.χ. Παιδίατρος"
+                      value={formData.specialization}
+                      onChange={(e) =>
+                        handleChange({ target: { name: 'specialization', value: e.target.value } } as any)
+                      }
+                      required
+                    />
+                    <TextInput
+                      label="Αριθμός άδειας"
+                      placeholder="Αριθμός άδειας ασκήσεως επαγγέλματος"
+                      value={formData.licenseNumber}
+                      onChange={(e) =>
+                        handleChange({ target: { name: 'licenseNumber', value: e.target.value } } as any)
+                      }
+                      required
+                    />
+                  </Group>
+                </>
               )}
 
               <TextInput

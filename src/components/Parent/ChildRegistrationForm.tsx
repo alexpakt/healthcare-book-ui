@@ -27,6 +27,7 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
     firstName: '',
     lastName: '',
     dateOfBirth: '',
+    amka: '',
     gender: 'MALE',
     bloodType: '',
   });
@@ -34,9 +35,16 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
   const { mutate, loading, error, reset } = useCreateChild();
 
   const handleChange = (field: keyof CreateChildRequest, value: string) => {
+    let processedValue = value;
+
+    // Only allow digits for AMKA
+    if (field === 'amka') {
+      processedValue = value.replace(/\D/g, '').slice(0, 11);
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: processedValue,
     }));
   };
 
@@ -49,6 +57,14 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
     }
     if (!formData.lastName.trim()) {
       alert('Το επώνυμο του παιδιού είναι υποχρεωτικό');
+      return;
+    }
+    if (!formData.amka.trim()) {
+      alert('Το AMKA είναι υποχρεωτικό');
+      return;
+    }
+    if (!/^\d{11}$/.test(formData.amka)) {
+      alert('Το AMKA πρέπει να περιέχει ακριβώς 11 ψηφία');
       return;
     }
     if (!formData.dateOfBirth) {
@@ -68,6 +84,7 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
       await mutate({
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
+        amka: formData.amka.trim(),
         dateOfBirth: formData.dateOfBirth,
         gender: formData.gender as 'MALE' | 'FEMALE',
         bloodType: formData.bloodType || undefined,
@@ -78,6 +95,7 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
         firstName: '',
         lastName: '',
         dateOfBirth: '',
+        amka: '',
         gender: 'MALE',
         bloodType: '',
       });
@@ -94,6 +112,7 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
       firstName: '',
       lastName: '',
       dateOfBirth: '',
+      amka: '',
       gender: 'MALE',
       bloodType: '',
     });
@@ -140,6 +159,19 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             onChange={(e) => handleChange('lastName', e.target.value)}
             required
             disabled={loading}
+          />
+
+          {/* AMKA */}
+          <TextInput
+            label="AMKA (Αριθμός Μητρώου Κοινωνικής Ασφάλισης)"
+            placeholder="11 ψηφία"
+            description="Εισάγετε 11 ψηφία (μόνο αριθμούς)"
+            value={formData.amka}
+            onChange={(e) => handleChange('amka', e.target.value)}
+            maxLength={11}
+            required
+            disabled={loading}
+            error={formData.amka && !/^\d{11}$/.test(formData.amka) ? 'Πρέπει να είναι ακριβώς 11 ψηφία' : false}
           />
 
           {/* Date of Birth */}
@@ -201,7 +233,7 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             <Button
               type="submit"
               loading={loading}
-              disabled={!formData.firstName || !formData.lastName || !formData.dateOfBirth}
+              disabled={!formData.firstName || !formData.lastName || !formData.amka || !/^\d{11}$/.test(formData.amka) || !formData.dateOfBirth}
             >
               {loading ? 'Αποθήκευση...' : 'Αποθήκευση Παιδιού'}
             </Button>

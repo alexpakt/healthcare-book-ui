@@ -24,6 +24,7 @@ export interface RegisterDoctorRequest {
   password: string;
   firstName: string;
   lastName: string;
+  amka: string;
   email: string;
   phoneNumber?: string;
   specialization: string;

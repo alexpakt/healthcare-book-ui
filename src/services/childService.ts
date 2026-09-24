@@ -4,7 +4,8 @@ import type { Child } from '../types/parent';
 export interface CreateChildRequest {
   firstName: string;
   lastName: string;
-  dateOfBirth: string; // YYYY-MM-DD format
+  amka: string;
+  dateOfBirth: string;
   gender: 'MALE' | 'FEMALE';
   bloodType?: string;
 }

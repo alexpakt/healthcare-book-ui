@@ -108,6 +108,9 @@ export const ChildDetail: React.FC = () => {
               </Text>
               {child.bloodType && <Badge size="sm">{child.bloodType}</Badge>}
             </Group>
+            <Text size="sm" c="dimmed">
+              AMKA: <strong>{child.amka}</strong>
+            </Text>
           </Stack>
         </Group>
       </Paper>
