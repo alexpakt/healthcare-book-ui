@@ -17,12 +17,15 @@ import {
 import { IconAlertCircle, IconSearch } from '@tabler/icons-react';
 import { childService } from '../../services/childService';
 import { doctorChildRequestService } from '../../services/doctorChildRequestService';
-import { useDoctorAssignedChildren } from '../../hooks/useDoctorData';
 import type { ChildRecord } from '../../services/childService';
+import type { AssignedChild } from '../../types/doctor';
 
-export const SearchChildForm: React.FC = () => {
+interface SearchChildFormProps {
+  patients: AssignedChild[] | null;
+}
+
+export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) => {
   const navigate = useNavigate();
-  const { data: myPatients } = useDoctorAssignedChildren();
   const [amka, setAmka] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,7 +34,7 @@ export const SearchChildForm: React.FC = () => {
   const [requestNotes, setRequestNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const isAlreadyPatient = foundChild && myPatients?.some(p => p.id === foundChild.id);
+  const isAlreadyPatient = foundChild && patients?.some(p => p.id === foundChild.id);
 
   const handleAmkaChange = (value: string) => {
     const filtered = value.replace(/\D/g, '').slice(0, 11);

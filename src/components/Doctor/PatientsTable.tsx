@@ -51,14 +51,14 @@ export const PatientsTable: React.FC<PatientsTableProps> = ({
             Δεν έχετε ασθενείς
           </Text>
         </Center>
-        <SearchChildForm />
+        <SearchChildForm patients={patients} />
       </Stack>
     );
   }
 
   return (
     <Stack gap="lg">
-      <SearchChildForm />
+      <SearchChildForm patients={patients} />
 
       <Table striped highlightOnHover>
         <Table.Thead>

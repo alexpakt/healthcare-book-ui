@@ -37,7 +37,7 @@ export const PatientsList: React.FC<PatientsListProps> = ({
 
   return (
     <Stack gap="lg">
-      <SearchChildForm />
+      <SearchChildForm patients={patients} />
 
       <Grid>
         {patients.map((patient) => (
