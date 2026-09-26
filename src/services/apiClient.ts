@@ -23,8 +23,8 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Clear auth on 401
+    const isLoginRequest = error.config?.url?.includes('/api/auth/login');
+    if (error.response?.status === 401 && !isLoginRequest) {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
@@ -34,4 +34,3 @@ apiClient.interceptors.response.use(
 );
 
 export { apiClient };
-export default apiClient;
