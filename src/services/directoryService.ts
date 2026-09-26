@@ -5,6 +5,7 @@ export interface DoctorDirectoryEntry {
   firstName: string;
   lastName: string;
   specialization: string;
+  phoneNumber?: string;
 }
 
 export const directoryService = {

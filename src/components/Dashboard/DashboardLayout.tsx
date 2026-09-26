@@ -21,6 +21,7 @@ import {
   IconMedicalCross,
   IconSettings,
   IconServerCog,
+  IconStethoscope,
 } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -45,6 +46,7 @@ const getNavItemsByRole = (role: UserRole): NavItem[] => {
       { label: 'Τα παιδιά μου', icon: <IconUsers size={16} />, path: '/children' },
       { label: 'Ραντεβού', icon: <IconCalendar size={16} />, path: '/appointments' },
       { label: 'Ιστορικό Υγείας', icon: <IconMedicalCross size={16} />, path: '/medical-history' },
+      { label: 'Ιατροί', icon: <IconStethoscope size={16} />, path: '/doctors' },
     ],
     ROLE_DOCTOR: [
       { label: 'Αρχική σελίδα', icon: <IconHome size={16} />, path: '/' },
