@@ -1,8 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stack, Title } from '@mantine/core';
-import { DashboardLayout } from '../components/Dashboard/DashboardLayout';
-import { PatientsTable } from "../components/Doctor/PatientsTable";
+import { DashboardLayout } from '../components/dashboard/DashboardLayout';
+import { PatientsTable } from "../components/doctor/PatientsTable";
 import { useDoctorAssignedChildren } from '../hooks/useDoctorData';
 
 const DoctorAppointmentsPage: React.FC = () => {

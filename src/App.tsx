@@ -6,9 +6,9 @@ import {
 import { lazy, Suspense } from 'react';
 import { Center, Loader } from '@mantine/core';
 import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute } from './components/Auth/ProtectedRoute';
-import { LoginForm } from './components/Auth/LoginForm';
-import { RegisterForm } from './components/Auth/RegisterForm';
+import { ProtectedRoute } from './components/auth/ProtectedRoute';
+import { LoginForm } from './components/auth/LoginForm';
+import { RegisterForm } from './components/auth/RegisterForm';
 import NotFound from './pages/NotFound';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));

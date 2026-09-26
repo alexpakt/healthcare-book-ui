@@ -1,18 +1,15 @@
 import React from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { Center, Loader } from '@mantine/core';
+import { Center } from '@mantine/core';
 import ParentDashboardPage from './ParentDashboardPage';
 import DoctorDashboardPage from './DoctorDashboardPage';
+import LoadingScreen from '../components/shared/LoadingScreen';
 
 const Dashboard: React.FC = () => {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <Center style={{ minHeight: '100vh' }}>
-        <Loader />
-      </Center>
-    );
+    return <LoadingScreen />;
   }
 
   // Route to appropriate dashboard based on role

@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Stack, Title, Text, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useParentChildren } from '../../hooks/useParentData';
-import { ChildrenList } from '../Parent/ChildrenList';
-import { ChildRegistrationForm } from '../Parent/ChildRegistrationForm';
+import { ChildrenList } from '../parent/ChildrenList';
+import { ChildRegistrationForm } from '../parent/ChildRegistrationForm';
 
 export const ParentChildren: React.FC = () => {
   const navigate = useNavigate();

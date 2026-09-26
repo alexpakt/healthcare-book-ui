@@ -6,8 +6,8 @@ import {
   useParentChild,
   useParentChildMedicalRecords,
 } from '../../hooks/useParentData';
-import { ChildCard } from '../Parent/ChildCard';
-import { MedicalRecordsList } from '../Shared/MedicalRecordsList';
+import { ChildCard } from '../parent/ChildCard';
+import { MedicalRecordsList } from '../shared/MedicalRecordsList';
 
 interface ChildMedicalHistoryProps {
   childId: number;

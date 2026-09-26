@@ -1,6 +1,6 @@
 import React from 'react';
-import { DashboardLayout } from '../components/Dashboard/DashboardLayout';
-import { ParentAppointments } from '../components/Dashboard/ParentAppointments';
+import { DashboardLayout } from '../components/dashboard/DashboardLayout';
+import { ParentAppointments } from '../components/dashboard/ParentAppointments';
 
 const ParentAppointmentsPage: React.FC = () => {
   return (

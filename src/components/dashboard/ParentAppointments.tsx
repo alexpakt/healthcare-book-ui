@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Stack, Title, Text, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh, IconPlus } from '@tabler/icons-react';
 import { useParentAppointments, useParentUpdateAppointmentStatus } from '../../hooks/useParentData';
-import { UpcomingAppointments } from '../Parent/UpcomingAppointments';
-import { AppointmentRequestForm } from '../Parent/AppointmentRequestForm';
+import { UpcomingAppointments } from '../parent/UpcomingAppointments';
+import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
 
 export const ParentAppointments: React.FC = () => {
   const { data, loading, error, refetch } = useParentAppointments();

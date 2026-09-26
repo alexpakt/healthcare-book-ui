@@ -1,6 +1,6 @@
 import React from 'react';
-import { DashboardLayout } from '../components/Dashboard/DashboardLayout';
-import { ChildDetail } from '../components/Dashboard/ChildDetail';
+import { DashboardLayout } from '../components/dashboard/DashboardLayout';
+import { ChildDetail } from '../components/dashboard/ChildDetail';
 
 const ChildDetailPage: React.FC = () => {
   return (

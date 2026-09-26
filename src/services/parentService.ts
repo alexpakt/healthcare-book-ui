@@ -12,7 +12,7 @@ export interface CreateAppointmentRequest {
 }
 
 /**
- * Parent service - Fetches data from resource endpoints
+ * parent service - Fetches data from resource endpoints
  * The backend uses role-based authorization on individual resource endpoints
  * No role-specific aggregation endpoints exist, so we fetch and aggregate on the frontend
  */

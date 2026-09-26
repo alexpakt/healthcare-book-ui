@@ -1,6 +1,6 @@
 import React from 'react';
-import { DashboardLayout } from '../components/Dashboard/DashboardLayout';
-import { DoctorAppointments } from '../components/Dashboard/DoctorAppointments';
+import { DashboardLayout } from '../components/dashboard/DashboardLayout';
+import { DoctorAppointments } from '../components/dashboard/DoctorAppointments';
 
 const DoctorAppointmentsPage: React.FC = () => {
   return (

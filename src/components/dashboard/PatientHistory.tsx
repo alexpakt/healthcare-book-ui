@@ -10,16 +10,16 @@ import {
   useDoctorUpdateAllergy,
   useDoctorDeleteAllergy,
 } from '../../hooks/useDoctorData';
-import { PatientCard } from '../Shared/PatientCard';
-import { MedicalRecordsList } from '../Shared/MedicalRecordsList';
-import { ChildVaccinationsList } from '../Shared/ChildVaccinationsList';
-import { AllergiesList } from '../Shared/AllergiesList';
-import { GrowthChart } from '../Shared/GrowthChart';
-import { GrowthMeasurementsList } from '../Shared/GrowthMeasurementsList';
-import { MedicalRecordForm } from '../Doctor/MedicalRecordForm';
-import { GrowthMeasurementForm, type GrowthMeasurementFormData } from '../Doctor/GrowthMeasurementForm';
-import { AllergyForm, type AllergyFormData } from '../Doctor/AllergyForm';
-import { NewVaccinationForm } from '../Doctor/NewVaccinationForm';
+import { PatientCard } from '../shared/PatientCard';
+import { MedicalRecordsList } from '../shared/MedicalRecordsList';
+import { ChildVaccinationsList } from '../shared/ChildVaccinationsList';
+import { AllergiesList } from '../shared/AllergiesList';
+import { GrowthChart } from '../shared/GrowthChart';
+import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
+import { MedicalRecordForm } from '../doctor/MedicalRecordForm';
+import { GrowthMeasurementForm, type GrowthMeasurementFormData } from '../doctor/GrowthMeasurementForm';
+import { AllergyForm, type AllergyFormData } from '../doctor/AllergyForm';
+import { NewVaccinationForm } from '../doctor/NewVaccinationForm';
 import type { MedicalHistory } from '../../types/doctor';
 import type { AllergyRecord } from '../../types/parent';
 

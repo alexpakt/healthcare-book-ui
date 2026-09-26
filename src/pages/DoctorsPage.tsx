@@ -1,8 +1,8 @@
 import React from 'react';
 import { Stack, Title, Text, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
-import { DashboardLayout } from '../components/Dashboard/DashboardLayout';
-import { DoctorsTable } from '../components/Parent/DoctorsTable';
+import { DashboardLayout } from '../components/dashboard/DashboardLayout';
+import { DoctorsTable } from '../components/parent/DoctorsTable';
 import { useDirectoryDoctors } from '../hooks/useDirectoryData';
 
 const DoctorsPage: React.FC = () => {

@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { Stack, Title, Text, Alert, Button, Pagination, Group, Center, Loader } from '@mantine/core';
 import { IconAlertCircle, IconRefresh, IconPlus } from '@tabler/icons-react';
 import { useDoctorAppointments, useDoctorUpdateAppointmentStatus } from '../../hooks/useDoctorData';
-import { AppointmentsTable } from '../Doctor/AppointmentsTable';
-import { NewAppointmentForm } from '../Doctor/NewAppointmentForm';
+import { AppointmentsTable } from '../doctor/AppointmentsTable';
+import { NewAppointmentForm } from '../doctor/NewAppointmentForm';
 
 const PAGE_SIZE = 10;
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { Center, Loader } from '@mantine/core';
 import { useAuth } from '../../hooks/useAuth';
+import LoadingScreen from '../shared/LoadingScreen';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -15,11 +15,7 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { isAuthenticated, user, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <Center style={{ minHeight: '100vh' }}>
-        <Loader />
-      </Center>
-    );
+    return <LoadingScreen />;
   }
 
   if (!isAuthenticated) {

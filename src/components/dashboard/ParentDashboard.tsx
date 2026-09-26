@@ -4,12 +4,12 @@ import { Stack, Title, Text, Tabs, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useParentDashboard } from '../../hooks/useParentData';
-import { QuickStats } from '../Parent/QuickStats';
-import { ChildrenList } from '../Parent/ChildrenList';
-import { UpcomingAppointments } from '../Parent/UpcomingAppointments';
-import { VaccinationReminders } from '../Parent/VaccinationReminders';
-import { DoctorRequestsNotification } from '../Parent/DoctorRequestsNotification';
-import { ChildRegistrationForm } from '../Parent/ChildRegistrationForm';
+import { QuickStats } from '../parent/QuickStats';
+import { ChildrenList } from '../parent/ChildrenList';
+import { UpcomingAppointments } from '../parent/UpcomingAppointments';
+import { VaccinationReminders } from '../parent/VaccinationReminders';
+import { DoctorRequestsNotification } from '../parent/DoctorRequestsNotification';
+import { ChildRegistrationForm } from '../parent/ChildRegistrationForm';
 
 export const ParentDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -91,7 +91,7 @@ export const ParentDashboard: React.FC = () => {
         isLoading={isLoading}
       />
 
-      {/* Doctor Requests Notification */}
+      {/* doctor Requests Notification */}
       <div>
         <DoctorRequestsNotification />
       </div>

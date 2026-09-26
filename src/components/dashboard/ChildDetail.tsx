@@ -12,12 +12,12 @@ import {
   useParentChildGrowthMeasurements,
   useParentUpdateAppointmentStatus,
 } from '../../hooks/useParentData';
-import { UpcomingAppointments } from '../Parent/UpcomingAppointments';
-import { VaccinationStatusWithHistory } from '../Shared/VaccinationStatusWithHistory';
-import { MedicalRecordsList } from '../Shared/MedicalRecordsList';
-import { AllergiesList } from '../Shared/AllergiesList';
-import { GrowthChart } from '../Shared/GrowthChart';
-import { GrowthMeasurementsList } from '../Shared/GrowthMeasurementsList';
+import { UpcomingAppointments } from '../parent/UpcomingAppointments';
+import { VaccinationStatusWithHistory } from '../shared/VaccinationStatusWithHistory';
+import { MedicalRecordsList } from '../shared/MedicalRecordsList';
+import { AllergiesList } from '../shared/AllergiesList';
+import { GrowthChart } from '../shared/GrowthChart';
+import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
 
 const getGenderLabel = (gender: string): string => (gender === 'MALE' ? 'Αγόρι' : 'Κορίτσι');
 

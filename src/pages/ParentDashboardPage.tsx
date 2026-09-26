@@ -1,6 +1,6 @@
 import React from 'react';
-import { DashboardLayout } from '../components/Dashboard/DashboardLayout';
-import { ParentDashboard } from '../components/Dashboard/ParentDashboard';
+import { DashboardLayout } from '../components/dashboard/DashboardLayout';
+import { ParentDashboard } from '../components/dashboard/ParentDashboard';
 
 const ParentDashboardPage: React.FC = () => {
   return (

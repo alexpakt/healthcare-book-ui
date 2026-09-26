@@ -4,9 +4,9 @@ import { Stack, Title, Text, Tabs, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useDoctorDashboard, useDoctorUpdateAppointmentStatus } from '../../hooks/useDoctorData';
-import { QuickStats } from '../Doctor/QuickStats';
-import { PatientsList } from '../Doctor/PatientsList';
-import { AppointmentsTable } from '../Doctor/AppointmentsTable';
+import { QuickStats } from '../doctor/QuickStats';
+import { PatientsList } from '../doctor/PatientsList';
+import { AppointmentsTable } from '../doctor/AppointmentsTable';
 
 export const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();

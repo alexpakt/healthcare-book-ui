@@ -3,7 +3,7 @@ import { Stack, Table, Text, Center, Loader, Paper, Alert, Box } from '@mantine/
 import { IconVaccine, IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import type { VaccinationRecord, VaccinationSchedule } from '../../types/parent';
 import { parentService } from '../../services/parentService';
-import { AppointmentRequestForm } from '../Parent/AppointmentRequestForm';
+import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
 import { useParentChildAppointments } from '../../hooks/useParentData';
 
 interface VaccinationStatusGridProps {
