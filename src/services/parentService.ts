@@ -1,6 +1,7 @@
 import { apiClient } from './apiClient';
 import type { Child, Appointment, VaccinationRecord, VaccinationSchedule, MedicalRecord, AllergyRecord, GrowthMeasurement, ParentDashboardData } from '../types/parent';
 import type { AppointmentStatus } from '../types/common';
+import type { ParentProfile, UpdateParentProfileRequest } from '../types/profile';
 import { getVaccinationStatus } from '../utils/vaccinationStatus';
 
 export interface CreateAppointmentRequest {
@@ -164,6 +165,22 @@ export const parentService = {
     const response = await apiClient.patch<Appointment>(`/api/appointments/${appointmentId}/status`, {
       status,
     });
+    return response.data;
+  },
+
+  /**
+   * Get the current parent's own profile
+   */
+  async getMyProfile(): Promise<ParentProfile> {
+    const response = await apiClient.get<ParentProfile>('/api/parents/me');
+    return response.data;
+  },
+
+  /**
+   * Update the current parent's own profile
+   */
+  async updateMyProfile(request: UpdateParentProfileRequest): Promise<ParentProfile> {
+    const response = await apiClient.patch<ParentProfile>('/api/parents/me', request);
     return response.data;
   },
 

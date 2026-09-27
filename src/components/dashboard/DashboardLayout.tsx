@@ -132,8 +132,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 </Group>
               </Menu.Target>
               <Menu.Dropdown>
-                <Menu.Item disabled>
-                    Ρυθμίσεις
+                <Menu.Item
+                  leftSection={<IconSettings size={14} />}
+                  onClick={() => navigate('/profile')}
+                >
+                  Προφίλ
                 </Menu.Item>
                 <Menu.Divider />
                 <Menu.Item

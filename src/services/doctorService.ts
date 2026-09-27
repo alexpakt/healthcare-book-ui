@@ -11,6 +11,7 @@ import type {
 } from '../types/doctor';
 import type { GrowthMeasurement } from '../types/parent';
 import type { AppointmentStatus, PaginatedResponse } from '../types/common';
+import type { DoctorProfile, UpdateDoctorProfileRequest } from '../types/profile';
 
 export interface CreateAppointmentRequest {
   childId: number;
@@ -287,6 +288,26 @@ export const doctorService = {
       return response.data;
     } catch (error) {
       console.error('Error creating vaccination:', error);
+      throw error;
+    }
+  },
+
+  async getMyProfile(): Promise<DoctorProfile> {
+    try {
+      const response = await apiClient.get<DoctorProfile>('/api/doctors/me');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching doctor profile:', error);
+      throw error;
+    }
+  },
+
+  async updateMyProfile(request: UpdateDoctorProfileRequest): Promise<DoctorProfile> {
+    try {
+      const response = await apiClient.patch<DoctorProfile>('/api/doctors/me', request);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating doctor profile:', error);
       throw error;
     }
   },

@@ -19,6 +19,7 @@ const PatientHistoryPage = lazy(() => import('./pages/PatientHistoryPage'));
 const PatientsPage = lazy(() => import('./pages/PatientsPage'));
 const ParentMedicalHistoryPage = lazy(() => import('./pages/ParentMedicalHistoryPage'));
 const DoctorsPage = lazy(() => import('./pages/DoctorsPage'));
+const ProfilePage = lazy(() => import('./pages/./ProfilePage'));
 
 const PageLoader = () => (
   <Center py="xl">
@@ -109,6 +110,16 @@ function App() {
               <ProtectedRoute requiredRole="ROLE_PARENT">
                 <Suspense fallback={<PageLoader />}>
                   <DoctorsPage />
+                </Suspense>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Suspense fallback={<PageLoader />}>
+                  <ProfilePage />
                 </Suspense>
               </ProtectedRoute>
             }
