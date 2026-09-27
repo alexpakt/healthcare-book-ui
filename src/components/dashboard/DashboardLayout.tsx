@@ -12,7 +12,9 @@ import {
   Title,
   Loader,
   Center,
+  Burger,
 } from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import {
   IconLogout,
   IconHome,
@@ -73,6 +75,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const navItems = getNavItemsByRole(user?.role as UserRole);
+  const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
 
   const handleLogout = () => {
     logout();
@@ -107,13 +110,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       navbar={{
         width: 250,
         breakpoint: 'sm',
-        collapsed: { mobile: true },
+        collapsed: { mobile: !navOpened },
       }}
       padding="md"
     >
       <AppShell.Header>
         <Group justify="space-between" h="100%" px="md">
-          <Title order={3}>ECHR</Title>
+          <Group gap="sm">
+            <Burger opened={navOpened} onClick={toggleNav} hiddenFrom="sm" size="sm" />
+            <Title order={3}>ECHR</Title>
+          </Group>
           <Group gap="md">
             <Menu position="bottom-end" shadow="md">
               <Menu.Target>
@@ -159,7 +165,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               key={item.path}
               label={item.label}
               leftSection={item.icon}
-              onClick={() => navigate(item.path)}
+              onClick={() => {
+                navigate(item.path);
+                closeNav();
+              }}
               style={{ cursor: 'pointer', borderRadius: 4 }}
             />
           ))}
