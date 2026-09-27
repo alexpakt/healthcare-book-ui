@@ -34,6 +34,7 @@ export const DoctorsTable: React.FC<DoctorsTableProps> = ({ doctors, isLoading }
             <Table.Th>Όνομα</Table.Th>
             <Table.Th>Ειδικότητα</Table.Th>
             <Table.Th>Τηλέφωνο</Table.Th>
+            <Table.Th>Διεύθυνση</Table.Th>
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
@@ -46,6 +47,7 @@ export const DoctorsTable: React.FC<DoctorsTableProps> = ({ doctors, isLoading }
               </Table.Td>
               <Table.Td>{doctor.specialization}</Table.Td>
               <Table.Td>{doctor.phoneNumber || '-'}</Table.Td>
+              <Table.Td>{doctor.address || '-'}</Table.Td>
             </Table.Tr>
           ))}
         </Table.Tbody>
