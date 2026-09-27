@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Paper, TextInput, Button, Group, Stack, Alert, Center, Loader } from '@mantine/core';
+import {Paper, TextInput, Button, Group, Stack, Alert, Center, Loader, Title} from '@mantine/core';
 import { IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { doctorService } from '../../services/doctorService';
@@ -169,6 +169,7 @@ export const EditProfileForm: React.FC = () => {
     <Paper p="xl" radius="lg" shadow="md" withBorder maw={600}>
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
+          <Title order={4}>Αλλαγή προσωπικών πληροφοριών</Title>
           {saveError && (
             <Alert icon={<IconAlertCircle size={16} />} color="red" title="Σφάλμα">
               {saveError}

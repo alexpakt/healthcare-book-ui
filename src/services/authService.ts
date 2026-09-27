@@ -4,6 +4,7 @@ import type {
   LoginRequest,
   RegisterParentRequest,
   RegisterDoctorRequest,
+  ChangePasswordRequest,
 } from '../types/auth';
 
 export const authService = {
@@ -26,6 +27,10 @@ export const authService = {
       data
     );
     return response.data;
+  },
+
+  async changePassword(data: ChangePasswordRequest): Promise<void> {
+    await apiClient.post('/api/auth/change-password', data);
   },
 
   logout(): void {

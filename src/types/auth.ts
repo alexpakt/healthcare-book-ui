@@ -19,6 +19,11 @@ export interface RegisterParentRequest {
   address?: string;
 }
 
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export interface RegisterDoctorRequest {
   username: string;
   password: string;
