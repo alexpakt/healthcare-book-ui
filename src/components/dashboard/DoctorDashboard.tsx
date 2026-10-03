@@ -4,7 +4,6 @@ import { Stack, Title, Text, Tabs, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useDoctorDashboard, useDoctorUpdateAppointmentStatus } from '../../hooks/useDoctorData';
-import { QuickStats } from '../doctor/QuickStats';
 import { PatientsList } from '../doctor/PatientsList';
 import { AppointmentsTable } from '../doctor/AppointmentsTable';
 
@@ -12,7 +11,6 @@ export const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const {
-    dashboardData,
     assignedChildren,
     todayAppointments,
     upcomingAppointments,
@@ -73,8 +71,6 @@ export const DoctorDashboard: React.FC = () => {
           </Stack>
         </Alert>
       )}
-
-      <QuickStats stats={dashboardData?.quickStats || null} isLoading={isLoading} />
 
       <Tabs defaultValue="patients" orientation="horizontal">
         <Tabs.List>

@@ -134,7 +134,6 @@ export function useDoctorDashboard() {
   }, [dashboardData.refetch]);
 
   return {
-    dashboardData: dashboardData.data,
     assignedChildren: dashboardData.data?.assignedChildren || null,
     todayAppointments: dashboardData.data?.todayAppointments || null,
     upcomingAppointments: dashboardData.data?.upcomingAppointments || null,

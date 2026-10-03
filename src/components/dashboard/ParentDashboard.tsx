@@ -4,7 +4,6 @@ import { Stack, Title, Text, Tabs, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useParentDashboard } from '../../hooks/useParentData';
-import { QuickStats } from '../parent/QuickStats';
 import { ChildrenList } from '../parent/ChildrenList';
 import { UpcomingAppointments } from '../parent/UpcomingAppointments';
 import { VaccinationReminders } from '../parent/VaccinationReminders';
@@ -16,7 +15,6 @@ export const ParentDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [childFormOpened, setChildFormOpened] = useState(false);
   const {
-    dashboardData,
     children,
     appointments,
     vaccinations,
@@ -84,12 +82,6 @@ export const ParentDashboard: React.FC = () => {
           </Stack>
         </Alert>
       )}
-
-      {/* Quick Stats */}
-      <QuickStats
-        stats={dashboardData?.quickStats || null}
-        isLoading={isLoading}
-      />
 
       {/* doctor Requests Notification */}
       <div>

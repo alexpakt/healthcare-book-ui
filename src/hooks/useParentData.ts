@@ -118,7 +118,6 @@ export function useParentDashboard() {
   }, [dashboardData.refetch]);
 
   return {
-    dashboardData: dashboardData.data,
     children: dashboardData.data?.children || null,
     appointments: dashboardData.data?.upcomingAppointments as Appointment[] || null,
     vaccinations: dashboardData.data?.vaccinationReminders as VaccinationRecord[] || null,
