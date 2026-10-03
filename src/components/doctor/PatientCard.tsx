@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, Text, Badge, Group, Stack, Button, Avatar } from '@mantine/core';
 import { IconArrowRight } from '@tabler/icons-react';
+import { getAgeDisplay } from '../../utils/ageCalculator';
 import type { AssignedChild } from '../../types/doctor';
 
 interface PatientCardProps {
@@ -8,21 +9,8 @@ interface PatientCardProps {
   onViewHistory?: (childId: number) => void;
 }
 
-const calculateAge = (dateOfBirth: string): number => {
-  const today = new Date();
-  const birthDate = new Date(dateOfBirth);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-
-  return age;
-};
-
 export const PatientCard: React.FC<PatientCardProps> = ({ patient, onViewHistory }) => {
-  const age = calculateAge(patient.dateOfBirth);
+  const ageDisplay = getAgeDisplay(patient.dateOfBirth);
   const fullName = `${patient.firstName} ${patient.lastName}`;
   const initials = `${patient.firstName.charAt(0)}${patient.lastName.charAt(0)}`.toUpperCase();
 
@@ -39,7 +27,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, onViewHistory
                 {fullName}
               </Text>
               <Text size="sm" c="dimmed">
-                {age} {age === 1 ? 'έτος' : 'ετών'}
+                {ageDisplay}
               </Text>
             </Stack>
           </Group>
