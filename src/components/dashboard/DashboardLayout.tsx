@@ -54,7 +54,6 @@ const getNavItemsByRole = (role: UserRole): NavItem[] => {
       { label: 'Αρχική σελίδα', icon: <IconHome size={16} />, path: '/' },
       { label: 'Ασθενείς', icon: <IconUsers size={16} />, path: '/patients' },
       { label: 'Ραντεβού', icon: <IconCalendar size={16} />, path: '/appointments' },
-      { label: 'Σημειώσεις', icon: <IconMedicalCross size={16} />, path: '/notes' },
     ],
     ROLE_ADMIN: [
       { label: 'Αρχική σελίδα', icon: <IconHome size={16} />, path: '/' },
