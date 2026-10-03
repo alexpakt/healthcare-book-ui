@@ -74,12 +74,12 @@ export const DoctorDashboard: React.FC = () => {
 
       <Tabs defaultValue="patients" orientation="horizontal">
         <Tabs.List>
-          <Tabs.Tab value="requests">
-            Αιτήματα{pendingAppointments && pendingAppointments.length > 0 ? ` (${pendingAppointments.length})` : ''}
-          </Tabs.Tab>
           <Tabs.Tab value="patients">Ασθενείς</Tabs.Tab>
           <Tabs.Tab value="today">Σημερινά Ραντεβού</Tabs.Tab>
           <Tabs.Tab value="upcoming">Προσεχή Ραντεβού</Tabs.Tab>
+          <Tabs.Tab value="requests">
+            Αιτήματα{pendingAppointments && pendingAppointments.length > 0 ? ` (${pendingAppointments.length})` : ''}
+          </Tabs.Tab>
         </Tabs.List>
 
         <Tabs.Panel value="requests" pt="md">
@@ -120,12 +120,6 @@ export const DoctorDashboard: React.FC = () => {
           />
         </Tabs.Panel>
       </Tabs>
-
-      {!isLoading && !error && (
-        <Button variant="light" onClick={refetch} leftSection={<IconRefresh size={16} />}>
-          Ανανέωση δεδομένων
-        </Button>
-      )}
     </Stack>
   );
 };
