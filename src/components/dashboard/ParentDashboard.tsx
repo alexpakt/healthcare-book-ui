@@ -109,6 +109,7 @@ export const ParentDashboard: React.FC = () => {
             isLoading={isLoading}
             onViewDetails={handleViewChildDetails}
             onAddChild={handleAddChild}
+            showAddButton={false}
           />
         </Tabs.Panel>
 
@@ -130,18 +131,6 @@ export const ParentDashboard: React.FC = () => {
           />
         </Tabs.Panel>
       </Tabs>
-
-      {/* Quick action buttons */}
-      {!isLoading && !error && (
-        <div style={{ display: 'flex', gap: 12 }}>
-          <Button variant="light" onClick={handleAddChild}>
-            Προσθήκη νέου παιδιού
-          </Button>
-          <Button variant="light" onClick={refetch} leftSection={<IconRefresh size={16} />}>
-            Ανανέωση δεδομένων
-          </Button>
-        </div>
-      )}
 
       {/* Child Registration Form Modal */}
       <ChildRegistrationForm

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid, Text, Stack, Button, Center, Loader } from '@mantine/core';
+import { Grid, Text, Stack, Button, Center, Loader, Box } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { ChildCard } from './ChildCard';
 import type { Child } from '../../types/parent';
@@ -9,6 +9,7 @@ interface ChildrenListProps {
   isLoading: boolean;
   onViewDetails?: (childId: number) => void;
   onAddChild?: () => void;
+  showAddButton?: boolean;
 }
 
 export const ChildrenList: React.FC<ChildrenListProps> = ({
@@ -16,6 +17,7 @@ export const ChildrenList: React.FC<ChildrenListProps> = ({
   isLoading,
   onViewDetails,
   onAddChild,
+  showAddButton = true,
 }) => {
   if (isLoading) {
     return (
@@ -52,13 +54,18 @@ export const ChildrenList: React.FC<ChildrenListProps> = ({
           </Grid.Col>
         ))}
       </Grid>
-      <Button
-        leftSection={<IconPlus size={16} />}
-        variant="light"
-        onClick={onAddChild}
-      >
-        Προσθήκη ακόμα ενός παιδιού
-      </Button>
+      {showAddButton && (
+        <Box w="auto" mt="lg">
+          <Button
+            size="sm"
+            leftSection={<IconPlus size={14} />}
+            variant="light"
+            onClick={onAddChild}
+          >
+            Προσθήκη παιδιού
+          </Button>
+        </Box>
+      )}
     </Stack>
   );
 };
