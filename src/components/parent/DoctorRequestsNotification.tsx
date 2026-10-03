@@ -24,6 +24,10 @@ export const DoctorRequestsNotification: React.FC = () => {
     }
   };
 
+  if (pendingCount === 0) {
+    return null;
+  }
+
   return (
     <>
       <Button
@@ -31,11 +35,9 @@ export const DoctorRequestsNotification: React.FC = () => {
         size="lg"
         onClick={() => setModalOpened(true)}
         rightSection={
-          pendingCount > 0 && (
-            <Badge size="lg" circle color="red">
-              {pendingCount}
-            </Badge>
-          )
+          <Badge size="lg" circle color="red">
+            {pendingCount}
+          </Badge>
         }
         leftSection={<IconBell size={20} />}
       >
