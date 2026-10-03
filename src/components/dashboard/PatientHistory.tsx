@@ -9,6 +9,9 @@ import {
   useDoctorCreateAllergy,
   useDoctorUpdateAllergy,
   useDoctorDeleteAllergy,
+  useDoctorBirthRecord,
+  useDoctorCreateBirthRecord,
+  useDoctorUpdateBirthRecord,
 } from '../../hooks/useDoctorData';
 import { PatientCard } from '../shared/PatientCard';
 import { MedicalRecordsList } from '../shared/MedicalRecordsList';
@@ -16,10 +19,12 @@ import { ChildVaccinationsList } from '../shared/ChildVaccinationsList';
 import { AllergiesList } from '../shared/AllergiesList';
 import { GrowthChart } from '../shared/GrowthChart';
 import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
+import { BirthRecordCard } from '../shared/BirthRecordCard';
 import { MedicalRecordForm } from '../doctor/MedicalRecordForm';
 import { GrowthMeasurementForm, type GrowthMeasurementFormData } from '../doctor/GrowthMeasurementForm';
 import { AllergyForm, type AllergyFormData } from '../doctor/AllergyForm';
 import { NewVaccinationForm } from '../doctor/NewVaccinationForm';
+import { BirthRecordForm, type BirthRecordFormData } from '../doctor/BirthRecordForm';
 import type { MedicalHistory } from '../../types/doctor';
 import type { AllergyRecord } from '../../types/parent';
 
@@ -29,11 +34,14 @@ export const PatientHistory: React.FC = () => {
   const id = Number(childId);
 
   const { data, loading, error, refetch } = useDoctorPatientMedicalHistory(id);
+  const birthRecordQuery = useDoctorBirthRecord(id);
   const growthMeasurementsQuery = useDoctorChildGrowthMeasurements(id);
   const { mutate: createGrowthMeasurement, loading: growthFormLoading, error: growthError } = useDoctorCreateGrowthMeasurement();
   const { mutate: createAllergy, loading: allergyFormLoading, error: allergyError } = useDoctorCreateAllergy();
   const { mutate: updateAllergy, loading: updateAllergyLoading } = useDoctorUpdateAllergy();
   const { mutate: deleteAllergy } = useDoctorDeleteAllergy();
+  const { mutate: createBirthRecord, loading: birthFormLoading, error: birthError } = useDoctorCreateBirthRecord();
+  const { mutate: updateBirthRecord, loading: birthUpdateLoading } = useDoctorUpdateBirthRecord();
 
   const [formOpened, setFormOpened] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MedicalHistory | null>(null);
@@ -41,6 +49,7 @@ export const PatientHistory: React.FC = () => {
   const [allergyFormOpened, setAllergyFormOpened] = useState(false);
   const [editingAllergy, setEditingAllergy] = useState<AllergyRecord | null>(null);
   const [vaccinationFormOpened, setVaccinationFormOpened] = useState(false);
+  const [birthFormOpened, setBirthFormOpened] = useState(false);
 
   const handleAddRecord = () => {
     setEditingRecord(null);
@@ -104,6 +113,27 @@ export const PatientHistory: React.FC = () => {
     }
   };
 
+  const handleSaveBirthRecord = async (formData: BirthRecordFormData) => {
+    try {
+      if (birthRecordQuery.data) {
+        await updateBirthRecord({
+          childId: id,
+          request: formData,
+        });
+      } else {
+        await createBirthRecord(formData);
+      }
+      await birthRecordQuery.refetch();
+      setBirthFormOpened(false);
+    } catch (err) {
+      console.error('Error saving birth record:', err);
+    }
+  };
+
+  const handleEditBirthRecord = () => {
+    setBirthFormOpened(true);
+  };
+
   if (loading && !data) {
     return (
       <Center py="xl">
@@ -144,7 +174,37 @@ export const PatientHistory: React.FC = () => {
           <Tabs.Tab value="vaccinations">Εμβολιασμοί</Tabs.Tab>
           <Tabs.Tab value="allergies">Αλλεργίες</Tabs.Tab>
           <Tabs.Tab value="growth">Ανάπτυξη</Tabs.Tab>
+          <Tabs.Tab value="birth">Δεδομένα Γέννησης</Tabs.Tab>
         </Tabs.List>
+
+        <Tabs.Panel value="birth" pt="md">
+          <Stack gap="md">
+            {birthRecordQuery.loading && !birthRecordQuery.data ? (
+              <Center py="xl">
+                <Loader />
+              </Center>
+            ) : birthRecordQuery.data ? (
+              <BirthRecordCard
+                record={birthRecordQuery.data}
+                onEdit={handleEditBirthRecord}
+                showEditButton={true}
+              />
+            ) : (
+              <Stack gap="md">
+                <Alert icon={<IconAlertCircle size={16} />} color="blue" title="Χωρίς δεδομένα">
+                  Δεν υπάρχουν δεδομένα γέννησης για αυτό το παιδί. Κάντε κλικ στο κουμπί παρακάτω για να προσθέσετε.
+                </Alert>
+                <Button
+                  leftSection={<IconPlus size={16} />}
+                  onClick={() => setBirthFormOpened(true)}
+                  style={{ alignSelf: 'flex-start' }}
+                >
+                  Προσθήκη δεδομένων γέννησης
+                </Button>
+              </Stack>
+            )}
+          </Stack>
+        </Tabs.Panel>
 
         <Tabs.Panel value="records" pt="md">
           <Stack gap="md">
@@ -259,6 +319,17 @@ export const PatientHistory: React.FC = () => {
           setVaccinationFormOpened(false);
           refetch();
         }}
+      />
+
+      <BirthRecordForm
+        opened={birthFormOpened}
+        childId={id}
+        childName={data?.childName || ''}
+        onClose={() => setBirthFormOpened(false)}
+        onSubmit={handleSaveBirthRecord}
+        isLoading={birthFormLoading || birthUpdateLoading}
+        error={birthError?.message || null}
+        existingRecord={birthRecordQuery.data || null}
       />
     </Stack>
   );

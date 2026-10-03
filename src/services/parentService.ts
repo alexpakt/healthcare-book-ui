@@ -1,5 +1,5 @@
 import { apiClient } from './apiClient';
-import type { Child, Appointment, VaccinationRecord, VaccinationSchedule, MedicalRecord, AllergyRecord, GrowthMeasurement, ParentDashboardData } from '../types/parent';
+import type { Child, Appointment, VaccinationRecord, VaccinationSchedule, MedicalRecord, AllergyRecord, GrowthMeasurement, BirthRecord, ParentDashboardData } from '../types/parent';
 import type { AppointmentStatus } from '../types/common';
 import type { ParentProfile, UpdateParentProfileRequest } from '../types/profile';
 import { getVaccinationStatus } from '../utils/vaccinationStatus';
@@ -229,6 +229,16 @@ export const parentService = {
       };
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
+      throw error;
+    }
+  },
+
+  async getChildBirthRecord(childId: number): Promise<BirthRecord> {
+    try {
+      const response = await apiClient.get<BirthRecord>(`/api/birth-records/child/${childId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching birth record:', error);
       throw error;
     }
   },

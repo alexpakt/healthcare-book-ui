@@ -86,6 +86,23 @@ export interface GrowthMeasurement {
   notes?: string;
 }
 
+export interface BirthRecord {
+  id: number;
+  childId: number;
+  childName: string;
+  birthWeightGrams: number;
+  birthLengthCm: number;
+  birthHeadCircumferenceCm: number;
+  gestationalAgeWeeks: number;
+  deliveryType: 'VAGINAL' | 'CESAREAN' | 'VAGINAL_ASSISTED';
+  apgarScore1Min: number;
+  apgarScore5Min: number;
+  birthHospital?: string;
+  nicuAdmission: boolean;
+  nicuDurationDays?: number;
+  notes?: string;
+}
+
 export interface ParentQuickStats {
   totalChildren: number;
   upcomingAppointmentsCount: number;

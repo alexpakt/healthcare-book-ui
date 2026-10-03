@@ -9,7 +9,7 @@ import type {
   AllergyRecord,
   DoctorDashboardData,
 } from '../types/doctor';
-import type { GrowthMeasurement } from '../types/parent';
+import type { GrowthMeasurement, BirthRecord } from '../types/parent';
 import type { AppointmentStatus, PaginatedResponse } from '../types/common';
 import type { DoctorProfile, UpdateDoctorProfileRequest } from '../types/profile';
 
@@ -48,6 +48,8 @@ export interface CreateVaccinationRequest {
   batchNumber?: string;
   notes?: string;
 }
+
+export type BirthRecordRequest = Omit<BirthRecord, 'id' | 'childName'>;
 
 const filterToday = (appointments: DoctorAppointment[]): DoctorAppointment[] => {
   const today = new Date();
@@ -288,6 +290,36 @@ export const doctorService = {
       return response.data;
     } catch (error) {
       console.error('Error creating vaccination:', error);
+      throw error;
+    }
+  },
+
+  async getBirthRecord(childId: number): Promise<BirthRecord> {
+    try {
+      const response = await apiClient.get<BirthRecord>(`/api/birth-records/child/${childId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching birth record:', error);
+      throw error;
+    }
+  },
+
+  async createBirthRecord(request: BirthRecordRequest): Promise<BirthRecord> {
+    try {
+      const response = await apiClient.post<BirthRecord>('/api/birth-records', request);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating birth record:', error);
+      throw error;
+    }
+  },
+
+  async updateBirthRecord(childId: number, request: BirthRecordRequest): Promise<BirthRecord> {
+    try {
+      const response = await apiClient.put<BirthRecord>(`/api/birth-records/child/${childId}`, request);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating birth record:', error);
       throw error;
     }
   },

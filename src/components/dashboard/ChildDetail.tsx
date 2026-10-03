@@ -10,6 +10,7 @@ import {
   useParentChildMedicalRecords,
   useParentChildAllergies,
   useParentChildGrowthMeasurements,
+  useParentChildBirthRecord,
   useParentUpdateAppointmentStatus,
 } from '../../hooks/useParentData';
 import { UpcomingAppointments } from '../parent/UpcomingAppointments';
@@ -18,6 +19,7 @@ import { MedicalRecordsList } from '../shared/MedicalRecordsList';
 import { AllergiesList } from '../shared/AllergiesList';
 import { GrowthChart } from '../shared/GrowthChart';
 import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
+import { BirthRecordCard } from '../shared/BirthRecordCard';
 
 const getGenderLabel = (gender: string): string => (gender === 'MALE' ? 'Αγόρι' : 'Κορίτσι');
 
@@ -32,6 +34,7 @@ export const ChildDetail: React.FC = () => {
   const medicalRecordsQuery = useParentChildMedicalRecords(id);
   const allergiesQuery = useParentChildAllergies(id);
   const growthMeasurementsQuery = useParentChildGrowthMeasurements(id);
+  const birthRecordQuery = useParentChildBirthRecord(id);
   const updateStatus = useParentUpdateAppointmentStatus();
 
   const handleCancelAppointment = async (appointmentId: number) => {
@@ -110,7 +113,22 @@ export const ChildDetail: React.FC = () => {
           <Tabs.Tab value="medical-records">Ιατρικό Ιστορικό</Tabs.Tab>
           <Tabs.Tab value="allergies">Αλλεργίες</Tabs.Tab>
           <Tabs.Tab value="growth">Ανάπτυξη</Tabs.Tab>
+          <Tabs.Tab value="birth">Δεδομένα Γέννησης</Tabs.Tab>
         </Tabs.List>
+
+        <Tabs.Panel value="birth" pt="md">
+          {birthRecordQuery.loading && !birthRecordQuery.data ? (
+            <Center py="xl">
+              <Loader />
+            </Center>
+          ) : birthRecordQuery.data ? (
+            <BirthRecordCard record={birthRecordQuery.data} showEditButton={false} />
+          ) : (
+            <Alert icon={<IconAlertCircle size={16} />} color="blue" title="Χωρίς δεδομένα">
+              Δεν υπάρχουν δεδομένα γέννησης για αυτό το παιδί.
+            </Alert>
+          )}
+        </Tabs.Panel>
 
         <Tabs.Panel value="appointments" pt="md">
           <UpcomingAppointments

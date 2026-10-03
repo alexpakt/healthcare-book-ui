@@ -78,6 +78,14 @@ export function useParentChildGrowthMeasurements(childId: number) {
 }
 
 /**
+ * Hook for fetching child birth record
+ */
+export function useParentChildBirthRecord(childId: number) {
+  const fetchFn = useCallback(() => parentService.getChildBirthRecord(childId), [childId]);
+  return useApi(fetchFn);
+}
+
+/**
  * Hook for requesting a new appointment (mutation)
  */
 export function useParentCreateAppointment() {

@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { doctorService } from '../services/doctorService';
-import type { CreateAppointmentRequest, MedicalRecordRequest, GrowthMeasurementRequest } from '../services/doctorService';
+import type { CreateAppointmentRequest, MedicalRecordRequest, GrowthMeasurementRequest, BirthRecordRequest } from '../services/doctorService';
 import type { AppointmentStatus } from '../types/common';
 
 export function useDoctorDashboardData() {
@@ -103,6 +103,24 @@ export function useDoctorUpdateAllergy() {
 
 export function useDoctorDeleteAllergy() {
   return useMutation((allergyId?: number) => doctorService.deleteAllergy(allergyId!));
+}
+
+export function useDoctorBirthRecord(childId: number) {
+  const fetchFn = useCallback(() => doctorService.getBirthRecord(childId), [childId]);
+  return useApi(fetchFn);
+}
+
+export function useDoctorCreateBirthRecord() {
+  return useMutation((request?: BirthRecordRequest) =>
+    doctorService.createBirthRecord(request!)
+  );
+}
+
+export function useDoctorUpdateBirthRecord() {
+  return useMutation(
+    (payload?: { childId: number; request: BirthRecordRequest }) =>
+      doctorService.updateBirthRecord(payload!.childId, payload!.request)
+  );
 }
 
 export function useDoctorDashboard() {
