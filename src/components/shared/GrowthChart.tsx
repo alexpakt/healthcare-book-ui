@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis,} from 'recharts';
+import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {Alert, Center, Loader, SegmentedControl, Stack, Text, Title} from '@mantine/core';
 import {IconAlertCircle} from '@tabler/icons-react';
 import {parentService} from '../../services/parentService';
@@ -29,6 +29,21 @@ interface ReferencePoint {
   value: number;
 }
 
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 767px)');
+    setIsMobile(mediaQuery.matches);
+
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, []);
+
+  return isMobile;
+};
+
 export const GrowthChart: React.FC<GrowthChartProps> = ({
   measurements,
   isLoading,
@@ -39,6 +54,7 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
   const [type, setType] = useState<MeasurementType>('height');
   const [references, setReferences] = useState<ReferencePoint[]>([]);
   const [loadingReferences, setLoadingReferences] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!childId) return;
@@ -218,7 +234,7 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
         <Alert color="gray">Δεν υπάρχουν διαθέσιμα δεδομένα αναφοράς για την ανάπτυξη.</Alert>
       ) : (
         <ResponsiveContainer width="100%" height={400}>
-          <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+          <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 15 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="ageInMonths"
@@ -226,7 +242,7 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
             />
             <YAxis label={{ value: getYAxisLabel(), angle: -90, position: 'insideLeft' }} />
             <Tooltip content={<CustomTooltip />} />
-            <Legend itemSorter="dataKey"/>
+            {!isMobile && <Legend itemSorter="dataKey"/>}
 
             {references.length > 0 && (
               <>
@@ -254,21 +270,6 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
         </ResponsiveContainer>
       )}
 
-      {data.length > 0 && (
-        <Stack gap="sm" style={{ fontSize: '0.875rem' }}>
-          <Text fw={500}>Εκατοστιαίες:</Text>
-          <Stack gap={4}>
-            {data
-              .filter(d => d.measurementDate && d.value)
-              .map((d, idx) => (
-                <Text key={idx} c="dimmed">
-                  {d.measurementDate && new Date(d.measurementDate).toLocaleDateString('el-GR')}: {d.value?.toFixed(1)} {getYAxisLabel()}
-                  {d.percentile && ` (${d.percentile}η εκατοστιαία)`}
-                </Text>
-              ))}
-          </Stack>
-        </Stack>
-      )}
     </Stack>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Stack, Text, Center, Loader, Paper, Badge, Group, Table } from '@mantine/core';
+import { Stack, Text, Center, Loader, Paper, Badge, Group, Table, ScrollArea } from '@mantine/core';
 import { IconRuler2 } from '@tabler/icons-react';
 import type { GrowthMeasurement } from '../../types/parent';
 
@@ -46,7 +46,8 @@ export const GrowthMeasurementsList: React.FC<GrowthMeasurementsListProps> = ({
 
   return (
     <Stack gap="md">
-      <Table striped highlightOnHover>
+      <ScrollArea>
+        <Table striped highlightOnHover>
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Ημερομηνία</Table.Th>
@@ -109,6 +110,7 @@ export const GrowthMeasurementsList: React.FC<GrowthMeasurementsListProps> = ({
           ))}
         </Table.Tbody>
       </Table>
+      </ScrollArea>
     </Stack>
   );
 };
