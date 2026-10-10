@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Stack, Table, Text, Center, Loader, Paper, Alert, Box } from '@mantine/core';
 import { IconVaccine, IconAlertCircle, IconCheck } from '@tabler/icons-react';
-import type { VaccinationRecord, VaccinationSchedule } from '../../types/parent';
+import type { Appointment, VaccinationRecord, VaccinationSchedule } from '../../types/parent';
 import { parentService } from '../../services/parentService';
 import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
 import { useParentChildAppointments } from '../../hooks/useParentData';
+import { getDoseState, getSchedulesForAge } from '../../utils/vaccinationStatus';
+import type { DoseStatus } from '../../utils/vaccinationStatus';
 
 interface VaccinationStatusGridProps {
   ageInMonths: number;
@@ -21,8 +23,9 @@ interface VaccineRow {
     doseNumber: number | null;
     recommendedAgeMonths: number;
     schedule: VaccinationSchedule;
-    status: 'COMPLETED' | 'PENDING' | 'OVERDUE' | 'FUTURE' | 'SCHEDULED';
+    status: DoseStatus;
     recordedVaccination?: VaccinationRecord;
+    scheduledAppointment?: Appointment;
   }[];
 }
 
@@ -49,8 +52,7 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
         setError(null);
 
         const allData = await parentService.getVaccinationSchedules();
-        const maxAge = ageInMonths + 6;
-        const data = allData.filter((schedule) => schedule.recommendedAgeMonths <= maxAge);
+        const data = getSchedulesForAge(allData, ageInMonths);
 
         // Group vaccines by name
         const vaccineMap = new Map<string, VaccineRow>();
@@ -68,43 +70,12 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
 
           const row = vaccineMap.get(key)!;
 
-          // Check if THIS SPECIFIC DOSE has been recorded (by dose number)
-          const recordedVaccination = vaccinations?.find(
-            (v) => v.vaccineName === schedule.vaccineName && v.doseNumber === schedule.doseNumber
+          const { status, recordedVaccination, scheduledAppointment } = getDoseState(
+            schedule,
+            ageInMonths,
+            vaccinations,
+            appointmentsQuery.data
           );
-
-          const isCompleted = !!recordedVaccination;
-          let status: 'COMPLETED' | 'PENDING' | 'OVERDUE' | 'FUTURE' | 'SCHEDULED' = 'FUTURE';
-
-          if (isCompleted) {
-            status = 'COMPLETED';
-          } else {
-            // Check if there's a scheduled appointment for this specific vaccine dose
-            // Match by vaccine name AND recommended age to avoid matching all doses
-            const ageMonthsStr = `${schedule.recommendedAgeMonths}μ`;
-            const scheduledAppointment = appointmentsQuery.data?.find(
-              (apt) =>
-                apt.status === 'SCHEDULED' &&
-                apt.reason?.includes(schedule.vaccineName) &&
-                apt.reason?.includes(ageMonthsStr)
-            );
-
-            if (scheduledAppointment) {
-              status = 'SCHEDULED';
-            } else {
-              const recommendedAge = schedule.recommendedAgeMonths;
-              const ageMinusOne = ageInMonths - 1;
-              const agePlusOne = ageInMonths + 1;
-
-              if (recommendedAge >= ageMinusOne && recommendedAge <= agePlusOne) {
-                status = 'PENDING';
-              } else if (recommendedAge < ageMinusOne) {
-                status = 'OVERDUE';
-              } else {
-                status = 'FUTURE';
-              }
-            }
-          }
 
           row.doses.push({
             doseNumber: schedule.doseNumber ?? null,
@@ -112,6 +83,7 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
             schedule,
             status,
             recordedVaccination,
+            scheduledAppointment,
           });
         });
 
@@ -298,18 +270,9 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
                             ✓ Προγραμματισμένο
                           </Text>
                           <Text size="xs" c="dimmed">
-                            {(() => {
-                              const ageMonthsStr = `${dose.recommendedAgeMonths}μ`;
-                              const appointment = appointmentsQuery.data?.find(
-                                (apt) =>
-                                  apt.status === 'SCHEDULED' &&
-                                  apt.reason?.includes(row.vaccineName) &&
-                                  apt.reason?.includes(ageMonthsStr)
-                              );
-                              return appointment
-                                ? new Date(appointment.appointmentDate).toLocaleDateString('el-GR')
-                                : 'Ραντεβού κλείστηκε';
-                            })()}
+                            {dose.scheduledAppointment
+                              ? new Date(dose.scheduledAppointment.appointmentDate).toLocaleDateString('el-GR')
+                              : 'Ραντεβού κλείστηκε'}
                           </Text>
                         </>
                       ) : dose.status === 'OVERDUE' ? (

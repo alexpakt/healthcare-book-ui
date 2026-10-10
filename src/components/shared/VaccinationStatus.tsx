@@ -3,6 +3,8 @@ import { Stack, Table, Text, Badge, Center, Loader, Paper, Group, Alert, Box } f
 import { IconVaccine, IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import type { VaccinationRecord, VaccinationSchedule } from '../../types/parent';
 import { parentService } from '../../services/parentService';
+import { getDoseState, getSchedulesForAge } from '../../utils/vaccinationStatus';
+import type { DoseStatus } from '../../utils/vaccinationStatus';
 
 interface VaccinationStatusProps {
   ageInMonths: number;
@@ -13,7 +15,7 @@ interface VaccinationStatusProps {
 interface VaccinationStatusItem {
   schedule: VaccinationSchedule;
   isCompleted: boolean;
-  status: 'COMPLETED' | 'PENDING' | 'OVERDUE' | 'FUTURE';
+  status: DoseStatus;
   recordedVaccination?: VaccinationRecord;
 }
 
@@ -63,58 +65,24 @@ export const VaccinationStatus: React.FC<VaccinationStatusProps> = ({
         setError(null);
 
         const allData = await parentService.getVaccinationSchedules();
+        const data = getSchedulesForAge(allData, ageInMonths);
 
-        const maxAge = ageInMonths + 6;
-        const data = allData.filter((schedule) => schedule.recommendedAgeMonths <= maxAge);
-
-        if (vaccinations && data.length > 0) {
-          const items = data.map((schedule) => {
-            const recordedVaccination = vaccinations.find(
-              (v) => v.vaccineName === schedule.vaccineName
+        setStatusItems(
+          data.map((schedule) => {
+            const { status, recordedVaccination } = getDoseState(
+              schedule,
+              ageInMonths,
+              vaccinations,
+              []
             );
-
-            const isCompleted = !!recordedVaccination;
-            let status: 'COMPLETED' | 'PENDING' | 'OVERDUE' | 'FUTURE' = 'FUTURE';
-
-            if (isCompleted) {
-              // Vaccine has been administered
-              status = 'COMPLETED';
-            } else {
-              // Vaccine not yet administered - determine based on age
-              const recommendedAge = schedule.recommendedAgeMonths;
-              const ageMinusOne = ageInMonths - 1;
-              const agePlusOne = ageInMonths + 1;
-
-              if (recommendedAge >= ageMinusOne && recommendedAge <= agePlusOne) {
-                // Current age ± 1 month
-                status = 'PENDING';
-              } else if (recommendedAge < ageMinusOne) {
-                // Past the recommended age by more than 1 month
-                status = 'OVERDUE';
-              } else {
-                // Future vaccines (more than 1 month away)
-                status = 'FUTURE';
-              }
-            }
-
             return {
               schedule,
-              isCompleted,
+              isCompleted: !!recordedVaccination,
               status,
               recordedVaccination,
             };
-          });
-
-          setStatusItems(items);
-        } else {
-          setStatusItems(
-            data.map((schedule) => ({
-              schedule,
-              isCompleted: false,
-              status: 'FUTURE',
-            }))
-          );
-        }
+          })
+        );
       } catch (err) {
         console.error('Error fetching vaccination schedules:', err);
         setError('Αποτυχία φόρτωσης προγράμματος εμβολιασμών');
