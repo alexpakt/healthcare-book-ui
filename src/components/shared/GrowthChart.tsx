@@ -54,7 +54,29 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
   const [type, setType] = useState<MeasurementType>('height');
   const [references, setReferences] = useState<ReferencePoint[]>([]);
   const [loadingReferences, setLoadingReferences] = useState(false);
+  const [childAgeInMonths, setChildAgeInMonths] = useState<number | undefined>();
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (!childId) return;
+
+    const fetchChildAge = async () => {
+      try {
+        const child = await parentService.getChildById(childId);
+        const birthDate = new Date(child.dateOfBirth);
+        const today = new Date();
+        const ageInMonths = Math.floor(
+          (today.getFullYear() - birthDate.getFullYear()) * 12 +
+          (today.getMonth() - birthDate.getMonth())
+        );
+        setChildAgeInMonths(Math.max(0, ageInMonths));
+      } catch (err) {
+        console.error('Error fetching child data:', err);
+      }
+    };
+
+    fetchChildAge();
+  }, [childId]);
 
   useEffect(() => {
     if (!childId) return;
@@ -95,8 +117,46 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
     (a, b) => new Date(a.measurementDate).getTime() - new Date(b.measurementDate).getTime()
   );
 
+  const getOldestAge = () => {
+    if (childAgeInMonths !== undefined) {
+      return childAgeInMonths;
+    }
+
+    if (references && references.length > 0) {
+      return Math.max(...references.map(r => r.ageInMonths));
+    }
+
+    return 0;
+  };
+
+  const getDisplayMode = () => {
+    const oldestAge = getOldestAge();
+    if (oldestAge <= 24) return 'baby'; // 0-24 months
+    return 'child'; // 0-60 months with 6-month intervals
+  };
+
+  const getAgeRange = () => {
+    const mode = getDisplayMode();
+
+    if (mode === 'baby') {
+      return { min: 0, max: 24 };
+    } else {
+      return { min: 0, max: 60 };
+    }
+  };
+
+  const getChartHeight = () => {
+    const mode = getDisplayMode();
+    if (mode === 'baby') return 400;
+    return 500;
+  };
+
   const getChartData = () => {
+    const { min, max } = getAgeRange();
+    const mode = getDisplayMode();
+
     const measurementData = sortedMeasurements
+      .filter(m => m.ageInMonths >= min && m.ageInMonths <= max)
       .map((m) => {
         if (type === 'height') {
           return m.heightCm
@@ -130,8 +190,14 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
       .filter((d) => d !== null) as ChartDataPoint[];
 
     const ageSet = new Set<number>();
+
+    // For child mode, only include 6-month intervals for reference data
+    const referencesToAdd = mode === 'child'
+      ? references.filter(r => r.ageInMonths >= min && r.ageInMonths <= max && r.ageInMonths % 6 === 0)
+      : references.filter(r => r.ageInMonths >= min && r.ageInMonths <= max);
+
     measurementData.forEach(m => ageSet.add(m.ageInMonths));
-    references.forEach(r => ageSet.add(r.ageInMonths));
+    referencesToAdd.forEach(r => ageSet.add(r.ageInMonths));
 
     return Array.from(ageSet).sort((a, b) => a - b).map(age => {
       const refData = references.filter(r => r.ageInMonths === age);
@@ -169,6 +235,14 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
     return 'cm';
   };
 
+  const formatAgeDisplay = (months: number): string => {
+    const mode = getDisplayMode();
+    if (mode === 'child') {
+      return `${(months / 12).toFixed(1)}y`;
+    }
+    return `${months} μήνες`;
+  };
+
   const CustomTooltip = (props: any) => {
     const { active, payload, label } = props;
     if (active && payload && payload.length) {
@@ -195,7 +269,7 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
 
       return (
         <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #ccc', padding: '8px', borderRadius: '4px' }}>
-          <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>Ηλικία: {label} μήνες</p>
+          <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>Ηλικία: {formatAgeDisplay(label)}</p>
           {sortedPayload.map((entry, index) => (
             <p key={index} style={{ margin: '2px 0', color: entry.color }}>
               {percentileLabels[entry.dataKey as string] || entry.name}: {typeof entry.value === 'number' ? entry.value.toFixed(1) : entry.value} {getYAxisLabel()}
@@ -233,12 +307,24 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
       {references.length === 0 ? (
         <Alert color="gray">Δεν υπάρχουν διαθέσιμα δεδομένα αναφοράς για την ανάπτυξη.</Alert>
       ) : (
-        <ResponsiveContainer width="100%" height={400}>
+        <ResponsiveContainer width="100%" height={getChartHeight()}>
           <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 15 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
               dataKey="ageInMonths"
-              label={{ value: 'Ηλικία (μήνες)', position: 'insideBottomRight', offset: -5 }}
+              tickFormatter={(months) => {
+                const mode = getDisplayMode();
+                if (mode === 'child') {
+                  return `${(months / 12).toFixed(1)}y`;
+                }
+                return `${months}`;
+              }}
+              ticks={getDisplayMode() === 'child' ? [0, 6, 12, 18, 24, 30, 36, 42, 48, 54, 60] : undefined}
+              label={{
+                value: getDisplayMode() === 'child' ? 'Ηλικία (έτη)' : 'Ηλικία (μήνες)',
+                position: 'insideBottomRight',
+                offset: -5
+              }}
             />
             <YAxis label={{ value: getYAxisLabel(), angle: -90, position: 'insideLeft' }} />
             <Tooltip content={<CustomTooltip />} />
