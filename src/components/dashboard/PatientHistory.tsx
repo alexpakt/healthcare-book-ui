@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Stack, Title, Tabs, Alert, Button, Center, Loader, Group } from '@mantine/core';
+import { Stack, Title, Tabs, Alert, Button, Center, Loader, Group, Badge, Text } from '@mantine/core';
 import { IconAlertCircle, IconArrowLeft, IconPlus } from '@tabler/icons-react';
 import {
   useDoctorPatientMedicalHistory,
@@ -166,7 +166,22 @@ export const PatientHistory: React.FC = () => {
         Πίσω στο ταμπλό
       </Button>
 
-      {data.child && <PatientCard child={data.child} showAmka={true} />}
+      {data.child && (
+        <PatientCard
+          child={data.child}
+          showAmka={true}
+          footer={
+            data.child.bloodType ? (
+              <Group gap="xs">
+                <Text size="sm" c="dimmed">
+                  Ομάδα αίματος:
+                </Text>
+                <Badge size="sm">{data.child.bloodType}</Badge>
+              </Group>
+            ) : undefined
+          }
+        />
+      )}
 
       <Tabs defaultValue="records" orientation="horizontal">
         <Tabs.List>

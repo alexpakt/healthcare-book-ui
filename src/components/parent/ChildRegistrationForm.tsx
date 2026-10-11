@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   Button,
@@ -9,30 +9,70 @@ import {
   Group,
 } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { useCreateChild } from '../../hooks/useChildData';
-import type { CreateChildRequest } from '../../services/childService';
+import { useCreateChild, useUpdateChild } from '../../hooks/useChildData';
+import type { ChildRecord, CreateChildRequest } from '../../services/childService';
+
+const BLOOD_TYPE_OPTIONS = [
+  { value: 'O+', label: 'O+' },
+  { value: 'O-', label: 'O-' },
+  { value: 'A+', label: 'A+' },
+  { value: 'A-', label: 'A-' },
+  { value: 'B+', label: 'B+' },
+  { value: 'B-', label: 'B-' },
+  { value: 'AB+', label: 'AB+' },
+  { value: 'AB-', label: 'AB-' },
+];
+
+const EMPTY_FORM: CreateChildRequest = {
+  firstName: '',
+  lastName: '',
+  dateOfBirth: '',
+  amka: '',
+  gender: 'MALE',
+  bloodType: '',
+};
+
+const toFormData = (child?: ChildRecord | null): CreateChildRequest =>
+  child
+    ? {
+        firstName: child.firstName,
+        lastName: child.lastName,
+        dateOfBirth: child.dateOfBirth,
+        amka: child.amka,
+        gender: child.gender,
+        bloodType: child.bloodType ?? '',
+      }
+    : EMPTY_FORM;
 
 interface ChildRegistrationFormProps {
   opened: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  /** When provided, the form edits this child instead of registering a new one */
+  child?: ChildRecord | null;
 }
 
 export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
   opened,
   onClose,
   onSuccess,
+  child,
 }) => {
-  const [formData, setFormData] = useState<CreateChildRequest>({
-    firstName: '',
-    lastName: '',
-    dateOfBirth: '',
-    amka: '',
-    gender: 'MALE',
-    bloodType: '',
-  });
+  const isEdit = !!child;
+  const [formData, setFormData] = useState<CreateChildRequest>(toFormData(child));
 
-  const { mutate, loading, error, reset } = useCreateChild();
+  const createChild = useCreateChild();
+  const updateChild = useUpdateChild();
+  const { loading, error } = isEdit ? updateChild : createChild;
+
+  // Prefill from the child each time the modal opens
+  useEffect(() => {
+    if (opened) {
+      setFormData(toFormData(child));
+      createChild.reset();
+      updateChild.reset();
+    }
+  }, [opened, child]);
 
   const handleChange = (field: keyof CreateChildRequest, value: string) => {
     let processedValue = value;
@@ -80,43 +120,34 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
       return;
     }
 
-    try {
-      await mutate({
-        firstName: formData.firstName.trim(),
-        lastName: formData.lastName.trim(),
-        amka: formData.amka.trim(),
-        dateOfBirth: formData.dateOfBirth,
-        gender: formData.gender as 'MALE' | 'FEMALE',
-        bloodType: formData.bloodType || undefined,
-      });
+    const payload: CreateChildRequest = {
+      firstName: formData.firstName.trim(),
+      lastName: formData.lastName.trim(),
+      amka: formData.amka.trim(),
+      dateOfBirth: formData.dateOfBirth,
+      gender: formData.gender as 'MALE' | 'FEMALE',
+      bloodType: formData.bloodType || undefined,
+    };
 
-      // Reset form on success
-      setFormData({
-        firstName: '',
-        lastName: '',
-        dateOfBirth: '',
-        amka: '',
-        gender: 'MALE',
-        bloodType: '',
-      });
-      reset();
+    try {
+      if (isEdit && child) {
+        await updateChild.mutate({ childId: child.id, data: payload });
+      } else {
+        await createChild.mutate(payload);
+      }
+
+      setFormData(toFormData(child));
       onSuccess?.();
       onClose();
     } catch (err) {
-      console.error('Error creating child:', err);
+      console.error(isEdit ? 'Error updating child:' : 'Error creating child:', err);
     }
   };
 
   const handleClose = () => {
-    setFormData({
-      firstName: '',
-      lastName: '',
-      dateOfBirth: '',
-      amka: '',
-      gender: 'MALE',
-      bloodType: '',
-    });
-    reset();
+    setFormData(toFormData(child));
+    createChild.reset();
+    updateChild.reset();
     onClose();
   };
 
@@ -124,7 +155,7 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
     <Modal
       opened={opened}
       onClose={handleClose}
-      title="Προσθήκη Παιδιού"
+      title={isEdit ? 'Επεξεργασία Παιδιού' : 'Προσθήκη Παιδιού'}
       size="md"
       centered
     >
@@ -137,7 +168,7 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
               color="red"
               title="Σφάλμα"
             >
-              {error.message || 'Αποτυχία δημιουργίας παιδιού. Προσπαθήστε ξανά.'}
+              {error.message || (isEdit ? 'Αποτυχία αποθήκευσης στοιχείων. Προσπαθήστε ξανά.' : 'Αποτυχία δημιουργίας παιδιού. Προσπαθήστε ξανά.')}
             </Alert>
           )}
 
@@ -165,12 +196,16 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
           <TextInput
             label="AMKA (Αριθμός Μητρώου Κοινωνικής Ασφάλισης)"
             placeholder="11 ψηφία"
-            description="Εισάγετε 11 ψηφία (μόνο αριθμούς)"
+            description={
+              isEdit
+                ? undefined
+                : 'Εισάγετε 11 ψηφία (μόνο αριθμούς). Το AMKA δεν μπορεί να τροποποιηθεί μετά την καταχώριση.'
+            }
             value={formData.amka}
             onChange={(e) => handleChange('amka', e.target.value)}
             maxLength={11}
             required
-            disabled={loading}
+            disabled={loading || isEdit}
             error={formData.amka && !/^\d{11}$/.test(formData.amka) ? 'Πρέπει να είναι ακριβώς 11 ψηφία' : false}
           />
 
@@ -204,20 +239,11 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
           <Select
             label="Ομάδα Αίματος (Προαιρετικό)"
             placeholder="Επιλέξτε ομάδα αίματος"
-            data={[
-              { value: 'O+', label: 'O+' },
-              { value: 'O-', label: 'O-' },
-              { value: 'A+', label: 'A+' },
-              { value: 'A-', label: 'A-' },
-              { value: 'B+', label: 'B+' },
-              { value: 'B-', label: 'B-' },
-              { value: 'AB+', label: 'AB+' },
-              { value: 'AB-', label: 'AB-' },
-            ]}
+            data={BLOOD_TYPE_OPTIONS}
             value={formData.bloodType}
             onChange={(value) => handleChange('bloodType', value || '')}
             disabled={loading}
-            clearable
+            clearable={!isEdit}
             searchable
           />
 

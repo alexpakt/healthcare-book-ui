@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useMediaQuery } from '@mantine/hooks';
 import { Stack, Title, Text, Tabs, Alert, Button, Paper, Group, Avatar, Badge, Center, Loader } from '@mantine/core';
-import { IconAlertCircle, IconArrowLeft } from '@tabler/icons-react';
+import { IconAlertCircle, IconArrowLeft, IconEdit } from '@tabler/icons-react';
 import { getAgeDisplay } from '../../utils/ageCalculator';
 import {
   useParentChild,
@@ -20,6 +21,7 @@ import { AllergiesList } from '../shared/AllergiesList';
 import { GrowthChart } from '../shared/GrowthChart';
 import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
 import { BirthRecordCard } from '../shared/BirthRecordCard';
+import { ChildRegistrationForm } from '../parent/ChildRegistrationForm';
 
 const getGenderLabel = (gender: string): string => (gender === 'MALE' ? 'Αγόρι' : 'Κορίτσι');
 
@@ -28,7 +30,9 @@ export const ChildDetail: React.FC = () => {
   const navigate = useNavigate();
   const id = Number(childId);
 
-  const { data: child, loading: childLoading, error: childError } = useParentChild(id);
+  const { data: child, loading: childLoading, error: childError, refetch: refetchChild } = useParentChild(id);
+  const [editOpened, setEditOpened] = useState(false);
+  const isDesktop = useMediaQuery('(min-width: 48em)');
   const appointmentsQuery = useParentChildAppointments(id);
   const vaccinationsQuery = useParentChildVaccinations(id);
   const medicalRecordsQuery = useParentChildMedicalRecords(id);
@@ -82,29 +86,72 @@ export const ChildDetail: React.FC = () => {
       </Button>
 
       <Paper p="md" radius="md" withBorder>
-        <Group>
-          <Avatar size="xl" radius="md" color="blue">
-            {initials}
-          </Avatar>
-          <Stack gap={4}>
-            <Title order={2}>
-              {child.firstName} {child.lastName}
-            </Title>
-            <Text c="dimmed">
-              {ageDisplay} • {getGenderLabel(child.gender)}
-            </Text>
-            <Group gap="xs">
+        <Stack gap="md">
+        <Group justify="space-between" align="flex-start" wrap="nowrap" gap="sm">
+          <Group wrap="nowrap" gap="md" style={{ flex: 1, minWidth: 0 }}>
+            <Avatar size={isDesktop ? 'xl' : 'lg'} radius="md" color="blue" style={{ flexShrink: 0 }}>
+              {initials}
+            </Avatar>
+            <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
+              <Title
+                order={2}
+                fz={{ base: 'h4', sm: 'h2' }}
+                style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+              >
+                {child.firstName} {child.lastName}
+              </Title>
+              <Text c="dimmed">
+                {ageDisplay} • {getGenderLabel(child.gender)}
+              </Text>
               <Text size="sm" c="dimmed">
                 Γεννήθηκε: {new Date(child.dateOfBirth).toLocaleDateString('el-GR')}
               </Text>
-              {child.bloodType && <Badge size="sm">{child.bloodType}</Badge>}
-            </Group>
-            <Text size="sm" c="dimmed">
-              AMKA: <strong>{child.amka}</strong>
-            </Text>
-          </Stack>
+              <Group gap="xs">
+                <Text size="sm" c="dimmed">
+                  Ομάδα αίματος:
+                </Text>
+                {child.bloodType ? (
+                  <Badge size="sm">{child.bloodType}</Badge>
+                ) : (
+                  <Text size="sm" c="dimmed">
+                    δεν έχει καταχωρηθεί
+                  </Text>
+                )}
+              </Group>
+              <Text size="sm" c="dimmed">
+                AMKA: <strong>{child.amka}</strong>
+              </Text>
+            </Stack>
+          </Group>
+          <Button
+            variant="light"
+            size="compact-sm"
+            leftSection={<IconEdit size={14} />}
+            onClick={() => setEditOpened(true)}
+            style={{ flexShrink: 0 }}
+            visibleFrom="sm"
+          >
+            Επεξεργασία
+          </Button>
         </Group>
+        <Button
+          variant="light"
+          size="compact-sm"
+          leftSection={<IconEdit size={14} />}
+          onClick={() => setEditOpened(true)}
+          hiddenFrom="sm"
+        >
+          Επεξεργασία
+        </Button>
+        </Stack>
       </Paper>
+
+      <ChildRegistrationForm
+        opened={editOpened}
+        child={child}
+        onClose={() => setEditOpened(false)}
+        onSuccess={refetchChild}
+      />
 
       <Tabs defaultValue="appointments" orientation="horizontal">
         <Tabs.List>
