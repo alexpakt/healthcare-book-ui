@@ -5,6 +5,7 @@ import type { VaccinationRecord, VaccinationSchedule } from '../../types/parent'
 import { parentService } from '../../services/parentService';
 import { getDoseState, getSchedulesForAge } from '../../utils/vaccinationStatus';
 import type { DoseStatus } from '../../utils/vaccinationStatus';
+import { formatDate } from '../../utils/dateFormat';
 
 interface VaccinationStatusProps {
   ageInMonths: number;
@@ -218,9 +219,7 @@ export const VaccinationStatus: React.FC<VaccinationStatusProps> = ({
                     <Table.Td>
                       <Text size="sm" c="dimmed">
                         {item.recordedVaccination
-                          ? new Date(item.recordedVaccination.administeredDate).toLocaleDateString(
-                              'el-GR'
-                            )
+                          ? formatDate(item.recordedVaccination.administeredDate)
                           : '—'}
                       </Text>
                     </Table.Td>

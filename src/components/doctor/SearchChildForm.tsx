@@ -19,6 +19,7 @@ import { childService } from '../../services/childService';
 import { doctorChildRequestService } from '../../services/doctorChildRequestService';
 import type { ChildRecord } from '../../services/childService';
 import type { AssignedChild } from '../../types/doctor';
+import { formatDate } from '../../utils/dateFormat';
 
 interface SearchChildFormProps {
   patients: AssignedChild[] | null;
@@ -144,7 +145,7 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
                   AMKA: {foundChild.amka}
                 </Text>
                 <Text size="sm" c="dimmed">
-                  Γεννήθηκε: {new Date(foundChild.dateOfBirth).toLocaleDateString('el-GR')}
+                  Γεννήθηκε: {formatDate(foundChild.dateOfBirth)}
                 </Text>
                 {foundChild.bloodType && (
                   <Text size="sm" c="dimmed">

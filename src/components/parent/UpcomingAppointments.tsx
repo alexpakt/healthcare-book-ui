@@ -2,6 +2,7 @@ import React from 'react';
 import { Stack, Table, Text, Badge, Button, Center, Loader, Paper } from '@mantine/core';
 import { IconCalendarEvent } from '@tabler/icons-react';
 import type { Appointment } from '../../types/parent';
+import { formatDate } from '../../utils/dateFormat';
 
 interface UpcomingAppointmentsProps {
   appointments: Appointment[] | null;
@@ -115,7 +116,7 @@ export const UpcomingAppointments: React.FC<UpcomingAppointmentsProps> = ({
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm">
-                      {new Date(appointment.appointmentDate).toLocaleDateString('el-GR')}
+                      {formatDate(appointment.appointmentDate)}
                     </Text>
                   </Table.Td>
                   <Table.Td>

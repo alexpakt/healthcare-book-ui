@@ -2,6 +2,7 @@ import React from 'react';
 import { Stack, Text, Badge, Center, Loader, Paper, Group, Button } from '@mantine/core';
 import { IconAlertTriangle, IconEdit, IconTrash } from '@tabler/icons-react';
 import type { AllergyRecord } from '../../types/parent';
+import { formatDate } from '../../utils/dateFormat';
 
 interface AllergiesListProps {
   allergies: AllergyRecord[] | null;
@@ -107,7 +108,7 @@ export const AllergiesList: React.FC<AllergiesListProps> = ({
               </Text>
             )}
             <Text size="sm" c="dimmed">
-              Διαγνώστηκε: {new Date(allergy.diagnosedDate).toLocaleDateString('el-GR')}
+              Διαγνώστηκε: {formatDate(allergy.diagnosedDate)}
             </Text>
             {allergy.notes && <Text size="sm">{allergy.notes}</Text>}
           </Stack>

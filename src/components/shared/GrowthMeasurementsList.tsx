@@ -2,6 +2,7 @@ import React from 'react';
 import { Stack, Text, Center, Loader, Paper, Badge, Group, Table, ScrollArea } from '@mantine/core';
 import { IconRuler2 } from '@tabler/icons-react';
 import type { GrowthMeasurement } from '../../types/parent';
+import { formatDate } from '../../utils/dateFormat';
 
 interface GrowthMeasurementsListProps {
   measurements: GrowthMeasurement[] | null;
@@ -61,7 +62,7 @@ export const GrowthMeasurementsList: React.FC<GrowthMeasurementsListProps> = ({
         <Table.Tbody>
           {sorted.map((m) => (
             <Table.Tr key={m.id}>
-              <Table.Td>{new Date(m.measurementDate).toLocaleDateString('el-GR')}</Table.Td>
+              <Table.Td>{formatDate(m.measurementDate)}</Table.Td>
               <Table.Td>{m.ageInMonths}</Table.Td>
               <Table.Td>
                 {m.heightCm ? (

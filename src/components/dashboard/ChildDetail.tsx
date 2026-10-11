@@ -22,6 +22,7 @@ import { GrowthChart } from '../shared/GrowthChart';
 import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
 import { BirthRecordCard } from '../shared/BirthRecordCard';
 import { ChildRegistrationForm } from '../parent/ChildRegistrationForm';
+import { formatDate } from '../../utils/dateFormat';
 
 const getGenderLabel = (gender: string): string => (gender === 'MALE' ? 'Αγόρι' : 'Κορίτσι');
 
@@ -104,7 +105,7 @@ export const ChildDetail: React.FC = () => {
                 {ageDisplay} • {getGenderLabel(child.gender)}
               </Text>
               <Text size="sm" c="dimmed">
-                Γεννήθηκε: {new Date(child.dateOfBirth).toLocaleDateString('el-GR')}
+                Γεννήθηκε: {formatDate(child.dateOfBirth)}
               </Text>
               <Group gap="xs">
                 <Text size="sm" c="dimmed">
@@ -114,7 +115,7 @@ export const ChildDetail: React.FC = () => {
                   <Badge size="sm">{child.bloodType}</Badge>
                 ) : (
                   <Text size="sm" c="dimmed">
-                    δεν έχει καταχωρηθεί
+                    Δεν έχει καταχωρηθεί
                   </Text>
                 )}
               </Group>

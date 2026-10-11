@@ -14,6 +14,7 @@ import {
 } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { doctorChildRequestService, type DoctorChildRequestResponse } from '../../services/doctorChildRequestService';
+import { formatDate } from '../../utils/dateFormat';
 
 export const DoctorConnectionRequests: React.FC = () => {
   const [requests, setRequests] = useState<DoctorChildRequestResponse[]>([]);
@@ -123,7 +124,7 @@ export const DoctorConnectionRequests: React.FC = () => {
                       Αίτηση για: <strong>{request.childFirstName} {request.childLastName}</strong>
                     </Text>
                     <Text size="sm" c="dimmed">
-                      Ημερομηνία: {new Date(request.requestedAt).toLocaleDateString('el-GR')}
+                      Ημερομηνία: {formatDate(request.requestedAt)}
                     </Text>
                   </div>
                   {request.notes && (

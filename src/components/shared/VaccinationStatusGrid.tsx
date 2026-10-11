@@ -7,6 +7,7 @@ import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
 import { useParentChildAppointments } from '../../hooks/useParentData';
 import { getDoseState, getSchedulesForAge } from '../../utils/vaccinationStatus';
 import type { DoseStatus } from '../../utils/vaccinationStatus';
+import { formatDate } from '../../utils/dateFormat';
 
 interface VaccinationStatusGridProps {
   ageInMonths: number;
@@ -261,7 +262,7 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
                             Ολοκληρωμένο
                           </Text>
                           <Text size="xs" c="dimmed">
-                            {new Date(dose.recordedVaccination.administeredDate).toLocaleDateString('el-GR')}
+                            {formatDate(dose.recordedVaccination.administeredDate)}
                           </Text>
                         </>
                       ) : dose.status === 'SCHEDULED' ? (
@@ -271,7 +272,7 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
                           </Text>
                           <Text size="xs" c="dimmed">
                             {dose.scheduledAppointment
-                              ? new Date(dose.scheduledAppointment.appointmentDate).toLocaleDateString('el-GR')
+                              ? formatDate(dose.scheduledAppointment.appointmentDate)
                               : 'Ραντεβού κλείστηκε'}
                           </Text>
                         </>

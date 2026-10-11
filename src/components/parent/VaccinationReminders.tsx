@@ -3,6 +3,7 @@ import { Stack, Table, Text, Badge, Alert, Center, Loader, Paper, Button } from 
 import { IconAlertCircle, IconVaccine } from '@tabler/icons-react';
 import type { VaccinationRecord } from '../../types/parent';
 import { getVaccinationStatus } from '../../utils/vaccinationStatus';
+import { formatDate } from '../../utils/dateFormat';
 
 interface VaccinationRemindersProps {
   vaccinations: VaccinationRecord[] | null;
@@ -123,13 +124,13 @@ export const VaccinationReminders: React.FC<VaccinationRemindersProps> = ({
                     </Table.Td>
                     <Table.Td>
                       <Text size="sm">
-                        {new Date(vaccination.administeredDate).toLocaleDateString('el-GR')}
+                        {formatDate(vaccination.administeredDate)}
                       </Text>
                     </Table.Td>
                     <Table.Td>
                       <Text size="sm">
                         {vaccination.nextDoseDate
-                          ? new Date(vaccination.nextDoseDate).toLocaleDateString('el-GR')
+                          ? formatDate(vaccination.nextDoseDate)
                           : '—'}
                       </Text>
                     </Table.Td>

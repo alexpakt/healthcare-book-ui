@@ -2,6 +2,7 @@ import React from 'react';
 import { Stack, Text, Center, Loader, Paper, Group, Divider, Button } from '@mantine/core';
 import { IconFileDescription, IconEdit } from '@tabler/icons-react';
 import type { MedicalRecord } from '../../types/parent';
+import { formatDate } from '../../utils/dateFormat';
 
 interface MedicalRecordsListProps {
   records: MedicalRecord[] | null;
@@ -48,7 +49,7 @@ export const MedicalRecordsList: React.FC<MedicalRecordsListProps> = ({
               <Text fw={600}>{record.diagnosis}</Text>
               <Group gap="xs">
                 <Text size="sm" c="dimmed">
-                  {new Date(record.recordDate).toLocaleDateString('el-GR')}
+                  {formatDate(record.recordDate)}
                 </Text>
                 {onEdit && (
                   <Button

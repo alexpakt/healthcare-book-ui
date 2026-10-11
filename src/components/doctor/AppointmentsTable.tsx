@@ -2,6 +2,7 @@ import React from 'react';
 import { Stack, Table, Text, Badge, Button, Center, Loader, Paper, Group } from '@mantine/core';
 import { IconCalendarEvent, IconCircleCheck, IconCheck, IconX } from '@tabler/icons-react';
 import type { DoctorAppointment } from '../../types/doctor';
+import { formatDate } from '../../utils/dateFormat';
 
 interface AppointmentsTableProps {
   title: string;
@@ -116,7 +117,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm">
-                      {new Date(appointment.appointmentDate).toLocaleDateString('el-GR')}
+                      {formatDate(appointment.appointmentDate)}
                     </Text>
                   </Table.Td>
                   <Table.Td>

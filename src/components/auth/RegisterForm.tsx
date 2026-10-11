@@ -122,7 +122,7 @@ export const RegisterForm: React.FC = () => {
                 onChange={(value) => setUserType((value || 'parent') as 'parent' | 'doctor')}
                 data={[
                   { value: 'parent', label: 'Γονέας/Κηδεμόνας' },
-                  { value: 'doctor', label: 'Παιδίατρος' },
+                  { value: 'doctor', label: 'Ιατρός' },
                 ]}
               />
 

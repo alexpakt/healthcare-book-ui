@@ -212,8 +212,9 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
           {/* Date of Birth */}
           <TextInput
             label="Ημερομηνία Γέννησης"
-            placeholder="YYYY-MM-DD"
+            placeholder="DD/MM/YYYY"
             type="date"
+            lang="el-GR"
             value={formData.dateOfBirth}
             onChange={(e) => handleChange('dateOfBirth', e.target.value)}
             max={new Date().toISOString().split('T')[0]}

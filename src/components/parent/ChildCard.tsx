@@ -3,6 +3,7 @@ import { Card, Text, Badge, Group, Stack, Button, Avatar } from '@mantine/core';
 import { IconArrowRight } from '@tabler/icons-react';
 import { getAgeDisplay } from '../../utils/ageCalculator';
 import type { Child } from '../../types/parent';
+import { formatDate } from '../../utils/dateFormat';
 
 interface ChildCardProps {
   child: Child;
@@ -65,7 +66,7 @@ export const ChildCard: React.FC<ChildCardProps> = ({
               Γεννήθηκε:
             </Text>
             <Text size="sm">
-              {new Date(child.dateOfBirth).toLocaleDateString('el-GR')}
+              {formatDate(child.dateOfBirth)}
             </Text>
           </Group>
         </Stack>

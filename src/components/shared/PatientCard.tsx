@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, Text, Group, Stack, Avatar } from '@mantine/core';
 import { getAgeDisplay } from '../../utils/ageCalculator';
 import type { ChildRecord } from '../../services/childService';
+import { formatDate } from '../../utils/dateFormat';
 
 interface PatientCardProps {
   child: ChildRecord;
@@ -42,7 +43,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ child, showAmka = fals
           </div>
 
           <Text size="sm" c="dimmed">
-            Γεννήθηκε: {new Date(child.dateOfBirth).toLocaleDateString('el-GR')}
+            Γεννήθηκε: {formatDate(child.dateOfBirth)}
           </Text>
 
           {footer}
