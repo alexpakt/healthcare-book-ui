@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, TextInput, Select, Stack, Alert, Group } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { useParentChildren, useParentCreateAppointment } from '../../hooks/useParentData';
-import { useDirectoryDoctors } from '../../hooks/useDirectoryData';
+import { useParentChildDoctors, useParentChildren, useParentCreateAppointment } from '../../hooks/useParentData';
 import { getMinDateTimeLocal, isNotInFuture } from '../../utils/dateTime';
 
 interface AppointmentRequestFormProps {
@@ -30,7 +29,9 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [dateError, setDateError] = useState('');
   const { data: children } = useParentChildren();
-  const { data: doctors } = useDirectoryDoctors();
+  const selectedChildId = formData.childId ? Number(formData.childId) : undefined;
+  const { data: childDoctors, loading: doctorsLoading, error: doctorsError } = useParentChildDoctors(selectedChildId);
+  const doctors = selectedChildId ? childDoctors : null;
   const { mutate, loading, error, reset } = useParentCreateAppointment();
 
   React.useEffect(() => {
@@ -45,6 +46,10 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
 
   const handleChange = (field: keyof typeof EMPTY_FORM, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleChildChange = (value: string | null) => {
+    setFormData((prev) => ({ ...prev, childId: value || '', doctorId: '' }));
   };
 
   const handleClose = () => {
@@ -97,14 +102,20 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
             placeholder="Επιλέξτε παιδί"
             data={(children || []).map((c) => ({ value: String(c.id), label: `${c.firstName} ${c.lastName}` }))}
             value={formData.childId}
-            onChange={(value) => handleChange('childId', value || '')}
+            onChange={handleChildChange}
             required
             disabled={loading}
           />
 
           <Select
             label="Γιατρός"
-            placeholder="Επιλέξτε γιατρό"
+            placeholder={selectedChildId ? 'Επιλέξτε γιατρό' : 'Επιλέξτε πρώτα παιδί'}
+            description={
+              selectedChildId && !doctorsLoading && !doctorsError && doctors?.length === 0
+                ? 'Το παιδί δεν έχει συνδεδεμένο γιατρό. Ζητήστε σύνδεση με γιατρό πρώτα.'
+                : undefined
+            }
+            error={doctorsError ? 'Αποτυχία φόρτωσης γιατρών του παιδιού.' : undefined}
             data={(doctors || []).map((d) => ({
               value: String(d.id),
               label: `${d.firstName} ${d.lastName} — ${d.specialization}`,
@@ -112,7 +123,7 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
             value={formData.doctorId}
             onChange={(value) => handleChange('doctorId', value || '')}
             required
-            disabled={loading}
+            disabled={loading || !selectedChildId || doctorsLoading}
             searchable
           />
 
@@ -145,7 +156,7 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
             <Button
               type="submit"
               loading={loading}
-              disabled={!formData.childId || !formData.doctorId || !formData.appointmentDate}
+              disabled={!formData.childId || !formData.doctorId || !formData.appointmentDate || doctorsLoading}
             >
               {loading ? 'Αποστολή...' : 'Υποβολή Αιτήματος'}
             </Button>

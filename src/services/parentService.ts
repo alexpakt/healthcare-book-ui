@@ -3,6 +3,7 @@ import type { Child, Appointment, VaccinationRecord, VaccinationSchedule, Medica
 import type { AppointmentStatus } from '../types/common';
 import type { ParentProfile, UpdateParentProfileRequest } from '../types/profile';
 import { getVaccinationStatus } from '../utils/vaccinationStatus';
+import type { DoctorDirectoryEntry } from './directoryService';
 
 export interface CreateAppointmentRequest {
   childId: number;
@@ -31,6 +32,14 @@ export const parentService = {
    */
   async getChildById(childId: number): Promise<Child> {
     const response = await apiClient.get<Child>(`/api/children/${childId}`);
+    return response.data;
+  },
+
+  /**
+   * Get the doctors connected to a specific child
+   */
+  async getChildDoctors(childId: number): Promise<DoctorDirectoryEntry[]> {
+    const response = await apiClient.get<DoctorDirectoryEntry[]>(`/api/children/${childId}/doctors`);
     return response.data;
   },
 

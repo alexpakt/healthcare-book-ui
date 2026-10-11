@@ -46,6 +46,14 @@ export function useParentChildAppointments(childId: number) {
 }
 
 /**
+ * Hook for fetching the doctors connected to a child (skipped until a child is chosen)
+ */
+export function useParentChildDoctors(childId?: number) {
+  const fetchFn = useCallback(() => parentService.getChildDoctors(childId!), [childId]);
+  return useApi(fetchFn, undefined, { skip: childId === undefined });
+}
+
+/**
  * Hook for fetching child vaccinations
  */
 export function useParentChildVaccinations(childId: number) {
