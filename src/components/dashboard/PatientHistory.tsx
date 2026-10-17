@@ -19,6 +19,7 @@ import { ChildVaccinationsList } from '../shared/ChildVaccinationsList';
 import { AllergiesList } from '../shared/AllergiesList';
 import { GrowthChart } from '../shared/GrowthChart';
 import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
+import { GrowthAlertCard } from '../Growth/GrowthAlertCard';
 import { BirthRecordCard } from '../shared/BirthRecordCard';
 import { MedicalRecordForm } from '../doctor/MedicalRecordForm';
 import { GrowthMeasurementForm, type GrowthMeasurementFormData } from '../doctor/GrowthMeasurementForm';
@@ -277,6 +278,7 @@ export const PatientHistory: React.FC = () => {
                 Νέα μέτρηση
               </Button>
             </Group>
+            <GrowthAlertCard childId={id} />
             <GrowthChart
               measurements={growthMeasurementsQuery.data}
               isLoading={growthMeasurementsQuery.loading}

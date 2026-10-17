@@ -21,7 +21,7 @@ export interface ErrorResponse {
 
 export type UserRole = 'ROLE_PARENT' | 'ROLE_DOCTOR' | 'ROLE_ADMIN';
 
-export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'BLOCKED';
+export type UserStatus = 'ACTIVE' | 'INACTIVE';
 
 export type AppointmentStatus = 'REQUESTED' | 'SCHEDULED' | 'DECLINED' | 'COMPLETED' | 'CANCELLED';
 
