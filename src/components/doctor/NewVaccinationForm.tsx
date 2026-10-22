@@ -14,6 +14,7 @@ import {
 import { IconAlertCircle } from '@tabler/icons-react';
 import { doctorService, type CreateVaccinationRequest } from '../../services/doctorService';
 import { parentService } from '../../services/parentService';
+import { parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
 
 interface NewVaccinationFormProps {
   opened: boolean;
@@ -32,7 +33,7 @@ export interface VaccinationFormData extends CreateVaccinationRequest {
 const EMPTY_FORM: Omit<VaccinationFormData, 'childId'> = {
   administeredByDoctorId: undefined,
   vaccineName: '',
-  administeredDate: new Date().toISOString().split('T')[0],
+  administeredDate: toLocalIsoDate(),
   nextDoseDate: '',
   batchNumber: '',
   notes: '',
@@ -109,7 +110,11 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
       return;
     }
 
-    const adminDate = new Date(formData.administeredDate);
+    const adminDate = parseLocalDate(formData.administeredDate);
+    if (!adminDate) {
+      setError('Η ημερομηνία χορήγησης δεν είναι έγκυρη');
+      return;
+    }
     const today = new Date();
     today.setHours(23, 59, 59, 0);
     if (adminDate > today) {
@@ -173,6 +178,7 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
               <TextInput
                 label="Ημερομηνία Χορήγησης"
                 type="date"
+                max={toLocalIsoDate()}
                 value={formData.administeredDate}
                 onChange={(e) => handleChange('administeredDate', e.target.value)}
                 required

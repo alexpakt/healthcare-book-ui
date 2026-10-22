@@ -3,6 +3,7 @@ import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XA
 import {Alert, Center, Loader, SegmentedControl, Stack, Text, Title} from '@mantine/core';
 import {IconAlertCircle} from '@tabler/icons-react';
 import {parentService} from '../../services/parentService';
+import {parseLocalDate} from '../../utils/dateTime';
 import type {GrowthMeasurement} from '../../types/parent';
 
 interface GrowthChartProps {
@@ -63,7 +64,8 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
     const fetchChildAge = async () => {
       try {
         const child = await parentService.getChildById(childId);
-        const birthDate = new Date(child.dateOfBirth);
+        const birthDate = parseLocalDate(child.dateOfBirth);
+        if (!birthDate) return;
         const today = new Date();
         const ageInMonths = Math.floor(
           (today.getFullYear() - birthDate.getFullYear()) * 12 +

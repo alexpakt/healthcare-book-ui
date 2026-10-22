@@ -11,6 +11,7 @@ import {
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useCreateChild, useUpdateChild } from '../../hooks/useChildData';
 import type { ChildRecord, CreateChildRequest } from '../../services/childService';
+import { parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
 
 const BLOOD_TYPE_OPTIONS = [
   { value: 'O+', label: 'O+' },
@@ -37,7 +38,7 @@ const toFormData = (child?: ChildRecord | null): CreateChildRequest =>
     ? {
         firstName: child.firstName,
         lastName: child.lastName,
-        dateOfBirth: child.dateOfBirth,
+        dateOfBirth: child.dateOfBirth.slice(0, 10),
         amka: child.amka,
         gender: child.gender,
         bloodType: child.bloodType ?? '',
@@ -112,7 +113,11 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
       return;
     }
 
-    const birthDate = new Date(formData.dateOfBirth);
+    const birthDate = parseLocalDate(formData.dateOfBirth);
+    if (!birthDate) {
+      alert('Η ημερομηνία γέννησης δεν είναι έγκυρη');
+      return;
+    }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (birthDate > today) {
@@ -217,7 +222,7 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             lang="el-GR"
             value={formData.dateOfBirth}
             onChange={(e) => handleChange('dateOfBirth', e.target.value)}
-            max={new Date().toISOString().split('T')[0]}
+            max={toLocalIsoDate()}
             required
             disabled={loading}
           />

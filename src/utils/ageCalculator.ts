@@ -1,17 +1,21 @@
+import { parseLocalDate } from './dateTime';
+
 export const getAgeDisplay = (dateOfBirth: string): string => {
   const today = new Date();
-  const birthDate = new Date(dateOfBirth);
-  let years = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
+  const birthDate = parseLocalDate(dateOfBirth);
+  if (!birthDate) return '—';
 
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    years--;
+  // Completed months: the calendar month difference, minus one if this month's
+  // day has not yet reached the birth day.
+  let months =
+    (today.getFullYear() - birthDate.getFullYear()) * 12 +
+    (today.getMonth() - birthDate.getMonth());
+  if (today.getDate() < birthDate.getDate()) {
+    months--;
   }
 
+  const years = Math.floor(months / 12);
   if (years < 2) {
-    const months =
-      (today.getFullYear() - birthDate.getFullYear()) * 12 +
-      (today.getMonth() - birthDate.getMonth());
     const monthLabel = months === 1 ? 'μηνός' : 'μηνών';
     return `${months} ${monthLabel}`;
   }

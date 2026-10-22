@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Stack, Group, NumberInput, Textarea, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
+import { toLocalIsoDate } from '../../utils/dateTime';
 
 interface GrowthMeasurementFormProps {
   opened: boolean;
@@ -23,7 +24,7 @@ export interface GrowthMeasurementFormData {
 
 const EMPTY_FORM: GrowthMeasurementFormData = {
   childId: 0,
-  measurementDate: new Date().toISOString().split('T')[0],
+  measurementDate: toLocalIsoDate(),
   heightCm: null,
   weightKg: null,
   headCircumferenceCm: null,
@@ -42,14 +43,14 @@ export const GrowthMeasurementForm: React.FC<GrowthMeasurementFormProps> = ({
   const [formData, setFormData] = useState<GrowthMeasurementFormData>({
     ...EMPTY_FORM,
     childId,
-    measurementDate: new Date().toISOString().split('T')[0],
+    measurementDate: toLocalIsoDate(),
   });
 
   const handleClose = () => {
     setFormData({
       ...EMPTY_FORM,
       childId,
-      measurementDate: new Date().toISOString().split('T')[0],
+      measurementDate: toLocalIsoDate(),
     });
     onClose();
   };
@@ -61,10 +62,7 @@ export const GrowthMeasurementForm: React.FC<GrowthMeasurementFormProps> = ({
       return;
     }
 
-    const measurementDate = new Date(formData.measurementDate);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (measurementDate > today) {
+    if (formData.measurementDate > toLocalIsoDate()) {
       alert('Η ημερομηνία μέτρησης δεν μπορεί να είναι στο μέλλον');
       return;
     }
@@ -105,7 +103,7 @@ export const GrowthMeasurementForm: React.FC<GrowthMeasurementFormProps> = ({
                 measurementDate: e.target.value,
               }))
             }
-            max={new Date().toISOString().split('T')[0]}
+            max={toLocalIsoDate()}
             style={{
               padding: '8px',
               borderRadius: '4px',

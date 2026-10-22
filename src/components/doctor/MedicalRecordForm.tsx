@@ -6,6 +6,7 @@ import {
   useDoctorUpdateMedicalRecord,
 } from '../../hooks/useDoctorData';
 import type { MedicalHistory } from '../../types/doctor';
+import { parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
 
 interface MedicalRecordFormProps {
   opened: boolean;
@@ -16,7 +17,7 @@ interface MedicalRecordFormProps {
 }
 
 const emptyForm = (record?: MedicalHistory | null) => ({
-  recordDate: record?.recordDate?.slice(0, 10) || new Date().toISOString().slice(0, 10),
+  recordDate: record?.recordDate?.slice(0, 10) || toLocalIsoDate(),
   diagnosis: record?.diagnosis || '',
   notes: record?.notes || '',
   prescription: record?.prescription || '',
@@ -30,16 +31,19 @@ export const MedicalRecordForm: React.FC<MedicalRecordFormProps> = ({
   onSuccess,
 }) => {
   const [formData, setFormData] = useState(emptyForm(editRecord));
+  const [dateError, setDateError] = useState<string | null>(null);
   const createRecord = useDoctorCreateMedicalRecord();
   const updateRecord = useDoctorUpdateMedicalRecord();
   const { loading, error } = editRecord ? updateRecord : createRecord;
 
   const handleChange = (field: keyof ReturnType<typeof emptyForm>, value: string) => {
+    if (field === 'recordDate') setDateError(null);
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleClose = () => {
     setFormData(emptyForm());
+    setDateError(null);
     createRecord.reset();
     updateRecord.reset();
     onClose();
@@ -48,6 +52,15 @@ export const MedicalRecordForm: React.FC<MedicalRecordFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.diagnosis.trim() || !formData.recordDate) {
+      return;
+    }
+
+    if (!parseLocalDate(formData.recordDate)) {
+      setDateError('Η ημερομηνία δεν είναι έγκυρη');
+      return;
+    }
+    if (formData.recordDate > toLocalIsoDate()) {
+      setDateError('Η ημερομηνία δεν μπορεί να είναι στο μέλλον');
       return;
     }
 
@@ -89,9 +102,16 @@ export const MedicalRecordForm: React.FC<MedicalRecordFormProps> = ({
             </Alert>
           )}
 
+          {dateError && (
+            <Alert icon={<IconAlertCircle size={16} />} color="red" title="Σφάλμα">
+              {dateError}
+            </Alert>
+          )}
+
           <TextInput
             label="Ημερομηνία"
             type="date"
+            max={toLocalIsoDate()}
             value={formData.recordDate}
             onChange={(e) => handleChange('recordDate', e.target.value)}
             required

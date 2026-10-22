@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, Button, Stack, Group, TextInput, Select, Textarea, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import type { AllergyRecord } from '../../types/parent';
+import { parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
 
 interface AllergyFormProps {
   opened: boolean;
@@ -25,7 +26,7 @@ const EMPTY_FORM: AllergyFormData = {
   allergen: '',
   severity: 'MODERATE',
   reaction: '',
-  diagnosedDate: new Date().toISOString().split('T')[0],
+  diagnosedDate: toLocalIsoDate(),
   notes: '',
 };
 
@@ -44,7 +45,7 @@ export const AllergyForm: React.FC<AllergyFormProps> = ({
           allergen: initialData.allergen,
           severity: initialData.severity as 'MILD' | 'MODERATE' | 'SEVERE',
           reaction: initialData.reaction || '',
-          diagnosedDate: initialData.diagnosedDate,
+          diagnosedDate: initialData.diagnosedDate.slice(0, 10),
           notes: initialData.notes || '',
         }
       : EMPTY_FORM
@@ -68,7 +69,11 @@ export const AllergyForm: React.FC<AllergyFormProps> = ({
       return;
     }
 
-    const diagnosedDate = new Date(formData.diagnosedDate);
+    const diagnosedDate = parseLocalDate(formData.diagnosedDate);
+    if (!diagnosedDate) {
+      alert('Η ημερομηνία διάγνωσης δεν είναι έγκυρη');
+      return;
+    }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     if (diagnosedDate > today) {
@@ -162,7 +167,7 @@ export const AllergyForm: React.FC<AllergyFormProps> = ({
                 diagnosedDate: e.target.value,
               }))
             }
-            max={new Date().toISOString().split('T')[0]}
+            max={toLocalIsoDate()}
             required
             disabled={isLoading}
           />

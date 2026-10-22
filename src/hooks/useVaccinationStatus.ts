@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import type { VaccinationRecord, Child } from '../types/parent';
+import { parseLocalDate } from '../utils/dateTime';
 
 interface UseVaccinationStatusProps {
   child: Child;
@@ -11,7 +12,8 @@ interface UseVaccinationStatusProps {
  */
 export const calculateAgeInMonths = (dateOfBirth: string): number => {
   const today = new Date();
-  const birthDate = new Date(dateOfBirth);
+  const birthDate = parseLocalDate(dateOfBirth);
+  if (!birthDate) return 0;
 
   let months = today.getMonth() - birthDate.getMonth();
   let years = today.getFullYear() - birthDate.getFullYear();
