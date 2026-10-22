@@ -15,7 +15,6 @@ import {
 } from '../../hooks/useDoctorData';
 import { PatientCard } from '../shared/PatientCard';
 import { MedicalRecordsList } from '../shared/MedicalRecordsList';
-import { ChildVaccinationsList } from '../shared/ChildVaccinationsList';
 import { AllergiesList } from '../shared/AllergiesList';
 import { GrowthChart } from '../shared/GrowthChart';
 import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
@@ -28,6 +27,11 @@ import { NewVaccinationForm } from '../doctor/NewVaccinationForm';
 import { BirthRecordForm, type BirthRecordFormData } from '../doctor/BirthRecordForm';
 import type { MedicalHistory } from '../../types/doctor';
 import type { AllergyRecord } from '../../types/parent';
+import { VaccinationStatusWithHistory } from '../shared/VaccinationStatusWithHistory';
+import type { DoseSelection } from '../shared/VaccinationStatusGrid';
+import { useVaccinationSchedules, useChildAppointments } from '../../hooks/useVaccinationCatalog';
+import { DoseActionDialog } from '../doctor/DoseActionDialog';
+import { NewAppointmentForm } from '../doctor/NewAppointmentForm';
 
 export const PatientHistory: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
@@ -50,7 +54,27 @@ export const PatientHistory: React.FC = () => {
   const [allergyFormOpened, setAllergyFormOpened] = useState(false);
   const [editingAllergy, setEditingAllergy] = useState<AllergyRecord | null>(null);
   const [vaccinationFormOpened, setVaccinationFormOpened] = useState(false);
+  const [recordVaccineName, setRecordVaccineName] = useState<string | undefined>(undefined);
+  const [doseAction, setDoseAction] = useState<DoseSelection | null>(null);
+  const [bookingOpened, setBookingOpened] = useState(false);
+  const [bookingReason, setBookingReason] = useState<string | undefined>(undefined);
+  const schedulesQuery = useVaccinationSchedules();
+  const appointmentsQuery = useChildAppointments(id);
   const [birthFormOpened, setBirthFormOpened] = useState(false);
+
+  const handleRecordFromDose = () => {
+    if (!doseAction) return;
+    setRecordVaccineName(doseAction.vaccineName);
+    setVaccinationFormOpened(true);
+    setDoseAction(null);
+  };
+
+  const handleScheduleFromDose = () => {
+    if (!doseAction) return;
+    setBookingReason(`Εμβολιασμός: ${doseAction.vaccineName} (${doseAction.recommendedAgeMonths}μ)`);
+    setBookingOpened(true);
+    setDoseAction(null);
+  };
 
   const handleAddRecord = () => {
     setEditingRecord(null);
@@ -239,12 +263,25 @@ export const PatientHistory: React.FC = () => {
           <Stack gap="md">
             <Button
               leftSection={<IconPlus size={16} />}
-              onClick={() => setVaccinationFormOpened(true)}
+              onClick={() => {
+                setRecordVaccineName(undefined);
+                setVaccinationFormOpened(true);
+              }}
               style={{ alignSelf: 'flex-start' }}
             >
               Νέος Εμβολιασμός
             </Button>
-            <ChildVaccinationsList vaccinations={data.vaccinations} isLoading={false} />
+            {data.child && (
+              <VaccinationStatusWithHistory
+                child={data.child}
+                vaccinations={data.vaccinations}
+                schedules={schedulesQuery.data}
+                appointments={appointmentsQuery.data}
+                viewerRole="DOCTOR"
+                schedulesError={!!schedulesQuery.error}
+                onDoseClick={setDoseAction}
+              />
+            )}
           </Stack>
         </Tabs.Panel>
 
@@ -331,10 +368,34 @@ export const PatientHistory: React.FC = () => {
         opened={vaccinationFormOpened}
         childId={id}
         childName={data?.childName || ''}
+        schedules={schedulesQuery.data}
+        vaccinations={data.vaccinations}
+        initialVaccineName={recordVaccineName}
         onClose={() => setVaccinationFormOpened(false)}
         onSuccess={() => {
           setVaccinationFormOpened(false);
           refetch();
+        }}
+      />
+
+      <DoseActionDialog
+        opened={doseAction !== null}
+        onClose={() => setDoseAction(null)}
+        vaccineLabel={doseAction?.vaccineNameGr ?? ''}
+        doseLabel={doseAction?.doseNumber != null ? `Δόση ${doseAction.doseNumber}` : 'Δόση'}
+        canSchedule={doseAction?.status !== 'SCHEDULED'}
+        onRecord={handleRecordFromDose}
+        onSchedule={handleScheduleFromDose}
+      />
+
+      <NewAppointmentForm
+        opened={bookingOpened}
+        childId={id}
+        reason={bookingReason}
+        onClose={() => setBookingOpened(false)}
+        onSuccess={() => {
+          setBookingOpened(false);
+          appointmentsQuery.refetch();
         }}
       />
 

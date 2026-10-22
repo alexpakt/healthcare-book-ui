@@ -74,3 +74,27 @@ export function getDoseState(
 
   return { status: getAgeBasedStatus(schedule.recommendedAgeMonths, ageInMonths) };
 }
+
+export function getNextMissingDoseNumber(
+  schedules: VaccinationSchedule[],
+  vaccinations: VaccinationRecord[] | null,
+  vaccineName: string
+): number {
+  const scheduled = schedules
+    .filter((s) => s.vaccineName === vaccineName)
+    .sort((a, b) => (a.doseNumber ?? 0) - (b.doseNumber ?? 0));
+  if (scheduled.length === 0) {
+    return 1;
+  }
+
+  const recorded = new Set(
+    (vaccinations ?? [])
+      .filter((v) => v.vaccineName === vaccineName && v.doseNumber != null)
+      .map((v) => v.doseNumber)
+  );
+  const missing = scheduled.find((s) => s.doseNumber != null && !recorded.has(s.doseNumber));
+  if (missing) {
+    return missing.doseNumber!;
+  }
+  return Math.max(...scheduled.map((s) => s.doseNumber ?? 0)) + 1;
+}

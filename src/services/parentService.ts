@@ -88,26 +88,6 @@ export const parentService = {
   },
 
   /**
-   * Get all available vaccines (schedules + combinations like Pentavalent, Hexavalent)
-   */
-  async getAllVaccines(): Promise<{ id: number; vaccineName: string; vaccineNameGr: string }[]> {
-    const response = await apiClient.get<{ id: number; vaccineName: string; vaccineNameGr: string }[]>(
-      '/api/vaccines'
-    );
-    return response.data;
-  },
-
-  /**
-   * Get all vaccination schedules
-   */
-  async getVaccinationSchedules(): Promise<VaccinationSchedule[]> {
-    const response = await apiClient.get<VaccinationSchedule[]>(
-      '/api/vaccination-schedules'
-    );
-    return response.data;
-  },
-
-  /**
    * Get vaccination schedules for a specific age (in months)
    */
   async getVaccinationSchedulesByAge(ageMonths: number): Promise<VaccinationSchedule[]> {
@@ -128,31 +108,10 @@ export const parentService = {
   },
 
   /**
-   * Update vaccination next dose date (typically when appointment is scheduled)
-   */
-  async updateVaccinationNextDoseDate(vaccinationId: number, nextDoseDate: string): Promise<VaccinationRecord> {
-    const response = await apiClient.patch<VaccinationRecord>(
-      `/api/vaccinations/${vaccinationId}/next-dose-date`,
-      { nextDoseDate }
-    );
-    return response.data;
-  },
-
-  /**
    * Get all appointments for the current parent
    */
   async getAppointments(): Promise<Appointment[]> {
     const response = await apiClient.get<Appointment[]>('/api/appointments');
-    return response.data;
-  },
-
-  /**
-   * Get appointments for a specific child
-   */
-  async getChildAppointments(childId: number): Promise<Appointment[]> {
-    const response = await apiClient.get<Appointment[]>(
-      `/api/appointments/child/${childId}`
-    );
     return response.data;
   },
 

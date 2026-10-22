@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { parentService } from '../services/parentService';
+import { childAppointmentService } from '../services/childAppointmentService';
 import type { CreateAppointmentRequest } from '../services/parentService';
 import type { Appointment, VaccinationRecord } from '../types/parent';
 import type { AppointmentStatus } from '../types/common';
@@ -41,7 +42,7 @@ export function useParentAppointments() {
  * Hook for fetching child appointments
  */
 export function useParentChildAppointments(childId: number) {
-  const fetchFn = useCallback(() => parentService.getChildAppointments(childId), [childId]);
+  const fetchFn = useCallback(() => childAppointmentService.getChildAppointments(childId), [childId]);
   return useApi(fetchFn);
 }
 

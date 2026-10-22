@@ -84,13 +84,6 @@ describe('parentService endpoints', () => {
     expect(calls[0].method).toBe('PATCH');
     expect(calls[0].body).toEqual({ status: 'CANCELLED' });
   });
-
-  it('updateVaccinationNextDoseDate sends a PATCH with the next dose date', async () => {
-    const calls = mockApi('patch', '/api/vaccinations/12/next-dose-date', vaccination({ id: 12 }));
-    await parentService.updateVaccinationNextDoseDate(12, '2027-01-10');
-    expect(calls[0].path).toBe('/api/vaccinations/12/next-dose-date');
-    expect(calls[0].body).toEqual({ nextDoseDate: '2027-01-10' });
-  });
 });
 
 describe('parentService.getDashboardData', () => {

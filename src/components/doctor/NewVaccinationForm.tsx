@@ -11,9 +11,11 @@ import {
   Loader,
   Center,
 } from '@mantine/core';
-import { IconAlertCircle } from '@tabler/icons-react';
+import { IconAlertCircle, IconInfoCircle } from '@tabler/icons-react';
 import { doctorService, type CreateVaccinationRequest } from '../../services/doctorService';
-import { parentService } from '../../services/parentService';
+import { vaccinationCatalogService, type VaccineCatalogEntry } from '../../services/vaccinationCatalogService';
+import type { VaccinationRecord, VaccinationSchedule } from '../../types/parent';
+import { getNextMissingDoseNumber } from '../../utils/vaccinationStatus';
 import { parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
 
 interface NewVaccinationFormProps {
@@ -21,6 +23,9 @@ interface NewVaccinationFormProps {
   onClose: () => void;
   childId: number;
   childName: string;
+  schedules: VaccinationSchedule[] | null;
+  vaccinations: VaccinationRecord[] | null;
+  initialVaccineName?: string;
   onSuccess?: () => void;
   isLoading?: boolean;
 }
@@ -34,29 +39,38 @@ const EMPTY_FORM: Omit<VaccinationFormData, 'childId'> = {
   administeredByDoctorId: undefined,
   vaccineName: '',
   administeredDate: toLocalIsoDate(),
-  nextDoseDate: '',
   batchNumber: '',
   notes: '',
 };
+
+interface PlannedDose {
+  vaccineName: string;
+  label: string;
+  doseNumber: number;
+  recommendedAgeMonths?: number;
+}
 
 export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
   opened,
   onClose,
   childId,
   childName,
+  schedules,
+  vaccinations,
+  initialVaccineName,
   onSuccess,
   isLoading: externalLoading,
 }) => {
   const [formData, setFormData] = useState<Omit<VaccinationFormData, 'childId'>>(EMPTY_FORM);
-  const [vaccineOptions, setVaccineOptions] = useState<{ value: string; label: string }[]>([]);
+  const [catalog, setCatalog] = useState<VaccineCatalogEntry[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingSchedules, setLoadingSchedules] = useState(false);
+  const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
-        setLoadingSchedules(true);
+        setLoadingCatalog(true);
 
         // Get current doctor ID from localStorage
         const userStr = localStorage.getItem('user');
@@ -65,27 +79,46 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
           setFormData((prev) => ({ ...prev, administeredByDoctorId: user.profileId }));
         }
 
-        const vaccines = await parentService.getAllVaccines();
-
-        // Convert vaccines to dropdown options
-        const options = vaccines.map((v) => ({
-          value: v.vaccineName,
-          label: v.vaccineNameGr || v.vaccineName,
-        }));
-
-        setVaccineOptions(options.sort((a, b) => a.label.localeCompare(b.label)));
+        setCatalog(await vaccinationCatalogService.getAllVaccines());
       } catch (err) {
         console.error('Error loading vaccines:', err);
         setError('Αποτυχία φόρτωσης καταλόγου εμβολίων');
       } finally {
-        setLoadingSchedules(false);
+        setLoadingCatalog(false);
       }
     };
 
     if (opened) {
       fetchVaccines();
+      if (initialVaccineName) {
+        setFormData((prev) => ({ ...prev, vaccineName: initialVaccineName }));
+      }
     }
-  }, [opened]);
+  }, [opened, initialVaccineName]);
+
+  const vaccineOptions = catalog
+    .map((v) => ({ value: v.vaccineName, label: v.vaccineNameGr || v.vaccineName }))
+    .sort((a, b) => a.label.localeCompare(b.label));
+
+  const plannedDoses = (): PlannedDose[] => {
+    const entry = catalog.find((v) => v.vaccineName === formData.vaccineName);
+    if (!entry || !schedules) {
+      return [];
+    }
+    const components = entry.componentVaccineNames ?? [];
+    const names = components.length > 0 ? components : [entry.vaccineName];
+    return names.map((name) => {
+      const doseNumber = getNextMissingDoseNumber(schedules, vaccinations, name);
+      const scheduled = schedules.find((s) => s.vaccineName === name && s.doseNumber === doseNumber);
+      return {
+        vaccineName: name,
+        label: catalog.find((v) => v.vaccineName === name)?.vaccineNameGr || name,
+        doseNumber,
+        recommendedAgeMonths: scheduled?.recommendedAgeMonths,
+      };
+    });
+  };
+  const planned = plannedDoses();
 
   const handleChange = (field: string, value: string | null) => {
     setFormData((prev) => ({ ...prev, [field]: value || '' }));
@@ -158,7 +191,7 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
             </Alert>
           )}
 
-          {loadingSchedules ? (
+          {loadingCatalog ? (
             <Center py="md">
               <Loader size="sm" />
             </Center>
@@ -175,6 +208,19 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
                 disabled={isSubmitting}
               />
 
+              {planned.length > 0 && (
+                <Alert icon={<IconInfoCircle size={16} />} color="blue" title="Θα καταχωρηθεί">
+                  <Stack gap={2}>
+                    {planned.map((dose) => (
+                      <Text key={dose.vaccineName} size="sm">
+                        {dose.label}: <strong>Δόση {dose.doseNumber}</strong>
+                        {dose.recommendedAgeMonths !== undefined && ` (${dose.recommendedAgeMonths} μήνες)`}
+                      </Text>
+                    ))}
+                  </Stack>
+                </Alert>
+              )}
+
               <TextInput
                 label="Ημερομηνία Χορήγησης"
                 type="date"
@@ -182,14 +228,6 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
                 value={formData.administeredDate}
                 onChange={(e) => handleChange('administeredDate', e.target.value)}
                 required
-                disabled={isSubmitting}
-              />
-
-              <TextInput
-                label="Ημερομηνία Επόμενης Δόσης (Προαιρετικό)"
-                type="date"
-                value={formData.nextDoseDate}
-                onChange={(e) => handleChange('nextDoseDate', e.target.value)}
                 disabled={isSubmitting}
               />
 
@@ -215,7 +253,7 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
             <Button variant="light" onClick={handleClose} disabled={isSubmitting}>
               Ακύρωση
             </Button>
-            <Button type="submit" loading={isSubmitting} disabled={!formData.vaccineName || !formData.administeredDate || loadingSchedules}>
+            <Button type="submit" loading={isSubmitting} disabled={!formData.vaccineName || !formData.administeredDate || loadingCatalog}>
               Καταχώρηση Εμβολιασμού
             </Button>
           </Group>

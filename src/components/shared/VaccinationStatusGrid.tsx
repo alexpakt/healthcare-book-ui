@@ -1,20 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Stack, Table, Text, Center, Loader, Paper, Alert, Box } from '@mantine/core';
 import { IconVaccine, IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import type { Appointment, VaccinationRecord, VaccinationSchedule } from '../../types/parent';
-import { parentService } from '../../services/parentService';
-import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
-import { useParentChildAppointments } from '../../hooks/useParentData';
 import { getDoseState, getSchedulesForAge } from '../../utils/vaccinationStatus';
 import type { DoseStatus } from '../../utils/vaccinationStatus';
 import { formatDate } from '../../utils/dateFormat';
 
+export type ViewerRole = 'PARENT' | 'DOCTOR';
+
+/** The dose a user clicked on in the grid. */
+export interface DoseSelection {
+  vaccineName: string;
+  vaccineNameGr: string;
+  doseNumber: number | null;
+  recommendedAgeMonths: number;
+  status: DoseStatus;
+}
+
 interface VaccinationStatusGridProps {
   ageInMonths: number;
+  schedules: VaccinationSchedule[] | null;
   vaccinations: VaccinationRecord[] | null;
-  childId: number;
+  appointments: Appointment[] | null;
+  viewerRole: ViewerRole;
   isLoading?: boolean;
-  onScheduleClick?: (vaccineInfo: { vaccineName: string; recommendedAgeMonths: number }) => void;
+  loadError?: boolean;
+  onDoseClick?: (dose: DoseSelection) => void;
 }
 
 interface VaccineRow {
@@ -23,110 +34,85 @@ interface VaccineRow {
   doses: {
     doseNumber: number | null;
     recommendedAgeMonths: number;
-    schedule: VaccinationSchedule;
     status: DoseStatus;
     recordedVaccination?: VaccinationRecord;
     scheduledAppointment?: Appointment;
   }[];
 }
 
+const isActionable = (status: DoseStatus, role: ViewerRole): boolean => {
+  if (role === 'DOCTOR') {
+    return status !== 'COMPLETED';
+  }
+  return status === 'OVERDUE' || status === 'PENDING' || status === 'FUTURE';
+};
 
 export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
   ageInMonths,
+  schedules,
   vaccinations,
-  childId,
+  appointments,
+  viewerRole,
   isLoading: externalLoading,
-  onScheduleClick,
+  loadError = false,
+  onDoseClick,
 }) => {
-  const [vaccineRows, setVaccineRows] = useState<VaccineRow[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [appointmentFormOpen, setAppointmentFormOpen] = useState(false);
-  const [selectedVaccine, setSelectedVaccine] = useState<{ vaccineName: string; recommendedAgeMonths: number } | null>(null);
-
-  const appointmentsQuery = useParentChildAppointments(childId);
-
-  useEffect(() => {
-    const fetchSchedules = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-
-        const allData = await parentService.getVaccinationSchedules();
-        const data = getSchedulesForAge(allData, ageInMonths);
-
-        // Group vaccines by name
-        const vaccineMap = new Map<string, VaccineRow>();
-
-        data.forEach((schedule) => {
-          const key = schedule.vaccineName;
-
-          if (!vaccineMap.has(key)) {
-            vaccineMap.set(key, {
-              vaccineName: schedule.vaccineName,
-              vaccineNameGr: schedule.vaccineNameGr || schedule.vaccineName,
-              doses: [],
-            });
-          }
-
-          const row = vaccineMap.get(key)!;
-
-          const { status, recordedVaccination, scheduledAppointment } = getDoseState(
-            schedule,
-            ageInMonths,
-            vaccinations,
-            appointmentsQuery.data
-          );
-
-          row.doses.push({
-            doseNumber: schedule.doseNumber ?? null,
-            recommendedAgeMonths: schedule.recommendedAgeMonths,
-            schedule,
-            status,
-            recordedVaccination,
-            scheduledAppointment,
-          });
-        });
-
-        // Sort doses by dose number
-        vaccineMap.forEach((row) => {
-          row.doses.sort((a, b) => (a.doseNumber || 0) - (b.doseNumber || 0));
-        });
-
-        // Convert map to sorted array
-        const rows = Array.from(vaccineMap.values()).sort((a, b) =>
-          a.vaccineNameGr.localeCompare(b.vaccineNameGr)
-        );
-
-        setVaccineRows(rows);
-      } catch (err) {
-        console.error('Error fetching vaccination schedules:', err);
-        setError('Αποτυχία φόρτωσης προγράμματος εμβολιασμών');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (ageInMonths >= 0) {
-      fetchSchedules();
+  const vaccineRows = useMemo<VaccineRow[]>(() => {
+    if (!schedules || ageInMonths < 0) {
+      return [];
     }
-  }, [ageInMonths, vaccinations, appointmentsQuery.data]);
 
-  const loading = isLoading || externalLoading;
+    const data = getSchedulesForAge(schedules, ageInMonths);
+    const vaccineMap = new Map<string, VaccineRow>();
 
-  if (loading) {
+    data.forEach((schedule) => {
+      const key = schedule.vaccineName;
+      if (!vaccineMap.has(key)) {
+        vaccineMap.set(key, {
+          vaccineName: schedule.vaccineName,
+          vaccineNameGr: schedule.vaccineNameGr || schedule.vaccineName,
+          doses: [],
+        });
+      }
+
+      const { status, recordedVaccination, scheduledAppointment } = getDoseState(
+        schedule,
+        ageInMonths,
+        vaccinations,
+        appointments
+      );
+
+      vaccineMap.get(key)!.doses.push({
+        doseNumber: schedule.doseNumber ?? null,
+        recommendedAgeMonths: schedule.recommendedAgeMonths,
+        status,
+        recordedVaccination,
+        scheduledAppointment,
+      });
+    });
+
+    vaccineMap.forEach((row) => {
+      row.doses.sort((a, b) => (a.doseNumber || 0) - (b.doseNumber || 0));
+    });
+
+    return Array.from(vaccineMap.values()).sort((a, b) =>
+      a.vaccineNameGr.localeCompare(b.vaccineNameGr)
+    );
+  }, [schedules, ageInMonths, vaccinations, appointments]);
+
+  if (loadError) {
+    return (
+      <Alert icon={<IconAlertCircle size={16} />} color="red" title="Σφάλμα">
+        Αποτυχία φόρτωσης προγράμματος εμβολιασμών
+      </Alert>
+    );
+  }
+
+  if (externalLoading || !schedules) {
     return (
       <Center py="xl">
         <Loader />
       </Center>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert icon={<IconAlertCircle size={16} />} color="red" title="Σφάλμα">
-        {error}
-      </Alert>
     );
   }
 
@@ -153,19 +139,7 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
   const sortedDoseNumbers = Array.from(allDoseNumbers).sort((a, b) => a - b);
 
   const hasOverdue = vaccineRows.some((row) => row.doses.some((d) => d.status === 'OVERDUE'));
-
-  const handleCellClick = (vaccineInfo: { vaccineName: string; recommendedAgeMonths: number }) => {
-    setSelectedVaccine(vaccineInfo);
-    setAppointmentFormOpen(true);
-    onScheduleClick?.(vaccineInfo);
-  };
-
-  const handleAppointmentSuccess = async () => {
-    // Refetch appointments to show the newly scheduled appointment
-    await appointmentsQuery.refetch();
-    setAppointmentFormOpen(false);
-    setSelectedVaccine(null);
-  };
+  const actionHint = viewerRole === 'DOCTOR' ? 'Κλικ για ενέργεια' : 'Κλικ για ραντεβού';
 
   return (
     <Stack gap="md">
@@ -200,7 +174,7 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
                     );
                   }
 
-                  const isClickable = dose.status === 'OVERDUE' || dose.status === 'PENDING' || dose.status === 'FUTURE';
+                  const clickable = !!onDoseClick && isActionable(dose.status, viewerRole);
                   const bgColor = {
                     COMPLETED: 'var(--mantine-color-green-1)',
                     PENDING: 'var(--mantine-color-yellow-1)',
@@ -224,7 +198,7 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
                         backgroundColor: bgColor,
                         border: `2px solid ${borderColor}`,
                         borderRadius: '8px',
-                        cursor: isClickable ? 'pointer' : 'default',
+                        cursor: clickable ? 'pointer' : 'default',
                         textAlign: 'center',
                         minHeight: '80px',
                         display: 'flex',
@@ -232,25 +206,28 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
                         justifyContent: 'center',
                         alignItems: 'center',
                         gap: '4px',
-                        transition: isClickable ? 'all 0.2s' : 'none',
+                        transition: clickable ? 'all 0.2s' : 'none',
                       }}
                       onMouseEnter={(e) => {
-                        if (isClickable) {
+                        if (clickable) {
                           e.currentTarget.style.transform = 'scale(1.05)';
                           e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (isClickable) {
+                        if (clickable) {
                           e.currentTarget.style.transform = 'scale(1)';
                           e.currentTarget.style.boxShadow = 'none';
                         }
                       }}
                       onClick={() => {
-                        if (isClickable) {
-                          handleCellClick({
+                        if (clickable) {
+                          onDoseClick!({
                             vaccineName: row.vaccineName,
+                            vaccineNameGr: row.vaccineNameGr,
+                            doseNumber: dose.doseNumber,
                             recommendedAgeMonths: dose.recommendedAgeMonths,
+                            status: dose.status,
                           });
                         }
                       }}
@@ -275,6 +252,11 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
                               ? formatDate(dose.scheduledAppointment.appointmentDate)
                               : 'Ραντεβού κλείστηκε'}
                           </Text>
+                          {clickable && (
+                            <Text size="xs" fw={600} c="blue" style={{ marginTop: '4px' }}>
+                              {actionHint}
+                            </Text>
+                          )}
                         </>
                       ) : dose.status === 'OVERDUE' ? (
                         <>
@@ -284,9 +266,11 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
                           <Text size="xs" c="dimmed">
                             {dose.recommendedAgeMonths} μήνες
                           </Text>
-                          <Text size="xs" fw={600} c="red" style={{ marginTop: '4px' }}>
-                            Κλικ για ραντεβού
-                          </Text>
+                          {clickable && (
+                            <Text size="xs" fw={600} c="red" style={{ marginTop: '4px' }}>
+                              {actionHint}
+                            </Text>
+                          )}
                         </>
                       ) : dose.status === 'PENDING' ? (
                         <>
@@ -296,9 +280,11 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
                           <Text size="xs" c="dimmed">
                             {dose.recommendedAgeMonths} μήνες
                           </Text>
-                          <Text size="xs" fw={600} c="orange" style={{ marginTop: '4px' }}>
-                            Κλικ για ραντεβού
-                          </Text>
+                          {clickable && (
+                            <Text size="xs" fw={600} c="orange" style={{ marginTop: '4px' }}>
+                              {actionHint}
+                            </Text>
+                          )}
                         </>
                       ) : (
                         <>
@@ -308,6 +294,11 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
                           <Text size="xs" c="dimmed">
                             {dose.recommendedAgeMonths} μήνες
                           </Text>
+                          {clickable && (
+                            <Text size="xs" fw={600} c="gray" style={{ marginTop: '4px' }}>
+                              {actionHint}
+                            </Text>
+                          )}
                         </>
                       )}
                     </Box>
@@ -327,20 +318,11 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
 
       {hasOverdue && (
         <Alert icon={<IconAlertCircle size={16} />} color="red" title="Προσοχή">
-          Υπάρχουν καθυστερημένοι εμβολιασμοί. Παρακαλώ επικοινωνήστε με τον ιατρό του παιδιού ή κάντε κλικ στο εμβόλιο για να κλείσετε ραντεβού.
+          {viewerRole === 'DOCTOR'
+            ? 'Υπάρχουν καθυστερημένοι εμβολιασμοί. Καταχωρήστε τη δόση ή κλείστε ραντεβού από τον πίνακα.'
+            : 'Υπάρχουν καθυστερημένοι εμβολιασμοί. Παρακαλώ επικοινωνήστε με τον ιατρό του παιδιού ή κάντε κλικ στο εμβόλιο για να κλείσετε ραντεβού.'}
         </Alert>
       )}
-
-      <AppointmentRequestForm
-        opened={appointmentFormOpen}
-        onClose={() => {
-          setAppointmentFormOpen(false);
-          setSelectedVaccine(null);
-        }}
-        onSuccess={handleAppointmentSuccess}
-        initialChildId={childId}
-        initialReason={selectedVaccine ? `Εμβολιασμός: ${selectedVaccine.vaccineName} (${selectedVaccine.recommendedAgeMonths}μ)` : undefined}
-      />
     </Stack>
   );
 };

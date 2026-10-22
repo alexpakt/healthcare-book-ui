@@ -44,7 +44,6 @@ export interface CreateVaccinationRequest {
   administeredByDoctorId?: number;
   vaccineName: string;
   administeredDate: string; // YYYY-MM-DD
-  nextDoseDate?: string;
   batchNumber?: string;
   notes?: string;
 }

@@ -15,7 +15,10 @@ import {
   useParentUpdateAppointmentStatus,
 } from '../../hooks/useParentData';
 import { UpcomingAppointments } from '../parent/UpcomingAppointments';
+import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
 import { VaccinationStatusWithHistory } from '../shared/VaccinationStatusWithHistory';
+import type { DoseSelection } from '../shared/VaccinationStatusGrid';
+import { useVaccinationSchedules } from '../../hooks/useVaccinationCatalog';
 import { MedicalRecordsList } from '../shared/MedicalRecordsList';
 import { AllergiesList } from '../shared/AllergiesList';
 import { GrowthChart } from '../shared/GrowthChart';
@@ -40,11 +43,22 @@ export const ChildDetail: React.FC = () => {
   const allergiesQuery = useParentChildAllergies(id);
   const growthMeasurementsQuery = useParentChildGrowthMeasurements(id);
   const birthRecordQuery = useParentChildBirthRecord(id);
+  const schedulesQuery = useVaccinationSchedules();
   const updateStatus = useParentUpdateAppointmentStatus();
+  const [bookingDose, setBookingDose] = useState<DoseSelection | null>(null);
 
   const handleCancelAppointment = async (appointmentId: number) => {
     await updateStatus.mutate({ appointmentId, status: 'CANCELLED' });
     appointmentsQuery.refetch();
+  };
+
+  const handleDoseClick = (dose: DoseSelection) => {
+    setBookingDose(dose);
+  };
+
+  const handleBookingSuccess = async () => {
+    setBookingDose(null);
+    await appointmentsQuery.refetch();
   };
 
   if (childLoading) {
@@ -154,6 +168,18 @@ export const ChildDetail: React.FC = () => {
         onSuccess={refetchChild}
       />
 
+      <AppointmentRequestForm
+        opened={bookingDose !== null}
+        onClose={() => setBookingDose(null)}
+        onSuccess={handleBookingSuccess}
+        initialChildId={id}
+        initialReason={
+          bookingDose
+            ? `Εμβολιασμός: ${bookingDose.vaccineName} (${bookingDose.recommendedAgeMonths}μ)`
+            : undefined
+        }
+      />
+
       <Tabs defaultValue="appointments" orientation="horizontal">
         <Tabs.List>
           <Tabs.Tab value="appointments">Ραντεβού</Tabs.Tab>
@@ -193,7 +219,12 @@ export const ChildDetail: React.FC = () => {
           <VaccinationStatusWithHistory
             child={child}
             vaccinations={vaccinationsQuery.data}
+            schedules={schedulesQuery.data}
+            appointments={appointmentsQuery.data}
+            viewerRole="PARENT"
             isLoading={vaccinationsQuery.loading}
+            schedulesError={!!schedulesQuery.error}
+            onDoseClick={handleDoseClick}
           />
         </Tabs.Panel>
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Button, TextInput, Select, Stack, Alert, Group } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -9,6 +9,8 @@ interface NewAppointmentFormProps {
   opened: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  childId?: number;
+  reason?: string;
 }
 
 const EMPTY_FORM = {
@@ -21,12 +23,24 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
   opened,
   onClose,
   onSuccess,
+  childId,
+  reason,
 }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [dateError, setDateError] = useState('');
   const { data: patients } = useDoctorAssignedChildren();
   const { mutate, loading, error, reset } = useDoctorCreateAppointment();
+
+  useEffect(() => {
+    if (opened) {
+      setFormData({
+        childId: childId !== undefined ? String(childId) : '',
+        appointmentDate: '',
+        reason: reason ?? '',
+      });
+    }
+  }, [opened, childId, reason]);
 
   const handleChange = (field: keyof typeof EMPTY_FORM, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -84,7 +98,7 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
             value={formData.childId}
             onChange={(value) => handleChange('childId', value || '')}
             required
-            disabled={loading}
+            disabled={loading || childId !== undefined}
           />
 
           <TextInput
@@ -104,9 +118,10 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
           <TextInput
             label="Λόγος (Προαιρετικό)"
             placeholder="π.χ. Τακτικός έλεγχος"
+            description={reason !== undefined ? 'Ο λόγος ορίζεται από τον εμβολιασμό και δεν αλλάζει.' : undefined}
             value={formData.reason}
             onChange={(e) => handleChange('reason', e.target.value)}
-            disabled={loading}
+            disabled={loading || reason !== undefined}
           />
 
           <Group justify="flex-end">
