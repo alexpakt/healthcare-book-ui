@@ -359,13 +359,6 @@ export const doctorService = {
         todayAppointments,
         upcomingAppointments,
         pendingAppointments,
-        quickStats: {
-          totalPatients: assignedChildren.length,
-          todayAppointmentsCount: todayAppointments.length,
-          upcomingAppointmentsCount: upcomingAppointments.length,
-          completedAppointmentsCount: 0,
-          pendingRequestsCount: pendingAppointments.length,
-        },
       };
     } catch (error) {
       console.error('Error fetching doctor dashboard data:', error);

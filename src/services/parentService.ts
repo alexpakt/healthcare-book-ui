@@ -2,7 +2,6 @@ import { apiClient } from './apiClient';
 import type { Child, Appointment, VaccinationRecord, VaccinationSchedule, MedicalRecord, AllergyRecord, GrowthMeasurement, BirthRecord, ParentDashboardData } from '../types/parent';
 import type { AppointmentStatus } from '../types/common';
 import type { ParentProfile, UpdateParentProfileRequest } from '../types/profile';
-import { getVaccinationStatus } from '../utils/vaccinationStatus';
 import type { DoctorDirectoryEntry } from './directoryService';
 
 export interface CreateAppointmentRequest {
@@ -221,20 +220,10 @@ export const parentService = {
         return aptDate >= today && aptDate <= thirtyDaysLater && apt.status === 'SCHEDULED';
       });
 
-      // Find overdue vaccinations (no server-side status; derive from nextDoseDate)
-      const overdueVaccinations = allVaccinations.filter(
-        (v) => getVaccinationStatus(v) === 'OVERDUE'
-      );
-
       return {
         children: childrenData,
         upcomingAppointments,
         vaccinationReminders: allVaccinations,
-        quickStats: {
-          totalChildren: childrenData.length,
-          upcomingAppointmentsCount: upcomingAppointments.length,
-          overdueVaccinationsCount: overdueVaccinations.length,
-        },
       };
     } catch (error) {
       console.error('Error fetching dashboard data:', error);

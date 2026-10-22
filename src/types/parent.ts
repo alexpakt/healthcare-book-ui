@@ -103,15 +103,8 @@ export interface BirthRecord {
   notes?: string;
 }
 
-export interface ParentQuickStats {
-  totalChildren: number;
-  upcomingAppointmentsCount: number;
-  overdueVaccinationsCount: number;
-}
-
 export interface ParentDashboardData {
   children: Child[];
   upcomingAppointments: Appointment[];
   vaccinationReminders: VaccinationRecord[];
-  quickStats: ParentQuickStats;
 }

@@ -36,18 +36,9 @@ export type MedicalHistory = MedicalRecord;
 export type VaccinationHistory = VaccinationRecord;
 export type { AllergyRecord };
 
-export interface DoctorQuickStats {
-  totalPatients: number;
-  todayAppointmentsCount: number;
-  upcomingAppointmentsCount: number;
-  completedAppointmentsCount: number;
-  pendingRequestsCount: number;
-}
-
 export interface DoctorDashboardData {
   assignedChildren: AssignedChild[];
   todayAppointments: DoctorAppointment[];
   upcomingAppointments: DoctorAppointment[];
   pendingAppointments: DoctorAppointment[];
-  quickStats: DoctorQuickStats;
 }
