@@ -64,12 +64,9 @@ export function getDoseState(
     return { status: 'COMPLETED', recordedVaccination };
   }
 
-  const ageMonthsStr = `${schedule.recommendedAgeMonths}μ`;
+  const scheduledReason = `${schedule.vaccineName} (${schedule.recommendedAgeMonths}μ)`;
   const scheduledAppointment = appointments?.find(
-    (apt) =>
-      apt.status === 'SCHEDULED' &&
-      apt.reason?.includes(schedule.vaccineName) &&
-      apt.reason?.includes(ageMonthsStr)
+    (apt) => apt.status === 'SCHEDULED' && apt.reason?.includes(scheduledReason)
   );
   if (scheduledAppointment) {
     return { status: 'SCHEDULED', scheduledAppointment };
