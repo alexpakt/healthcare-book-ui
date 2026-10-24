@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
 import {
   Modal,
   Button,
@@ -67,13 +68,13 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
   const { loading, error } = isEdit ? updateChild : createChild;
 
   // Prefill from the child each time the modal opens
-  useEffect(() => {
+  useSyncStateToProps([opened, child], () => {
     if (opened) {
       setFormData(toFormData(child));
       createChild.reset();
       updateChild.reset();
     }
-  }, [opened, child]);
+  });
 
   const handleChange = (field: keyof CreateChildRequest, value: string) => {
     let processedValue = value;

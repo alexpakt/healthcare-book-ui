@@ -1,5 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
 import { Modal, Button, Stack, Group, NumberInput, TextInput, Select, Checkbox, Textarea, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import type { BirthRecord } from '../../types/parent';
@@ -60,7 +61,7 @@ export const BirthRecordForm: React.FC<BirthRecordFormProps> = ({
     childId,
   });
 
-  useEffect(() => {
+  useSyncStateToProps([existingRecord, childId, opened], () => {
     if (existingRecord) {
       setFormData({
         childId: existingRecord.childId,
@@ -82,7 +83,7 @@ export const BirthRecordForm: React.FC<BirthRecordFormProps> = ({
         childId,
       });
     }
-  }, [existingRecord, childId, opened]);
+  });
 
   const handleClose = () => {
     setFormData({

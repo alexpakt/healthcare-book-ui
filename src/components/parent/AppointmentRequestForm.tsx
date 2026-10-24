@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
 import { Modal, Button, TextInput, Select, Stack, Alert, Group } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useParentChildDoctors, useParentChildren, useParentCreateAppointment } from '../../hooks/useParentData';
@@ -34,7 +35,7 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
   const doctors = selectedChildId ? childDoctors : null;
   const { mutate, loading, error, reset } = useParentCreateAppointment();
 
-  React.useEffect(() => {
+  useSyncStateToProps([opened, initialChildId, initialReason], () => {
     if (opened && (initialChildId || initialReason)) {
       setFormData({
         ...EMPTY_FORM,
@@ -42,7 +43,7 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
         reason: initialReason || '',
       });
     }
-  }, [opened, initialChildId, initialReason]);
+  });
 
   const handleChange = (field: keyof typeof EMPTY_FORM, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
