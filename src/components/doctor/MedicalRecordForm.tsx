@@ -7,6 +7,7 @@ import {
 } from '../../hooks/useDoctorData';
 import type { MedicalHistory } from '../../types/doctor';
 import { parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
+import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
 
 interface MedicalRecordFormProps {
   opened: boolean;
@@ -36,13 +37,20 @@ export const MedicalRecordForm: React.FC<MedicalRecordFormProps> = ({
   const updateRecord = useDoctorUpdateMedicalRecord();
   const { loading, error } = editRecord ? updateRecord : createRecord;
 
+  // Fill the fields each time the modal opens, so an edit shows the record's saved values
+  useSyncStateToProps([opened, editRecord], () => {
+    if (opened) {
+      setFormData(emptyForm(editRecord));
+      setDateError(null);
+    }
+  });
+
   const handleChange = (field: keyof ReturnType<typeof emptyForm>, value: string) => {
     if (field === 'recordDate') setDateError(null);
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleClose = () => {
-    setFormData(emptyForm());
     setDateError(null);
     createRecord.reset();
     updateRecord.reset();
@@ -78,7 +86,6 @@ export const MedicalRecordForm: React.FC<MedicalRecordFormProps> = ({
       } else {
         await createRecord.mutate(request);
       }
-      setFormData(emptyForm());
       onSuccess?.();
       onClose();
     } catch (err) {
