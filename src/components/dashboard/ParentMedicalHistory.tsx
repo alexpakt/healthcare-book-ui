@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Stack, Title, Text, Alert, Button, Grid, Center, Loader } from '@mantine/core';
 import { IconAlertCircle, IconArrowLeft, IconRefresh } from '@tabler/icons-react';
 import {
@@ -58,13 +58,9 @@ const ChildMedicalHistory: React.FC<ChildMedicalHistoryProps> = ({ childId, onBa
 
 export const ParentMedicalHistory: React.FC = () => {
   const { data: children, loading, error } = useParentChildren();
-  const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
-
-  useEffect(() => {
-    if (children && children.length === 1 && selectedChildId === null) {
-      setSelectedChildId(children[0].id);
-    }
-  }, [children, selectedChildId]);
+  const [pickedChildId, setPickedChildId] = useState<number | null>(null);
+  // A parent with a single child goes straight to that child's record
+  const selectedChildId = pickedChildId ?? (children?.length === 1 ? children[0].id : null);
 
   if (loading) {
     return (
@@ -86,7 +82,7 @@ export const ParentMedicalHistory: React.FC = () => {
     return (
       <ChildMedicalHistory
         childId={selectedChildId}
-        onBack={children && children.length > 1 ? () => setSelectedChildId(null) : undefined}
+        onBack={children && children.length > 1 ? () => setPickedChildId(null) : undefined}
       />
     );
   }
@@ -106,7 +102,7 @@ export const ParentMedicalHistory: React.FC = () => {
             <Grid.Col key={child.id} span={{ base: 12, sm: 6, md: 4 }}>
               <ChildCard
                 child={child}
-                onViewDetails={setSelectedChildId}
+                onViewDetails={setPickedChildId}
                 actionLabel="Προβολή ιστορικού"
               />
             </Grid.Col>

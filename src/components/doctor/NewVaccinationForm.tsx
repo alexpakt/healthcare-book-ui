@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
 import {
   Modal,
   Button,
@@ -90,11 +91,14 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
 
     if (opened) {
       fetchVaccines();
-      if (initialVaccineName) {
-        setFormData((prev) => ({ ...prev, vaccineName: initialVaccineName }));
-      }
     }
-  }, [opened, initialVaccineName]);
+  }, [opened]);
+
+  useSyncStateToProps([opened, initialVaccineName], () => {
+    if (opened && initialVaccineName) {
+      setFormData((prev) => ({ ...prev, vaccineName: initialVaccineName }));
+    }
+  });
 
   const vaccineOptions = catalog
     .map((v) => ({ value: v.vaccineName, label: v.vaccineNameGr || v.vaccineName }))

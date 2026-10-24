@@ -26,22 +26,21 @@ export const DoctorConnectionRequests: React.FC = () => {
   const [rejecting, setRejecting] = useState(false);
 
   useEffect(() => {
+    const fetchRequests = async () => {
+      try {
+        const data = await doctorChildRequestService.getPendingRequests();
+        setRequests(data);
+        setError('');
+      } catch (err: any) {
+        setError('Σφάλμα κατά τη φόρτωση των αιτήσεων');
+        console.error('Error fetching requests:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchRequests();
   }, []);
-
-  const fetchRequests = async () => {
-    setLoading(true);
-    try {
-      const data = await doctorChildRequestService.getPendingRequests();
-      setRequests(data);
-      setError('');
-    } catch (err: any) {
-      setError('Σφάλμα κατά τη φόρτωση των αιτήσεων');
-      console.error('Error fetching requests:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleApprove = async (requestId: number) => {
     try {

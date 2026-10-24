@@ -54,7 +54,7 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
     try {
       const child = await childService.searchByAmka(amka);
       setFoundChild(child);
-    } catch (err: any) {
+    } catch {
       setError('Δεν υπάρχει αυτός ο ΑΜΚΑ καταχωρημένος στην βάση δεδομένων.');
       setFoundChild(null);
     } finally {

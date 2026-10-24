@@ -31,12 +31,10 @@ interface ReferencePoint {
 }
 
 const useIsMobile = () => {
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 767px)');
-    setIsMobile(mediaQuery.matches);
-
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
     mediaQuery.addEventListener('change', handler);
     return () => mediaQuery.removeEventListener('change', handler);
@@ -245,7 +243,7 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
     return `${months} μήνες`;
   };
 
-  const CustomTooltip = (props: any) => {
+  const renderCustomTooltip = (props: any) => {
     const { active, payload, label } = props;
     if (active && payload && payload.length) {
       const percentileOrder = ['p03', 'p10', 'p25', 'p50', 'p75', 'p90', 'p97'];
@@ -329,7 +327,7 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
               }}
             />
             <YAxis label={{ value: getYAxisLabel(), angle: -90, position: 'insideLeft' }} />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={renderCustomTooltip} />
             {!isMobile && <Legend itemSorter="dataKey"/>}
 
             {references.length > 0 && (

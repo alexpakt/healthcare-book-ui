@@ -128,10 +128,11 @@ export function useDoctorDashboard() {
 
   const isLoading = dashboardData.loading;
   const hasError = dashboardData.error;
+  const refetchDashboard = dashboardData.refetch;
 
   const refetch = useCallback(async () => {
-    await dashboardData.refetch();
-  }, [dashboardData.refetch]);
+    await refetchDashboard();
+  }, [refetchDashboard]);
 
   return {
     assignedChildren: dashboardData.data?.assignedChildren || null,

@@ -7,22 +7,23 @@ import { doctorChildRequestService } from '../../services/doctorChildRequestServ
 export const DoctorRequestsNotification: React.FC = () => {
   const [modalOpened, setModalOpened] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const requests = await doctorChildRequestService.getPendingRequests();
+        setPendingCount(requests.length);
+      } catch (error) {
+        console.error('Error fetching pending requests count:', error);
+      }
+    };
+
     fetchPendingCount();
     // Poll for new requests every 30 seconds
     const interval = setInterval(fetchPendingCount, 30000);
     return () => clearInterval(interval);
-  }, []);
-
-  const fetchPendingCount = async () => {
-    try {
-      const requests = await doctorChildRequestService.getPendingRequests();
-      setPendingCount(requests.length);
-    } catch (error) {
-      console.error('Error fetching pending requests count:', error);
-    }
-  };
+  }, [refreshKey]);
 
   if (pendingCount === 0) {
     return null;
@@ -48,7 +49,7 @@ export const DoctorRequestsNotification: React.FC = () => {
         opened={modalOpened}
         onClose={() => {
           setModalOpened(false);
-          fetchPendingCount();
+          setRefreshKey((key) => key + 1);
         }}
         title="Αιτήσεις Σύνδεσης από Γιατρούς"
         size="lg"
