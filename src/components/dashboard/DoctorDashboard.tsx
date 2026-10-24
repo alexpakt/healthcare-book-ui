@@ -6,6 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useDoctorDashboard, useDoctorUpdateAppointmentStatus } from '../../hooks/useDoctorData';
 import { PatientsList } from '../doctor/PatientsList';
 import { AppointmentsTable } from '../doctor/AppointmentsTable';
+import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
 
 export const DoctorDashboard: React.FC = () => {
   const { user } = useAuth();
@@ -20,6 +21,7 @@ export const DoctorDashboard: React.FC = () => {
     refetch,
   } = useDoctorDashboard();
   const updateStatus = useDoctorUpdateAppointmentStatus();
+  const { actionError, clearActionError, runStatusUpdate } = useAppointmentStatusAction(updateStatus.mutate, refetch);
 
   if (!user) {
     return (
@@ -35,20 +37,10 @@ export const DoctorDashboard: React.FC = () => {
     navigate(`/patients/${childId}`);
   };
 
-  const handleMarkCompleted = async (appointmentId: number) => {
-    await updateStatus.mutate({ appointmentId, status: 'COMPLETED' });
-    refetch();
-  };
-
-  const handleAccept = async (appointmentId: number) => {
-    await updateStatus.mutate({ appointmentId, status: 'SCHEDULED' });
-    refetch();
-  };
-
-  const handleDecline = async (appointmentId: number) => {
-    await updateStatus.mutate({ appointmentId, status: 'DECLINED' });
-    refetch();
-  };
+  const handleMarkCompleted = (appointmentId: number) => runStatusUpdate(appointmentId, 'COMPLETED');
+  const handleAccept = (appointmentId: number) => runStatusUpdate(appointmentId, 'SCHEDULED');
+  const handleDecline = (appointmentId: number) => runStatusUpdate(appointmentId, 'DECLINED');
+  const handleCancel = (appointmentId: number) => runStatusUpdate(appointmentId, 'CANCELLED');
 
   return (
     <Stack gap="lg">
@@ -56,6 +48,12 @@ export const DoctorDashboard: React.FC = () => {
         <Title order={2}>Καλώς ήρθατε, {user.username}!</Title>
         <Text c="dimmed">Διαχειριστείτε τους ασθενείς και τα ραντεβού σας</Text>
       </div>
+
+      {actionError && (
+        <Alert color="red" title="Η ενέργεια απέτυχε" withCloseButton onClose={clearActionError}>
+          {actionError}
+        </Alert>
+      )}
 
       {error && (
         <Alert
@@ -108,6 +106,7 @@ export const DoctorDashboard: React.FC = () => {
             appointments={todayAppointments}
             isLoading={isLoading}
             onMarkCompleted={handleMarkCompleted}
+            onCancel={handleCancel}
           />
         </Tabs.Panel>
 
@@ -117,6 +116,7 @@ export const DoctorDashboard: React.FC = () => {
             emptyMessage="Δεν υπάρχουν προσεχή ραντεβού"
             appointments={upcomingAppointments}
             isLoading={isLoading}
+            onCancel={handleCancel}
           />
         </Tabs.Panel>
       </Tabs>

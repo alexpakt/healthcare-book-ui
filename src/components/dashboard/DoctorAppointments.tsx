@@ -4,6 +4,7 @@ import { IconAlertCircle, IconRefresh, IconPlus } from '@tabler/icons-react';
 import { useDoctorAppointments, useDoctorUpdateAppointmentStatus } from '../../hooks/useDoctorData';
 import { AppointmentsTable } from '../doctor/AppointmentsTable';
 import { NewAppointmentForm } from '../doctor/NewAppointmentForm';
+import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
 
 const PAGE_SIZE = 10;
 
@@ -12,21 +13,12 @@ export const DoctorAppointments: React.FC = () => {
   const { data, loading, error, refetch } = useDoctorAppointments(page, PAGE_SIZE);
   const updateStatus = useDoctorUpdateAppointmentStatus();
   const [formOpened, setFormOpened] = useState(false);
+  const { actionError, clearActionError, runStatusUpdate } = useAppointmentStatusAction(updateStatus.mutate, refetch);
 
-  const handleMarkCompleted = async (appointmentId: number) => {
-    await updateStatus.mutate({ appointmentId, status: 'COMPLETED' });
-    refetch();
-  };
-
-  const handleAccept = async (appointmentId: number) => {
-    await updateStatus.mutate({ appointmentId, status: 'SCHEDULED' });
-    refetch();
-  };
-
-  const handleDecline = async (appointmentId: number) => {
-    await updateStatus.mutate({ appointmentId, status: 'DECLINED' });
-    refetch();
-  };
+  const handleMarkCompleted = (appointmentId: number) => runStatusUpdate(appointmentId, 'COMPLETED');
+  const handleAccept = (appointmentId: number) => runStatusUpdate(appointmentId, 'SCHEDULED');
+  const handleDecline = (appointmentId: number) => runStatusUpdate(appointmentId, 'DECLINED');
+  const handleCancel = (appointmentId: number) => runStatusUpdate(appointmentId, 'CANCELLED');
 
   return (
     <Stack gap="lg">
@@ -34,6 +26,12 @@ export const DoctorAppointments: React.FC = () => {
         <Title order={2}>Όλα τα Ραντεβού</Title>
         <Text c="dimmed">Πλήρης λίστα των ραντεβού σας</Text>
       </Stack>
+
+      {actionError && (
+        <Alert color="red" title="Η ενέργεια απέτυχε" withCloseButton onClose={clearActionError}>
+          {actionError}
+        </Alert>
+      )}
 
       {error && (
         <Alert
@@ -70,6 +68,7 @@ export const DoctorAppointments: React.FC = () => {
             onMarkCompleted={handleMarkCompleted}
             onAccept={handleAccept}
             onDecline={handleDecline}
+            onCancel={handleCancel}
           />
 
           {data && data.totalPages > 1 && (

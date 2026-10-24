@@ -18,6 +18,7 @@ import { UpcomingAppointments } from '../parent/UpcomingAppointments';
 import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
 import { VaccinationStatusWithHistory } from '../shared/VaccinationStatusWithHistory';
 import type { DoseSelection } from '../shared/VaccinationStatusGrid';
+import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
 import { useVaccinationSchedules } from '../../hooks/useVaccinationCatalog';
 import { MedicalRecordsList } from '../shared/MedicalRecordsList';
 import { AllergiesList } from '../shared/AllergiesList';
@@ -46,11 +47,12 @@ export const ChildDetail: React.FC = () => {
   const schedulesQuery = useVaccinationSchedules();
   const updateStatus = useParentUpdateAppointmentStatus();
   const [bookingDose, setBookingDose] = useState<DoseSelection | null>(null);
+  const { actionError, clearActionError, runStatusUpdate } = useAppointmentStatusAction(
+    updateStatus.mutate,
+    appointmentsQuery.refetch
+  );
 
-  const handleCancelAppointment = async (appointmentId: number) => {
-    await updateStatus.mutate({ appointmentId, status: 'CANCELLED' });
-    appointmentsQuery.refetch();
-  };
+  const handleCancelAppointment = (appointmentId: number) => runStatusUpdate(appointmentId, 'CANCELLED');
 
   const handleDoseClick = (dose: DoseSelection) => {
     setBookingDose(dose);
@@ -99,6 +101,12 @@ export const ChildDetail: React.FC = () => {
       >
         Πίσω στα παιδιά μου
       </Button>
+
+      {actionError && (
+        <Alert color="red" title="Η ακύρωση απέτυχε" withCloseButton onClose={clearActionError}>
+          {actionError}
+        </Alert>
+      )}
 
       <Paper p="md" radius="md" withBorder>
         <Stack gap="md">

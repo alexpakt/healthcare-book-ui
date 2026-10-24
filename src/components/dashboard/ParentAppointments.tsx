@@ -4,16 +4,15 @@ import { IconAlertCircle, IconRefresh, IconPlus } from '@tabler/icons-react';
 import { useParentAppointments, useParentUpdateAppointmentStatus } from '../../hooks/useParentData';
 import { UpcomingAppointments } from '../parent/UpcomingAppointments';
 import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
+import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
 
 export const ParentAppointments: React.FC = () => {
   const { data, loading, error, refetch } = useParentAppointments();
   const updateStatus = useParentUpdateAppointmentStatus();
   const [formOpened, setFormOpened] = useState(false);
+  const { actionError, clearActionError, runStatusUpdate } = useAppointmentStatusAction(updateStatus.mutate, refetch);
 
-  const handleCancel = async (appointmentId: number) => {
-    await updateStatus.mutate({ appointmentId, status: 'CANCELLED' });
-    refetch();
-  };
+  const handleCancel = (appointmentId: number) => runStatusUpdate(appointmentId, 'CANCELLED');
 
   return (
     <Stack gap="lg">
@@ -21,6 +20,12 @@ export const ParentAppointments: React.FC = () => {
         <Title order={2}>Όλα τα Ραντεβού</Title>
         <Text c="dimmed">Τα ραντεβού των παιδιών σας</Text>
       </Stack>
+
+      {actionError && (
+        <Alert color="red" title="Η ακύρωση απέτυχε" withCloseButton onClose={clearActionError}>
+          {actionError}
+        </Alert>
+      )}
 
       {error && (
         <Alert
