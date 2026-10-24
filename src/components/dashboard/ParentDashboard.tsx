@@ -105,7 +105,7 @@ export const ParentDashboard: React.FC = () => {
         {/* Children Tab */}
         <Tabs.Panel value="children" pt="md">
           <ChildrenList
-            children={children}
+            items={children}
             isLoading={isLoading}
             onViewDetails={handleViewChildDetails}
             onAddChild={handleAddChild}

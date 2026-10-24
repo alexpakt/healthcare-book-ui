@@ -38,7 +38,7 @@ export const ParentChildren: React.FC = () => {
       )}
 
       <ChildrenList
-        children={data}
+        items={data}
         isLoading={loading}
         onViewDetails={handleViewDetails}
         onAddChild={() => setChildFormOpened(true)}

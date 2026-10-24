@@ -5,7 +5,7 @@ import { ChildCard } from './ChildCard';
 import type { Child } from '../../types/parent';
 
 interface ChildrenListProps {
-  children: Child[] | null;
+  items: Child[] | null;
   isLoading: boolean;
   onViewDetails?: (childId: number) => void;
   onAddChild?: () => void;
@@ -13,7 +13,7 @@ interface ChildrenListProps {
 }
 
 export const ChildrenList: React.FC<ChildrenListProps> = ({
-  children,
+  items,
   isLoading,
   onViewDetails,
   onAddChild,
@@ -27,7 +27,7 @@ export const ChildrenList: React.FC<ChildrenListProps> = ({
     );
   }
 
-  if (!children || children.length === 0) {
+  if (!items || items.length === 0) {
     return (
       <Center py="xl">
         <Stack align="center" gap="md">
@@ -48,7 +48,7 @@ export const ChildrenList: React.FC<ChildrenListProps> = ({
   return (
     <Stack gap="lg">
       <Grid>
-        {children.map((child) => (
+        {items.map((child) => (
           <Grid.Col key={child.id} span={{ base: 12, sm: 6, md: 4 }}>
             <ChildCard child={child} onViewDetails={onViewDetails} />
           </Grid.Col>
