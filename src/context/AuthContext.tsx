@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import type {
   AuthContextType,
   AuthUser,
@@ -6,32 +6,29 @@ import type {
   RegisterDoctorRequest,
 } from '../types/auth';
 import { authService } from '../services/authService';
+import { AuthContext } from './AuthContextObject';
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const readStoredSession = (): { user: AuthUser; token: string } | null => {
+  const storedToken = localStorage.getItem('token');
+  const storedUser = localStorage.getItem('user');
+  if (!storedToken || !storedUser) return null;
+
+  try {
+    return { user: JSON.parse(storedUser), token: storedToken };
+  } catch {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    return null;
+  }
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Load auth state from localStorage on mount
-  useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-
-    if (storedToken && storedUser) {
-      try {
-        setUser(JSON.parse(storedUser));
-        setToken(storedToken);
-      } catch {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      }
-    }
-    setIsLoading(false);
-  }, []);
+  const [storedSession] = useState(readStoredSession);
+  const [user, setUser] = useState<AuthUser | null>(storedSession?.user ?? null);
+  const [token, setToken] = useState<string | null>(storedSession?.token ?? null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const login = async (username: string, password: string) => {
     setIsLoading(true);
