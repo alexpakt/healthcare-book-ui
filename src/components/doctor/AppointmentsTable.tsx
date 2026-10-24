@@ -1,6 +1,6 @@
 import React from 'react';
 import { Stack, Table, Text, Badge, Button, Center, Loader, Paper, Group } from '@mantine/core';
-import { IconCalendarEvent, IconCircleCheck, IconCheck, IconX } from '@tabler/icons-react';
+import { IconCalendarEvent, IconCalendarOff, IconCircleCheck, IconCheck, IconX } from '@tabler/icons-react';
 import type { DoctorAppointment } from '../../types/doctor';
 import { formatDate } from '../../utils/dateFormat';
 
@@ -12,6 +12,7 @@ interface AppointmentsTableProps {
   onMarkCompleted?: (appointmentId: number) => void;
   onAccept?: (appointmentId: number) => void;
   onDecline?: (appointmentId: number) => void;
+  onCancel?: (appointmentId: number) => void;
 }
 
 const getStatusColor = (status: string): string => {
@@ -56,8 +57,9 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
   onMarkCompleted,
   onAccept,
   onDecline,
+  onCancel,
 }) => {
-  const showActionsColumn = Boolean(onMarkCompleted || onAccept || onDecline);
+  const showActionsColumn = Boolean(onMarkCompleted || onAccept || onDecline || onCancel);
   if (isLoading) {
     return (
       <Center py="xl">
@@ -172,6 +174,17 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                             onClick={() => onMarkCompleted(appointment.id)}
                           >
                             Ολοκλήρωση
+                          </Button>
+                        )}
+                        {appointment.status === 'SCHEDULED' && onCancel && (
+                          <Button
+                            size="xs"
+                            variant="subtle"
+                            color="red"
+                            leftSection={<IconCalendarOff size={14} />}
+                            onClick={() => onCancel(appointment.id)}
+                          >
+                            Ακύρωση
                           </Button>
                         )}
                       </Group>
