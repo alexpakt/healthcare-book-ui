@@ -5,9 +5,10 @@ import type { DoctorDirectoryEntry } from '../../services/directoryService';
 interface DoctorsTableProps {
   doctors: DoctorDirectoryEntry[] | null;
   isLoading: boolean;
+  emptyMessage?: string;
 }
 
-export const DoctorsTable: React.FC<DoctorsTableProps> = ({ doctors, isLoading }) => {
+export const DoctorsTable: React.FC<DoctorsTableProps> = ({ doctors, isLoading, emptyMessage = 'Δεν βρέθηκαν ιατροί' }) => {
   if (isLoading) {
     return (
       <Center py="xl">
@@ -20,7 +21,7 @@ export const DoctorsTable: React.FC<DoctorsTableProps> = ({ doctors, isLoading }
     return (
       <Center py="xl">
         <Text c="dimmed" size="lg">
-          Δεν βρέθηκαν ιατροί
+          {emptyMessage}
         </Text>
       </Center>
     );
