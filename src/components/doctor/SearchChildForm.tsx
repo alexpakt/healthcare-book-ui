@@ -148,7 +148,7 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
                   Γεννήθηκε: {formatDate(foundChild.dateOfBirth)}
                 </Text>
                 {foundChild.bloodType && (
-                  <Text size="sm" c="dimmed">
+                  <Text size="sm" c="dimmed" component="div">
                     Ομάδα αίματος: <Badge size="sm">{foundChild.bloodType}</Badge>
                   </Text>
                 )}
