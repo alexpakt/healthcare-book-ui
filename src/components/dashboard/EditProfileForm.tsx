@@ -87,10 +87,6 @@ export const EditProfileForm: React.FC = () => {
 
   const handleFieldChange = (field: keyof ProfileFormData, value: string) => {
     setSaveSuccess(false);
-    if (field === 'amka') {
-      setFormData((prev) => ({ ...prev, amka: value.replace(/\D/g, '').slice(0, 11) }));
-      return;
-    }
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -105,7 +101,6 @@ export const EditProfileForm: React.FC = () => {
         await doctorService.updateMyProfile({
           firstName: formData.firstName,
           lastName: formData.lastName,
-          amka: formData.amka,
           email: formData.email,
           phoneNumber: formData.phoneNumber || undefined,
           specialization: formData.specialization,
@@ -159,11 +154,6 @@ export const EditProfileForm: React.FC = () => {
       </Alert>
     );
   }
-
-  const amkaError =
-    isDoctor && formData.amka && !/^\d{11}$/.test(formData.amka)
-      ? 'Πρέπει να είναι ακριβώς 11 ψηφία'
-      : false;
 
   return (
     <Paper p="xl" radius="lg" shadow="md" withBorder maw={600}>
@@ -219,13 +209,10 @@ export const EditProfileForm: React.FC = () => {
             <>
               <TextInput
                 label="AMKA (Αριθμός Μητρώου Κοινωνικής Ασφάλισης)"
-                description="Εισάγετε 11 ψηφία (μόνο αριθμούς)"
+                description="Το AMKA δεν μπορεί να αλλάξει"
                 value={formData.amka}
-                onChange={(e) => handleFieldChange('amka', e.target.value)}
-                maxLength={11}
-                required
-                error={amkaError}
-                disabled={isSaving}
+                readOnly
+                disabled
               />
               <Group grow>
                 <TextInput
@@ -254,7 +241,7 @@ export const EditProfileForm: React.FC = () => {
           />
 
           <Group justify="flex-end">
-            <Button type="submit" loading={isSaving} disabled={Boolean(amkaError)}>
+            <Button type="submit" loading={isSaving}>
               Αποθήκευση
             </Button>
           </Group>

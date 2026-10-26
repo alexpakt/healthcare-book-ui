@@ -13,7 +13,6 @@ export interface DoctorProfile {
 export interface UpdateDoctorProfileRequest {
   firstName: string;
   lastName: string;
-  amka: string;
   email: string;
   phoneNumber?: string;
   specialization: string;
