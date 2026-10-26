@@ -1,7 +1,6 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vitest/config'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   build: {
@@ -31,5 +30,6 @@ export default defineConfig({
       include: ['src/utils/**', 'src/services/**', 'src/hooks/**', 'src/context/**'],
       exclude: ['src/test/**'],
     },
+    isolate: false
   },
 })
