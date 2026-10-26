@@ -125,7 +125,7 @@ export const GrowthAlertCard: React.FC<GrowthAlertCardProps> = ({ childId }) => 
               {alert.acknowledged ? (
                 <Group gap="xs">
                   <Badge color="green" leftSection={<IconCheck size={12} />}>
-                    Αξιολογήθηκε
+                    ΑΞΙΟΛΟΓΗΘΗΚΕ
                   </Badge>
                   <Text size="xs" c="dimmed">
                     {alert.acknowledgedBy} · {alert.acknowledgedAt ? formatDate(alert.acknowledgedAt) : ''}

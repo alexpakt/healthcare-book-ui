@@ -27,11 +27,11 @@ const getSeverityColor = (severity: string): string => {
 const getSeverityLabel = (severity: string): string => {
   switch (severity) {
     case 'SEVERE':
-      return 'Σοβαρή';
+      return 'ΣΟΒΑΡΗ';
     case 'MODERATE':
-      return 'Μέτρια';
+      return 'ΜΕΤΡΙΑ';
     case 'MILD':
-      return 'Ελαφρά';
+      return 'ΕΛΑΦΡΑ';
     default:
       return severity;
   }

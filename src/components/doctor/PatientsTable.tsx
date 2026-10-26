@@ -85,7 +85,7 @@ export const PatientsTable: React.FC<PatientsTableProps> = ({
                 <Table.Td>{patient.parentName}</Table.Td>
                 <Table.Td>
                   <Badge size="sm" color={patient.status === 'ACTIVE' ? 'green' : 'gray'}>
-                    {patient.status === 'ACTIVE' ? 'Ενεργός' : 'Ανενεργός'}
+                    {patient.status === 'ACTIVE' ? 'ΕΝΕΡΓΟΣ' : 'ΑΝΕΝΕΡΓΟΣ'}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
@@ -114,7 +114,7 @@ export const PatientsTable: React.FC<PatientsTableProps> = ({
               <Table.Td>-</Table.Td>
               <Table.Td>
                 <Badge size="sm" color="yellow">
-                  Εκκρεμής
+                  ΕΚΚΡΕΜΗΣ
                 </Badge>
               </Table.Td>
               <Table.Td></Table.Td>

@@ -32,7 +32,7 @@ export const PatientCard: React.FC<PatientCardProps> = ({ patient, onViewHistory
             </Stack>
           </Group>
           <Badge size="sm" color={patient.status === 'ACTIVE' ? 'green' : 'gray'}>
-            {patient.status === 'ACTIVE' ? 'Ενεργός' : 'Ανενεργός'}
+            {patient.status === 'ACTIVE' ? 'ΕΝΕΡΓΟΣ' : 'ΑΝΕΝΕΡΓΟΣ'}
           </Badge>
         </Group>
       </Card.Section>

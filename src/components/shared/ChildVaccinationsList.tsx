@@ -26,11 +26,11 @@ const getStatusColor = (status: string): string => {
 const getStatusLabel = (status: string): string => {
   switch (status) {
     case 'COMPLETED':
-      return 'Ολοκληρωμένο';
+      return 'ΟΛΟΚΛΗΡΩΜΕΝΟ';
     case 'PENDING':
-      return 'Εκκρεμές';
+      return 'ΕΚΚΡΕΜΕΣ';
     case 'OVERDUE':
-      return 'Καθυστερημένο';
+      return 'ΚΑΘΥΣΤΕΡΗΜΕΝΟ';
     default:
       return status;
   }
