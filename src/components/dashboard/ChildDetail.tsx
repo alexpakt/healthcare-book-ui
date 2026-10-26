@@ -5,8 +5,6 @@ import { Stack, Title, Text, Tabs, Alert, Button, Paper, Group, Avatar, Badge, C
 import { IconAlertCircle, IconArrowLeft, IconEdit } from '@tabler/icons-react';
 import { getAgeDisplay } from '../../utils/ageCalculator';
 import {
-} from '../../hooks/useParentData';
-import {
   useChild,
   useChildGrowthMeasurements,
   useChildBirthRecord,
@@ -14,7 +12,7 @@ import {
   useChildMedicalRecords,
   useChildAllergies,
 } from '../../hooks/useChildData';
-import { UpcomingAppointments } from '../parent/UpcomingAppointments';
+import { AppointmentsTable } from '../shared/AppointmentsTable';
 import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
 import { VaccinationStatusWithHistory } from '../shared/VaccinationStatusWithHistory';
 import type { DoseSelection } from '../shared/VaccinationStatusGrid';
@@ -214,12 +212,12 @@ export const ChildDetail: React.FC = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="appointments" pt="md">
-          <UpcomingAppointments
+          <AppointmentsTable
+            viewer="parent"
             title="Ραντεβού"
             emptyMessage="Δεν υπάρχουν ραντεβού για αυτό το παιδί"
             appointments={appointmentsQuery.data}
             isLoading={appointmentsQuery.loading}
-            showViewAllButton={false}
             onCancel={handleCancelAppointment}
           />
         </Tabs.Panel>

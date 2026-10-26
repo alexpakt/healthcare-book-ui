@@ -5,7 +5,7 @@ import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useParentDashboard } from '../../hooks/useParentData';
 import { ChildrenList } from '../parent/ChildrenList';
-import { UpcomingAppointments } from '../parent/UpcomingAppointments';
+import { AppointmentsTable } from '../shared/AppointmentsTable';
 import { DoctorRequestsNotification } from '../parent/DoctorRequestsNotification';
 import { ChildRegistrationForm } from '../parent/ChildRegistrationForm';
 
@@ -99,10 +99,13 @@ export const ParentDashboard: React.FC = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="appointments" pt="md">
-          <UpcomingAppointments
-            appointments={appointments as any}
+          <AppointmentsTable
+            viewer="parent"
+            title="Προσεχή Ραντεβού"
+            emptyMessage="Δεν υπάρχουν προσεχή ραντεβού"
+            appointments={appointments}
             isLoading={isLoading}
-            onViewDetails={handleViewAllAppointments}
+            onViewAll={handleViewAllAppointments}
           />
         </Tabs.Panel>
       </Tabs>

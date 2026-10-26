@@ -1,65 +1,46 @@
 import React from 'react';
-import { Stack, Table, Text, Badge, Button, Center, Loader, Paper, Group } from '@mantine/core';
+import { Stack, Table, Text, Button, Center, Loader, Paper, Group } from '@mantine/core';
 import { IconCalendarEvent, IconCalendarOff, IconCircleCheck, IconCheck, IconX } from '@tabler/icons-react';
-import type { DoctorAppointment } from '../../types/doctor';
+import type { Appointment } from '../../types/parent';
 import { formatDate } from '../../utils/dateFormat';
+import { AppointmentStatusBadge } from './AppointmentStatusBadge';
+
+type AppointmentRow = Appointment & { parentName?: string };
 
 interface AppointmentsTableProps {
+  /** Who is looking at the table: shows the other party's column and decides what can be cancelled */
+  viewer: 'parent' | 'doctor';
   title: string;
   emptyMessage: string;
-  appointments: DoctorAppointment[] | null;
+  appointments: AppointmentRow[] | null;
   isLoading: boolean;
+  /** Shows a "view all" button under the table */
+  onViewAll?: () => void;
   onMarkCompleted?: (appointmentId: number) => void;
   onAccept?: (appointmentId: number) => void;
   onDecline?: (appointmentId: number) => void;
   onCancel?: (appointmentId: number) => void;
 }
 
-const getStatusColor = (status: string): string => {
-  switch (status) {
-    case 'REQUESTED':
-      return 'orange';
-    case 'SCHEDULED':
-      return 'blue';
-    case 'COMPLETED':
-      return 'green';
-    case 'DECLINED':
-      return 'gray';
-    case 'CANCELLED':
-      return 'red';
-    default:
-      return 'gray';
-  }
-};
-
-const getStatusLabel = (status: string): string => {
-  switch (status) {
-    case 'REQUESTED':
-      return 'Σε αναμονή';
-    case 'SCHEDULED':
-      return 'Προγραμματισμένο';
-    case 'COMPLETED':
-      return 'Ολοκληρωμένο';
-    case 'DECLINED':
-      return 'Απορρίφθηκε';
-    case 'CANCELLED':
-      return 'Ακυρώθηκε';
-    default:
-      return status;
-  }
-};
-
 export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
+  viewer,
   title,
   emptyMessage,
   appointments,
   isLoading,
+  onViewAll,
   onMarkCompleted,
   onAccept,
   onDecline,
   onCancel,
 }) => {
   const showActionsColumn = Boolean(onMarkCompleted || onAccept || onDecline || onCancel);
+
+  // A doctor answers a request (accept/decline) and cancels only what is scheduled;
+  // a parent may also withdraw a request that has not been answered yet.
+  const canCancel = (status: Appointment['status']) =>
+    status === 'SCHEDULED' || (viewer === 'parent' && status === 'REQUESTED');
+
   if (isLoading) {
     return (
       <Center py="xl">
@@ -89,7 +70,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
             {title}
           </Text>
           <Text size="sm" c="dimmed">
-            {appointments.length} {appointments.length === 1 ? 'ραντεβού' : 'ραντεβού'}
+            {appointments.length} ραντεβού
           </Text>
         </div>
 
@@ -98,7 +79,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
             <Table.Thead>
               <Table.Tr>
                 <Table.Th>Παιδί</Table.Th>
-                <Table.Th>Γονέας</Table.Th>
+                <Table.Th>{viewer === 'doctor' ? 'Γονέας' : 'Γιατρός'}</Table.Th>
                 <Table.Th>Ημερομηνία</Table.Th>
                 <Table.Th>Ώρα</Table.Th>
                 <Table.Th>Λόγος</Table.Th>
@@ -115,12 +96,12 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm">{appointment.parentName}</Text>
+                    <Text size="sm">
+                      {viewer === 'doctor' ? appointment.parentName : appointment.doctorName}
+                    </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Text size="sm">
-                      {formatDate(appointment.appointmentDate)}
-                    </Text>
+                    <Text size="sm">{formatDate(appointment.appointmentDate)}</Text>
                   </Table.Td>
                   <Table.Td>
                     <Text size="sm">
@@ -136,9 +117,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                     </Text>
                   </Table.Td>
                   <Table.Td>
-                    <Badge size="sm" color={getStatusColor(appointment.status)}>
-                      {getStatusLabel(appointment.status)}
-                    </Badge>
+                    <AppointmentStatusBadge status={appointment.status} />
                   </Table.Td>
                   {showActionsColumn && (
                     <Table.Td>
@@ -176,7 +155,7 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
                             Ολοκλήρωση
                           </Button>
                         )}
-                        {appointment.status === 'SCHEDULED' && onCancel && (
+                        {canCancel(appointment.status) && onCancel && (
                           <Button
                             size="xs"
                             variant="subtle"
@@ -195,6 +174,12 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
             </Table.Tbody>
           </Table>
         </div>
+
+        {onViewAll && (
+          <Button variant="light" onClick={onViewAll}>
+            Προβολή όλων των ραντεβού
+          </Button>
+        )}
       </Stack>
     </Paper>
   );

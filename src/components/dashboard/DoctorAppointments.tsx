@@ -3,7 +3,7 @@ import { Stack, Title, Text, Alert, Button, Pagination, Group, Center, Loader } 
 import { IconAlertCircle, IconRefresh, IconPlus } from '@tabler/icons-react';
 import { useDoctorAppointments } from '../../hooks/useDoctorData';
 import { useUpdateAppointmentStatus } from '../../hooks/useAppointmentData';
-import { AppointmentsTable } from '../doctor/AppointmentsTable';
+import { AppointmentsTable } from '../shared/AppointmentsTable';
 import { NewAppointmentForm } from '../doctor/NewAppointmentForm';
 import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
 
@@ -62,6 +62,7 @@ export const DoctorAppointments: React.FC = () => {
       ) : (
         <>
           <AppointmentsTable
+            viewer="doctor"
             title="Ραντεβού"
             emptyMessage="Δεν υπάρχουν ραντεβού"
             appointments={data?.content || null}

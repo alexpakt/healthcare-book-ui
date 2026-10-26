@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Stack, Title, Text, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh, IconPlus } from '@tabler/icons-react';
 import { useAppointments, useUpdateAppointmentStatus } from '../../hooks/useAppointmentData';
-import { UpcomingAppointments } from '../parent/UpcomingAppointments';
+import { AppointmentsTable } from '../shared/AppointmentsTable';
 import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
 import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
 
@@ -48,12 +48,12 @@ export const ParentAppointments: React.FC = () => {
         </Button>
       </div>
 
-      <UpcomingAppointments
+      <AppointmentsTable
+        viewer="parent"
         title="Ραντεβού"
         emptyMessage="Δεν υπάρχουν ραντεβού"
         appointments={data}
         isLoading={loading}
-        showViewAllButton={false}
         onCancel={handleCancel}
       />
 

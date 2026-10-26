@@ -6,7 +6,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useDoctorDashboard } from '../../hooks/useDoctorData';
 import { useUpdateAppointmentStatus } from '../../hooks/useAppointmentData';
 import { PatientsList } from '../doctor/PatientsList';
-import { AppointmentsTable } from '../doctor/AppointmentsTable';
+import { AppointmentsTable } from '../shared/AppointmentsTable';
 import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
 
 export const DoctorDashboard: React.FC = () => {
@@ -83,6 +83,7 @@ export const DoctorDashboard: React.FC = () => {
 
         <Tabs.Panel value="requests" pt="md">
           <AppointmentsTable
+            viewer="doctor"
             title="Αιτήματα Ραντεβού"
             emptyMessage="Δεν υπάρχουν εκκρεμή αιτήματα"
             appointments={pendingAppointments}
@@ -102,6 +103,7 @@ export const DoctorDashboard: React.FC = () => {
 
         <Tabs.Panel value="today" pt="md">
           <AppointmentsTable
+            viewer="doctor"
             title="Σημερινά Ραντεβού"
             emptyMessage="Δεν έχετε ραντεβού σήμερα"
             appointments={todayAppointments}
@@ -113,6 +115,7 @@ export const DoctorDashboard: React.FC = () => {
 
         <Tabs.Panel value="upcoming" pt="md">
           <AppointmentsTable
+            viewer="doctor"
             title="Προσεχή Ραντεβού"
             emptyMessage="Δεν υπάρχουν προσεχή ραντεβού"
             appointments={upcomingAppointments}
