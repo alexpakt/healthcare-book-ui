@@ -190,10 +190,11 @@ export const parentService = {
     }
   },
 
-  async getChildBirthRecord(childId: number): Promise<BirthRecord> {
+  async getChildBirthRecord(childId: number): Promise<BirthRecord | null> {
     try {
       const response = await apiClient.get<BirthRecord>(`/api/birth-records/child/${childId}`);
-      return response.data;
+      // 204 No Content: the child has no birth record yet, which is an expected state
+      return response.status === 204 ? null : response.data;
     } catch (error) {
       console.error('Error fetching birth record:', error);
       throw error;
