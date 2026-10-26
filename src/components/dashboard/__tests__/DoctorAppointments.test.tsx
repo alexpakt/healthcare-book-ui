@@ -20,7 +20,6 @@ const scheduled: DoctorAppointment = {
 
 describe('DoctorAppointments status errors', () => {
   beforeEach(() => {
-    localStorage.setItem('user', JSON.stringify({ profileId: 7 }));
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -34,7 +33,7 @@ describe('DoctorAppointments status errors', () => {
       403
     );
 
-    renderAuthApp(<Route path="/" element={<DoctorAppointments />} />);
+    renderAuthApp(<Route path="/" element={<DoctorAppointments />} />, { session: { role: 'ROLE_DOCTOR', profileId: 7 } });
     fireEvent.click(await screen.findByRole('button', { name: /Ακύρωση/ }));
 
     expect(await screen.findByText('Invalid status transition: CANCELLED -> CANCELLED')).toBeInTheDocument();
@@ -48,7 +47,7 @@ describe('DoctorAppointments status errors', () => {
     mockApi('get', '/api/children', []);
     mockApi('patch', '/api/appointments/1/status', { status: 403, message: 'Denied' }, 403);
 
-    renderAuthApp(<Route path="/" element={<DoctorAppointments />} />);
+    renderAuthApp(<Route path="/" element={<DoctorAppointments />} />, { session: { role: 'ROLE_DOCTOR', profileId: 7 } });
     fireEvent.click(await screen.findByRole('button', { name: /Ακύρωση/ }));
     expect(await screen.findByText('Denied')).toBeInTheDocument();
 

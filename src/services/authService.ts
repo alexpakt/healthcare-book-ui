@@ -5,6 +5,7 @@ import type {
   RegisterParentRequest,
   RegisterDoctorRequest,
   ChangePasswordRequest,
+  CurrentUserResponse,
 } from '../types/auth';
 
 export const authService = {
@@ -33,8 +34,12 @@ export const authService = {
     await apiClient.post('/api/auth/change-password', data);
   },
 
-  logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  async me(): Promise<CurrentUserResponse> {
+    const response = await apiClient.get<CurrentUserResponse>('/api/auth/me');
+    return response.data;
+  },
+
+  async logout(): Promise<void> {
+    await apiClient.post('/api/auth/logout');
   },
 };

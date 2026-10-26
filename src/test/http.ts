@@ -36,3 +36,8 @@ export function mockApi(method: Method, path: string, response: unknown = {}, st
   );
   return recorded;
 }
+
+/** Signs the test user in: /api/auth/me answers with this user, as it does when the auth cookie is valid. */
+export function mockSession(user: { username?: string; role?: string; profileId?: number } = {}) {
+  return mockApi('get', '/api/auth/me', { username: 'u', role: 'ROLE_PARENT', profileId: 1, ...user });
+}

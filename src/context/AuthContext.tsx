@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type {
   AuthContextType,
   AuthUser,
@@ -8,92 +8,63 @@ import type {
 import { authService } from '../services/authService';
 import { AuthContext } from './AuthContextObject';
 
-const readStoredSession = (): { user: AuthUser; token: string } | null => {
-  const storedToken = localStorage.getItem('token');
-  const storedUser = localStorage.getItem('user');
-  if (!storedToken || !storedUser) return null;
-
-  try {
-    return { user: JSON.parse(storedUser), token: storedToken };
-  } catch {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    return null;
-  }
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const [storedSession] = useState(readStoredSession);
-  const [user, setUser] = useState<AuthUser | null>(storedSession?.user ?? null);
-  const [token, setToken] = useState<string | null>(storedSession?.token ?? null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const login = async (username: string, password: string) => {
+  useEffect(() => {
+    let cancelled = false;
+    authService
+      .me()
+      .then((current) => {
+        if (!cancelled) setUser(current);
+      })
+      .catch(() => {
+        if (!cancelled) setUser(null);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const authenticate = async (
+    request: () => Promise<{ role: AuthUser['role']; profileId: number }>,
+    username: string
+  ) => {
     setIsLoading(true);
     try {
-      const response = await authService.login({ username, password });
-      setToken(response.token);
-      const userData: AuthUser = {
-        username,
-        role: response.role,
-        profileId: response.profileId,
-      };
-      setUser(userData);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(userData));
+      const response = await request();
+      setUser({ username, role: response.role, profileId: response.profileId });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const registerParent = async (data: RegisterParentRequest) => {
-    setIsLoading(true);
-    try {
-      const response = await authService.registerParent(data);
-      setToken(response.token);
-      const userData: AuthUser = {
-        username: data.username,
-        role: response.role,
-        profileId: response.profileId,
-      };
-      setUser(userData);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(userData));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const login = (username: string, password: string) =>
+    authenticate(() => authService.login({ username, password }), username);
 
-  const registerDoctor = async (data: RegisterDoctorRequest) => {
-    setIsLoading(true);
-    try {
-      const response = await authService.registerDoctor(data);
-      setToken(response.token);
-      const userData: AuthUser = {
-        username: data.username,
-        role: response.role,
-        profileId: response.profileId,
-      };
-      setUser(userData);
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(userData));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const registerParent = (data: RegisterParentRequest) =>
+    authenticate(() => authService.registerParent(data), data.username);
 
-  const logout = () => {
+  const registerDoctor = (data: RegisterDoctorRequest) =>
+    authenticate(() => authService.registerDoctor(data), data.username);
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch {
+    }
     setUser(null);
-    setToken(null);
-    authService.logout();
   };
 
   const value: AuthContextType = {
     user,
-    token,
-    isAuthenticated: !!token && !!user,
+    isAuthenticated: !!user,
     isLoading,
     login,
     registerParent,

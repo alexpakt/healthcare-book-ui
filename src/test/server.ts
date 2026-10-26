@@ -1,4 +1,6 @@
+import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 
-// Network layer for component and service tests. Unhandled requests fail the test.
-export const server = setupServer();
+export const server = setupServer(
+  http.get('http://localhost:8080/api/auth/me', () => HttpResponse.json({ message: 'Unauthorized' }, { status: 401 }))
+);

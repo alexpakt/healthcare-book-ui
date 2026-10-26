@@ -8,7 +8,7 @@ The web frontend for the Electronic Child Health Records (ECHR) system. Parents 
 - **Vite 8** for development and production builds
 - **Mantine 9** for UI components, forms and hooks
 - **React Router 7** for client-side routing
-- **Axios** for HTTP, with JWT request and response interceptors
+- **Axios** for HTTP, with cookie credentials and a response interceptor
 - **Recharts** for growth charts
 - **Vitest**, **Testing Library**, **jsdom** and **MSW** for tests
 - **oxlint** for linting
@@ -37,9 +37,9 @@ cp .env.example .env.local
 
 Configuration is read from Vite environment variables. Only variables prefixed with `VITE_` are exposed to the app.
 
-| Variable            | Default                 | Description          |
-| ------------------- | ----------------------- | -------------------- |
-| `VITE_API_BASE_URL` | `http://localhost:8080` | Base URL of the backend API |
+| Variable            | Default                                                  | Description                 |
+| ------------------- | -------------------------------------------------------- | --------------------------- |
+| `VITE_API_BASE_URL` | `http://localhost:8080` in dev, empty (same origin) in builds | Base URL of the backend API |
 
 ## Development
 
@@ -92,7 +92,7 @@ src/
 │   ├── parent/       # Parent views: children, appointments, doctor requests
 │   ├── shared/       # Components used by both roles (charts, lists, status)
 │   └── Growth/       # Growth alert components
-├── context/          # AuthContext: JWT token and session state
+├── context/          # AuthContext: current user and session state
 ├── hooks/            # Data and state hooks (useApi, useParentData, useVaccinationStatus, ...)
 ├── pages/            # Route-level pages
 ├── services/         # API clients (apiClient, authService, parentService, doctorService, ...)
@@ -103,16 +103,16 @@ src/
 └── main.tsx          # Application entry point
 ```
 
-`services/apiClient.ts` is the single Axios instance. It reads `VITE_API_BASE_URL`, attaches the JWT to requests, and handles 401 responses.
+`services/apiClient.ts` is the single Axios instance. It reads `VITE_API_BASE_URL`, sends the auth cookie with every request (`withCredentials`), and handles 401 responses.
 
 ## Authentication and Roles
 
-1. **Register** or **log in** through `/register` or `/login`. The JWT and user are stored in `localStorage`.
-2. The JWT is sent with every API request by the Axios interceptor.
+1. **Register** or **log in** through `/register` or `/login`. The backend sets the JWT in an `HttpOnly` cookie, so JavaScript never sees it and nothing is kept in `localStorage`.
+2. The browser sends the cookie with every API request. On load, `AuthProvider` calls `GET /api/auth/me` to restore the session, and `ProtectedRoute` waits for that check before redirecting. Logging out calls `POST /api/auth/logout`, which clears the cookie.
 3. Routes in `App.tsx` are wrapped in `ProtectedRoute`. Some routes also require a role:
    - `ROLE_PARENT`: children, child detail, medical history and doctors
    - `ROLE_DOCTOR`: patient history
-4. A 401 response removes the stored token and user, then redirects to `/login`.
+4. A 401 response from a protected endpoint redirects to `/login`. 401s from `/api/auth/login`, `/api/auth/me` and `/api/auth/logout` are expected and do not redirect.
 
 ## Routes
 
@@ -139,4 +139,4 @@ npm run build     # outputs to dist/
 npm run preview   # check the build locally
 ```
 
-`vercel.json` rewrites all paths to `index.html`, so client-side routes work on Vercel. To deploy elsewhere, serve `dist/` as a single-page app with the same fallback to `index.html`, and set `VITE_API_BASE_URL` at build time to the production backend URL.
+`vercel.json` proxies `/api/*` to the backend and rewrites every other path to `index.html`, so client-side routes work and the auth cookie stays first-party. Do not set `VITE_API_BASE_URL` on Vercel. To deploy elsewhere, serve `dist/` as a single-page app with the same fallback, and proxy `/api` to the backend on the same origin. The backend must list the site's origin in `app.cors.allowed-origins`.

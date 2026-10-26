@@ -76,8 +76,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const navItems = getNavItemsByRole(user?.role as UserRole);
   const [navOpened, { toggle: toggleNav, close: closeNav }] = useDisclosure(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 

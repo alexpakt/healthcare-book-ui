@@ -1,5 +1,4 @@
 export interface AuthResponse {
-  token: string;
   role: 'ROLE_PARENT' | 'ROLE_DOCTOR' | 'ROLE_ADMIN';
   profileId: number;
 }
@@ -36,6 +35,12 @@ export interface RegisterDoctorRequest {
   licenseNumber: string;
 }
 
+export interface CurrentUserResponse {
+  username: string;
+  role: 'ROLE_PARENT' | 'ROLE_DOCTOR' | 'ROLE_ADMIN';
+  profileId: number;
+}
+
 export interface AuthUser {
   username: string;
   role: 'ROLE_PARENT' | 'ROLE_DOCTOR' | 'ROLE_ADMIN';
@@ -44,11 +49,10 @@ export interface AuthUser {
 
 export interface AuthContextType {
   user: AuthUser | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
   registerParent: (data: RegisterParentRequest) => Promise<void>;
   registerDoctor: (data: RegisterDoctorRequest) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
 }

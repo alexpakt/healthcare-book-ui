@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
+import { useAuth } from '../../hooks/useAuth';
 import {
   Modal,
   Button,
@@ -62,6 +63,7 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
   onSuccess,
   isLoading: externalLoading,
 }) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState<Omit<VaccinationFormData, 'childId'>>(EMPTY_FORM);
   const [catalog, setCatalog] = useState<VaccineCatalogEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -72,13 +74,6 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
     const fetchVaccines = async () => {
       try {
         setLoadingCatalog(true);
-
-        // Get current doctor ID from localStorage
-        const userStr = localStorage.getItem('user');
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          setFormData((prev) => ({ ...prev, administeredByDoctorId: user.profileId }));
-        }
 
         setCatalog(await vaccinationCatalogService.getAllVaccines());
       } catch (err) {
@@ -166,6 +161,7 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
       await doctorService.createVaccination({
         childId,
         ...formData,
+        administeredByDoctorId: user?.profileId,
       });
 
       setFormData(EMPTY_FORM);

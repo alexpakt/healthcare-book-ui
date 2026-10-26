@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { AuthProvider } from '../AuthContext';
 import { useAuth } from '../../hooks/useAuth';
-import { mockApi } from '../../test/http';
+import { mockApi, mockSession } from '../../test/http';
 
 function AuthProbe() {
   const { isAuthenticated, user, login, logout, isLoading } = useAuth();
@@ -17,64 +17,67 @@ function AuthProbe() {
   );
 }
 
+async function renderProbe() {
+  render(<AuthProvider><AuthProbe /></AuthProvider>);
+  await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('idle'));
+}
+
 describe('AuthContext', () => {
-  it('starts logged out when nothing is stored', async () => {
+  it('is loading until the session check finishes', async () => {
     render(<AuthProvider><AuthProbe /></AuthProvider>);
+    expect(screen.getByTestId('loading')).toHaveTextContent('loading');
     await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('idle'));
+  });
+
+  it('starts logged out when there is no session', async () => {
+    await renderProbe();
     expect(screen.getByTestId('state')).toHaveTextContent('out');
   });
 
-  it('restores the user and token from storage on mount', async () => {
-    localStorage.setItem('token', 't');
-    localStorage.setItem('user', JSON.stringify({ username: 'maria', role: 'ROLE_PARENT', profileId: 1 }));
+  it('restores the user from the session check on mount', async () => {
+    mockSession({ username: 'maria', role: 'ROLE_PARENT', profileId: 1 });
 
-    render(<AuthProvider><AuthProbe /></AuthProvider>);
+    await renderProbe();
 
-    expect(await screen.findByTestId('state')).toHaveTextContent('in');
+    expect(screen.getByTestId('state')).toHaveTextContent('in');
     expect(screen.getByTestId('user')).toHaveTextContent('maria:ROLE_PARENT');
   });
 
-  it('login stores the token and user, and marks the session as authenticated', async () => {
-    mockApi('post', '/api/auth/login', { token: 'jwt-1', role: 'ROLE_DOCTOR', profileId: 9 });
-    render(<AuthProvider><AuthProbe /></AuthProvider>);
-    await waitFor(() => expect(screen.getByTestId('loading')).toHaveTextContent('idle'));
+  it('login marks the session as authenticated and keeps nothing in browser storage', async () => {
+    mockApi('post', '/api/auth/login', { role: 'ROLE_DOCTOR', profileId: 9 });
+    await renderProbe();
 
     await act(async () => {
       screen.getByText('login').click();
     });
 
     await waitFor(() => expect(screen.getByTestId('state')).toHaveTextContent('in'));
-    expect(localStorage.getItem('token')).toBe('jwt-1');
-    expect(JSON.parse(localStorage.getItem('user')!)).toEqual({
-      username: 'maria',
-      role: 'ROLE_DOCTOR',
-      profileId: 9,
-    });
+    expect(screen.getByTestId('user')).toHaveTextContent('maria:ROLE_DOCTOR');
+    expect(localStorage.length).toBe(0);
   });
 
-  it('logout clears the state and storage', async () => {
-    localStorage.setItem('token', 't');
-    localStorage.setItem('user', JSON.stringify({ username: 'maria', role: 'ROLE_PARENT', profileId: 1 }));
-    render(<AuthProvider><AuthProbe /></AuthProvider>);
-    await screen.findByTestId('state');
+  it('logout calls the API and clears the state', async () => {
+    mockSession({ username: 'maria' });
+    const logoutCalls = mockApi('post', '/api/auth/logout', undefined, 204);
+    await renderProbe();
 
     await act(async () => {
       screen.getByText('logout').click();
     });
 
+    expect(logoutCalls).toHaveLength(1);
     expect(screen.getByTestId('state')).toHaveTextContent('out');
-    expect(localStorage.getItem('token')).toBeNull();
-    expect(localStorage.getItem('user')).toBeNull();
   });
 
-  describe('corrupt storage', () => {
-    it('starts logged out and discards the session when the stored user data is corrupt', async () => {
-      localStorage.setItem('token', 't');
-      localStorage.setItem('user', '{not json');
-      render(<AuthProvider><AuthProbe /></AuthProvider>);
-      expect(await screen.findByTestId('state')).toHaveTextContent('out');
-      expect(localStorage.getItem('token')).toBeNull();
-      expect(localStorage.getItem('user')).toBeNull();
+  it('logout clears the state even when the API call fails', async () => {
+    mockSession({ username: 'maria' });
+    mockApi('post', '/api/auth/logout', { message: 'boom' }, 500);
+    await renderProbe();
+
+    await act(async () => {
+      screen.getByText('logout').click();
     });
+
+    await waitFor(() => expect(screen.getByTestId('state')).toHaveTextContent('out'));
   });
 });

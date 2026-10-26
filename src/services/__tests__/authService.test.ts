@@ -4,16 +4,16 @@ import { mockApi } from '../../test/http';
 
 describe('authService', () => {
   it('login posts the credentials and returns the auth response', async () => {
-    const calls = mockApi('post', '/api/auth/login', { token: 't', role: 'ROLE_PARENT', profileId: 7 });
+    const calls = mockApi('post', '/api/auth/login', { role: 'ROLE_PARENT', profileId: 7 });
 
     const result = await authService.login({ username: 'maria', password: 'pw' });
 
     expect(calls[0].body).toEqual({ username: 'maria', password: 'pw' });
-    expect(result).toEqual({ token: 't', role: 'ROLE_PARENT', profileId: 7 });
+    expect(result).toEqual({ role: 'ROLE_PARENT', profileId: 7 });
   });
 
   it('registerParent posts to the parent registration endpoint', async () => {
-    const calls = mockApi('post', '/api/auth/register/parent', { token: 't', role: 'ROLE_PARENT', profileId: 1 });
+    const calls = mockApi('post', '/api/auth/register/parent', { role: 'ROLE_PARENT', profileId: 1 });
 
     await authService.registerParent({ username: 'p', password: 'pw' } as never);
 
@@ -21,7 +21,7 @@ describe('authService', () => {
   });
 
   it('registerDoctor posts to the doctor registration endpoint', async () => {
-    const calls = mockApi('post', '/api/auth/register/doctor', { token: 't', role: 'ROLE_DOCTOR', profileId: 2 });
+    const calls = mockApi('post', '/api/auth/register/doctor', { role: 'ROLE_DOCTOR', profileId: 2 });
 
     await authService.registerDoctor({ username: 'd', password: 'pw' } as never);
 
@@ -37,13 +37,17 @@ describe('authService', () => {
     expect(calls[0].body).toEqual({ currentPassword: 'a', newPassword: 'b' });
   });
 
-  it('logout removes the token and user from storage', () => {
-    localStorage.setItem('token', 't');
-    localStorage.setItem('user', '{}');
+  it('me returns the user the auth cookie identifies', async () => {
+    mockApi('get', '/api/auth/me', { username: 'maria', role: 'ROLE_PARENT', profileId: 7 });
 
-    authService.logout();
+    expect(await authService.me()).toEqual({ username: 'maria', role: 'ROLE_PARENT', profileId: 7 });
+  });
 
-    expect(localStorage.getItem('token')).toBeNull();
-    expect(localStorage.getItem('user')).toBeNull();
+  it('logout asks the API to clear the auth cookie', async () => {
+    const calls = mockApi('post', '/api/auth/logout', undefined, 204);
+
+    await authService.logout();
+
+    expect(calls).toHaveLength(1);
   });
 });

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Route } from 'react-router-dom';
@@ -14,15 +14,11 @@ function renderPage() {
   return renderAuthApp(<Route path="/doctors" element={<DoctorsPage />} />, {
     route: '/doctors',
     defaultLoginPage: false,
+    session: { username: 'maria', role: 'ROLE_PARENT', profileId: 5 },
   });
 }
 
 describe('DoctorsPage', () => {
-  beforeEach(() => {
-    localStorage.setItem('token', 'token');
-    localStorage.setItem('user', JSON.stringify({ username: 'maria', role: 'ROLE_PARENT', profileId: 5 }));
-  });
-
   it('shows only the doctors connected to the child by default', async () => {
     mockApi('get', '/api/children', [child]);
     mockApi('get', '/api/children/10/doctors', [eleni]);

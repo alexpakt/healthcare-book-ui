@@ -1,7 +1,9 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { screen } from '@testing-library/react';
 import { NewVaccinationForm } from '../NewVaccinationForm';
-import { renderWithProviders } from '../../../test/render';
+import { Route } from 'react-router-dom';
+import type { ReactElement } from 'react';
+import { renderAuthApp } from '../../../test/renderAuth';
 import { mockApi } from '../../../test/http';
 import type { VaccinationSchedule } from '../../../types/parent';
 
@@ -10,9 +12,12 @@ const schedules: VaccinationSchedule[] = [
   { id: 2, vaccineName: 'Hib', vaccineNameGr: 'Haemophilus', recommendedAgeMonths: 2, doseNumber: 1 },
 ];
 
+function renderAsDoctor(ui: ReactElement) {
+  return renderAuthApp(<Route path="/" element={ui} />, { session: { role: 'ROLE_DOCTOR', profileId: 7 } });
+}
+
 describe('NewVaccinationForm opened from a grid dose', () => {
   beforeEach(() => {
-    localStorage.setItem('user', JSON.stringify({ profileId: 7 }));
     vi.spyOn(console, 'error').mockImplementation(() => {});
   });
 
@@ -23,7 +28,7 @@ describe('NewVaccinationForm opened from a grid dose', () => {
       { id: 3, vaccineName: 'Hib', vaccineNameGr: 'Haemophilus', componentVaccineNames: [] },
     ]);
 
-    renderWithProviders(
+    renderAsDoctor(
       <NewVaccinationForm
         opened
         onClose={vi.fn()}
@@ -43,7 +48,7 @@ describe('NewVaccinationForm opened from a grid dose', () => {
       { id: 1, vaccineName: 'Hexavalent', vaccineNameGr: 'Εξαδύναμο' },
     ]);
 
-    renderWithProviders(
+    renderAsDoctor(
       <NewVaccinationForm
         opened
         onClose={vi.fn()}
