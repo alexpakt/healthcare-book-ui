@@ -3,7 +3,8 @@ import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
 import { Modal, Button, TextInput, Select, Stack, Alert, Group } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
-import { useDoctorAssignedChildren, useDoctorCreateAppointment } from '../../hooks/useDoctorData';
+import { useDoctorAssignedChildren } from '../../hooks/useDoctorData';
+import { useCreateAppointment } from '../../hooks/useAppointmentData';
 import { getMinDateTimeLocal, isNotInFuture } from '../../utils/dateTime';
 
 interface NewAppointmentFormProps {
@@ -31,7 +32,7 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [dateError, setDateError] = useState('');
   const { data: patients } = useDoctorAssignedChildren();
-  const { mutate, loading, error, reset } = useDoctorCreateAppointment();
+  const { mutate, loading, error, reset } = useCreateAppointment();
 
   useSyncStateToProps([opened, childId, reason], () => {
     if (opened) {

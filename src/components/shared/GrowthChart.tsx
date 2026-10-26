@@ -2,7 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {Alert, Center, Loader, SegmentedControl, Stack, Text, Title} from '@mantine/core';
 import {IconAlertCircle} from '@tabler/icons-react';
-import {parentService} from '../../services/parentService';
+import {childService} from '../../services/childService';
+import {childHealthRecordService} from '../../services/childHealthRecordService';
 import {parseLocalDate} from '../../utils/dateTime';
 import type {GrowthMeasurement} from '../../types/parent';
 
@@ -61,7 +62,7 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
 
     const fetchChildAge = async () => {
       try {
-        const child = await parentService.getChildById(childId);
+        const child = await childService.getById(childId);
         const birthDate = parseLocalDate(child.dateOfBirth);
         if (!birthDate) return;
         const today = new Date();
@@ -85,7 +86,7 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
       try {
         setLoadingReferences(true);
         const measurementTypeKey = type === 'height' ? 'HEIGHT' : type === 'weight' ? 'WEIGHT' : 'HEAD_CIRCUMFERENCE';
-        const data = await parentService.getGrowthReferenceCurves(childId, measurementTypeKey);
+        const data = await childHealthRecordService.getGrowthReferenceCurves(childId, measurementTypeKey);
         setReferences(data);
       } catch (err) {
         console.error('Error fetching reference curves:', err);

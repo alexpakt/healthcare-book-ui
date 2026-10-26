@@ -1,5 +1,6 @@
 import { apiClient } from './apiClient';
 import type { Child } from '../types/parent';
+import type { DoctorDirectoryEntry } from './directoryService';
 
 export interface CreateChildRequest {
   firstName: string;
@@ -47,6 +48,11 @@ export const childService = {
       console.error('Error fetching child:', error);
       throw error;
     }
+  },
+
+  async getChildDoctors(childId: number): Promise<DoctorDirectoryEntry[]> {
+    const response = await apiClient.get<DoctorDirectoryEntry[]>(`/api/children/${childId}/doctors`);
+    return response.data;
   },
 
   async createChild(childData: CreateChildRequest): Promise<Child> {

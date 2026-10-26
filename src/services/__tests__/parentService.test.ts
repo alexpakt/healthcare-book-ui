@@ -40,25 +40,6 @@ const vaccination = (overrides: Partial<VaccinationRecord>): VaccinationRecord =
 });
 
 describe('parentService endpoints', () => {
-  it('getChildren lists the parent children', async () => {
-    const calls = mockApi('get', '/api/children', [child(1)]);
-    const result = await parentService.getChildren();
-    expect(calls[0].path).toBe('/api/children');
-    expect(result).toHaveLength(1);
-  });
-
-  it('getChildVaccinations reads the vaccinations of one child', async () => {
-    const calls = mockApi('get', '/api/vaccinations/child/4', []);
-    await parentService.getChildVaccinations(4);
-    expect(calls[0].path).toBe('/api/vaccinations/child/4');
-  });
-
-  it('getChildGrowthMeasurements reads the measurements of one child', async () => {
-    const calls = mockApi('get', '/api/growth-measurements/child/4', []);
-    await parentService.getChildGrowthMeasurements(4);
-    expect(calls[0].path).toBe('/api/growth-measurements/child/4');
-  });
-
   it('getVaccinationSchedulesByAge reads schedules for an age in months', async () => {
     const calls = mockApi('get', '/api/vaccination-schedules/age/6', []);
     await parentService.getVaccinationSchedulesByAge(6);
@@ -71,19 +52,6 @@ describe('parentService endpoints', () => {
     expect(calls[0].path).toBe('/api/vaccination-schedules/vaccine/DTaP');
   });
 
-  it('createAppointment posts the appointment request', async () => {
-    const calls = mockApi('post', '/api/appointments', appointment({}));
-    await parentService.createAppointment({ childId: 1, doctorId: 2, appointmentDate: '2026-10-25T10:00:00' } as never);
-    expect(calls[0].method).toBe('POST');
-    expect(calls[0].body).toEqual({ childId: 1, doctorId: 2, appointmentDate: '2026-10-25T10:00:00' });
-  });
-
-  it('updateAppointmentStatus sends the new status', async () => {
-    const calls = mockApi('patch', '/api/appointments/8/status', appointment({ id: 8 }));
-    await parentService.updateAppointmentStatus(8, 'CANCELLED');
-    expect(calls[0].method).toBe('PATCH');
-    expect(calls[0].body).toEqual({ status: 'CANCELLED' });
-  });
 });
 
 describe('parentService.getDashboardData', () => {

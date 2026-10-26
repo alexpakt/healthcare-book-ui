@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { Stack, Title, Text, Alert, Button, Grid, Center, Loader } from '@mantine/core';
 import { IconAlertCircle, IconArrowLeft, IconRefresh } from '@tabler/icons-react';
 import {
-  useParentChildren,
-  useParentChild,
-  useParentChildMedicalRecords,
 } from '../../hooks/useParentData';
+import { useChildren, useChild, useChildMedicalRecords } from '../../hooks/useChildData';
 import { ChildCard } from '../parent/ChildCard';
 import { MedicalRecordsList } from '../shared/MedicalRecordsList';
 
@@ -15,8 +13,8 @@ interface ChildMedicalHistoryProps {
 }
 
 const ChildMedicalHistory: React.FC<ChildMedicalHistoryProps> = ({ childId, onBack }) => {
-  const { data: child } = useParentChild(childId);
-  const { data: records, loading, error, refetch } = useParentChildMedicalRecords(childId);
+  const { data: child } = useChild(childId);
+  const { data: records, loading, error, refetch } = useChildMedicalRecords(childId);
 
   return (
     <Stack gap="lg">
@@ -57,7 +55,7 @@ const ChildMedicalHistory: React.FC<ChildMedicalHistoryProps> = ({ childId, onBa
 };
 
 export const ParentMedicalHistory: React.FC = () => {
-  const { data: children, loading, error } = useParentChildren();
+  const { data: children, loading, error } = useChildren();
   const [pickedChildId, setPickedChildId] = useState<number | null>(null);
   // A parent with a single child goes straight to that child's record
   const selectedChildId = pickedChildId ?? (children?.length === 1 ? children[0].id : null);

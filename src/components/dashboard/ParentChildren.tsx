@@ -2,14 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Stack, Title, Text, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
-import { useParentChildren } from '../../hooks/useParentData';
+import { useChildren } from '../../hooks/useChildData';
 import { ChildrenList } from '../parent/ChildrenList';
 import { ChildRegistrationForm } from '../parent/ChildRegistrationForm';
 
 export const ParentChildren: React.FC = () => {
   const navigate = useNavigate();
   const [childFormOpened, setChildFormOpened] = useState(false);
-  const { data, loading, error, refetch } = useParentChildren();
+  const { data, loading, error, refetch } = useChildren();
 
   const handleViewDetails = (childId: number) => {
     navigate(`/children/${childId}`);

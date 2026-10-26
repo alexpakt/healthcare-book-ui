@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Stack, Title, Text, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh, IconPlus } from '@tabler/icons-react';
-import { useParentAppointments, useParentUpdateAppointmentStatus } from '../../hooks/useParentData';
+import { useAppointments, useUpdateAppointmentStatus } from '../../hooks/useAppointmentData';
 import { UpcomingAppointments } from '../parent/UpcomingAppointments';
 import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
 import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
 
 export const ParentAppointments: React.FC = () => {
-  const { data, loading, error, refetch } = useParentAppointments();
-  const updateStatus = useParentUpdateAppointmentStatus();
+  const { data, loading, error, refetch } = useAppointments();
+  const updateStatus = useUpdateAppointmentStatus();
   const [formOpened, setFormOpened] = useState(false);
   const { actionError, clearActionError, runStatusUpdate } = useAppointmentStatusAction(updateStatus.mutate, refetch);
 

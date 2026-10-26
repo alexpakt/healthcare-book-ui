@@ -4,18 +4,17 @@ import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { DoctorsTable } from '../components/parent/DoctorsTable';
 import { useDirectoryDoctors } from '../hooks/useDirectoryData';
-import { useParentChildDoctors, useParentChildren } from '../hooks/useParentData';
+import { useChildDoctors, useChildren } from '../hooks/useChildData';
 
 const DoctorsPage: React.FC = () => {
   const { data: doctors, loading: doctorsLoading, error, refetch } = useDirectoryDoctors();
-  const { data: children, loading: childrenLoading } = useParentChildren();
+  const { data: children, loading: childrenLoading } = useChildren();
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
-  // Connected-only is the default state, so the parent sees the doctors the child is linked to.
   const [onlyConnected, setOnlyConnected] = useState(true);
 
   const hasChildren = (children?.length ?? 0) > 0;
   const activeChildId = selectedChildId ?? children?.[0]?.id;
-  const { data: connectedDoctors, loading: connectedLoading } = useParentChildDoctors(
+  const { data: connectedDoctors, loading: connectedLoading } = useChildDoctors(
     hasChildren ? activeChildId : undefined
   );
 

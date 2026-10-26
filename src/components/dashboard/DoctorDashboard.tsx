@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Stack, Title, Text, Tabs, Alert, Button } from '@mantine/core';
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
-import { useDoctorDashboard, useDoctorUpdateAppointmentStatus } from '../../hooks/useDoctorData';
+import { useDoctorDashboard } from '../../hooks/useDoctorData';
+import { useUpdateAppointmentStatus } from '../../hooks/useAppointmentData';
 import { PatientsList } from '../doctor/PatientsList';
 import { AppointmentsTable } from '../doctor/AppointmentsTable';
 import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
@@ -20,7 +21,7 @@ export const DoctorDashboard: React.FC = () => {
     error,
     refetch,
   } = useDoctorDashboard();
-  const updateStatus = useDoctorUpdateAppointmentStatus();
+  const updateStatus = useUpdateAppointmentStatus();
   const { actionError, clearActionError, runStatusUpdate } = useAppointmentStatusAction(updateStatus.mutate, refetch);
 
   if (!user) {

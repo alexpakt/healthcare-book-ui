@@ -5,19 +5,20 @@ import { Stack, Title, Text, Tabs, Alert, Button, Paper, Group, Avatar, Badge, C
 import { IconAlertCircle, IconArrowLeft, IconEdit } from '@tabler/icons-react';
 import { getAgeDisplay } from '../../utils/ageCalculator';
 import {
-  useParentChild,
-  useParentChildAppointments,
-  useParentChildVaccinations,
-  useParentChildMedicalRecords,
-  useParentChildAllergies,
-  useParentChildGrowthMeasurements,
-  useParentChildBirthRecord,
-  useParentUpdateAppointmentStatus,
 } from '../../hooks/useParentData';
+import {
+  useChild,
+  useChildGrowthMeasurements,
+  useChildBirthRecord,
+  useChildVaccinations,
+  useChildMedicalRecords,
+  useChildAllergies,
+} from '../../hooks/useChildData';
 import { UpcomingAppointments } from '../parent/UpcomingAppointments';
 import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
 import { VaccinationStatusWithHistory } from '../shared/VaccinationStatusWithHistory';
 import type { DoseSelection } from '../shared/VaccinationStatusGrid';
+import { useChildAppointments, useUpdateAppointmentStatus } from '../../hooks/useAppointmentData';
 import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
 import { useVaccinationSchedules } from '../../hooks/useVaccinationCatalog';
 import { MedicalRecordsList } from '../shared/MedicalRecordsList';
@@ -35,17 +36,17 @@ export const ChildDetail: React.FC = () => {
   const navigate = useNavigate();
   const id = Number(childId);
 
-  const { data: child, loading: childLoading, error: childError, refetch: refetchChild } = useParentChild(id);
+  const { data: child, loading: childLoading, error: childError, refetch: refetchChild } = useChild(id);
   const [editOpened, setEditOpened] = useState(false);
   const isDesktop = useMediaQuery('(min-width: 48em)');
-  const appointmentsQuery = useParentChildAppointments(id);
-  const vaccinationsQuery = useParentChildVaccinations(id);
-  const medicalRecordsQuery = useParentChildMedicalRecords(id);
-  const allergiesQuery = useParentChildAllergies(id);
-  const growthMeasurementsQuery = useParentChildGrowthMeasurements(id);
-  const birthRecordQuery = useParentChildBirthRecord(id);
+  const appointmentsQuery = useChildAppointments(id);
+  const vaccinationsQuery = useChildVaccinations(id);
+  const medicalRecordsQuery = useChildMedicalRecords(id);
+  const allergiesQuery = useChildAllergies(id);
+  const growthMeasurementsQuery = useChildGrowthMeasurements(id);
+  const birthRecordQuery = useChildBirthRecord(id);
   const schedulesQuery = useVaccinationSchedules();
-  const updateStatus = useParentUpdateAppointmentStatus();
+  const updateStatus = useUpdateAppointmentStatus();
   const [bookingDose, setBookingDose] = useState<DoseSelection | null>(null);
   const { actionError, clearActionError, runStatusUpdate } = useAppointmentStatusAction(
     updateStatus.mutate,

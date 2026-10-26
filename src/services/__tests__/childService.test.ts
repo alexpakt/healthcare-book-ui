@@ -22,6 +22,12 @@ describe('childService', () => {
     expect(calls[0].path).toBe('/api/children/3');
   });
 
+  it('getChildDoctors reads the doctors connected to one child', async () => {
+    const calls = mockApi('get', '/api/children/3/doctors', []);
+    await childService.getChildDoctors(3);
+    expect(calls[0].path).toBe('/api/children/3/doctors');
+  });
+
   it('createChild posts the child data', async () => {
     const data = { firstName: 'Νίκος', lastName: 'Παπαδόπουλος' };
     const calls = mockApi('post', '/api/children', {});

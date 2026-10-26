@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Stack, Title, Text, Alert, Button, Pagination, Group, Center, Loader } from '@mantine/core';
 import { IconAlertCircle, IconRefresh, IconPlus } from '@tabler/icons-react';
-import { useDoctorAppointments, useDoctorUpdateAppointmentStatus } from '../../hooks/useDoctorData';
+import { useDoctorAppointments } from '../../hooks/useDoctorData';
+import { useUpdateAppointmentStatus } from '../../hooks/useAppointmentData';
 import { AppointmentsTable } from '../doctor/AppointmentsTable';
 import { NewAppointmentForm } from '../doctor/NewAppointmentForm';
 import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
@@ -11,7 +12,7 @@ const PAGE_SIZE = 10;
 export const DoctorAppointments: React.FC = () => {
   const [page, setPage] = useState(1);
   const { data, loading, error, refetch } = useDoctorAppointments(page, PAGE_SIZE);
-  const updateStatus = useDoctorUpdateAppointmentStatus();
+  const updateStatus = useUpdateAppointmentStatus();
   const [formOpened, setFormOpened] = useState(false);
   const { actionError, clearActionError, runStatusUpdate } = useAppointmentStatusAction(updateStatus.mutate, refetch);
 

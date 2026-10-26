@@ -1,5 +1,4 @@
-import type { AppointmentStatus } from './common';
-import type { MedicalRecord, VaccinationRecord, AllergyRecord } from './parent';
+import type { Appointment, MedicalRecord, VaccinationRecord, AllergyRecord } from './parent';
 
 export interface AssignedChild {
   id: number;
@@ -10,16 +9,7 @@ export interface AssignedChild {
   status: 'ACTIVE' | 'INACTIVE';
 }
 
-export interface DoctorAppointment {
-  id: number;
-  childId: number;
-  childName: string;
-  doctorId: number;
-  doctorName: string;
-  appointmentDate: string;
-  reason: string;
-  status: AppointmentStatus;
-  notes?: string;
+export interface DoctorAppointment extends Appointment {
   parentName: string;
 }
 

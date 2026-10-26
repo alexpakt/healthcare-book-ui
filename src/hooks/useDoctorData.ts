@@ -1,8 +1,7 @@
 import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { doctorService } from '../services/doctorService';
-import type { CreateAppointmentRequest, MedicalRecordRequest, GrowthMeasurementRequest, BirthRecordRequest } from '../services/doctorService';
-import type { AppointmentStatus } from '../types/common';
+import type { MedicalRecordRequest, GrowthMeasurementRequest, BirthRecordRequest } from '../services/doctorService';
 
 export function useDoctorDashboardData() {
   const fetchFn = useCallback(() => doctorService.getDashboardData(), []);
@@ -29,26 +28,8 @@ export function useDoctorAppointments(page: number = 1, pageSize: number = 10) {
   return useApi(fetchFn);
 }
 
-export function useDoctorCreateAppointment() {
-  return useMutation((request?: CreateAppointmentRequest) =>
-    doctorService.createAppointment(request!)
-  );
-}
-
-export function useDoctorUpdateAppointmentStatus() {
-  return useMutation(
-    (payload?: { appointmentId: number; status: AppointmentStatus }) =>
-      doctorService.updateAppointmentStatus(payload!.appointmentId, payload!.status)
-  );
-}
-
 export function useDoctorPatientMedicalHistory(childId: number) {
   const fetchFn = useCallback(() => doctorService.getPatientMedicalHistory(childId), [childId]);
-  return useApi(fetchFn);
-}
-
-export function useDoctorChildGrowthMeasurements(childId: number) {
-  const fetchFn = useCallback(() => doctorService.getChildGrowthMeasurements(childId), [childId]);
   return useApi(fetchFn);
 }
 
@@ -103,11 +84,6 @@ export function useDoctorUpdateAllergy() {
 
 export function useDoctorDeleteAllergy() {
   return useMutation((allergyId?: number) => doctorService.deleteAllergy(allergyId!));
-}
-
-export function useDoctorBirthRecord(childId: number) {
-  const fetchFn = useCallback(() => doctorService.getBirthRecord(childId), [childId]);
-  return useApi(fetchFn);
 }
 
 export function useDoctorCreateBirthRecord() {

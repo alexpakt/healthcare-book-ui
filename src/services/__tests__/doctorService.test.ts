@@ -122,11 +122,4 @@ describe('doctorService appointment views', () => {
     expect(page.currentPage).toBe(2);
   });
 
-  it('updateAppointmentStatus patches the status of one appointment', async () => {
-    const calls = mockApi('patch', '/api/appointments/5/status', appointment({ id: 5 }));
-    await doctorService.updateAppointmentStatus(5, 'SCHEDULED');
-    expect(calls[0].method).toBe('PATCH');
-    expect(calls[0].body).toEqual({ status: 'SCHEDULED' });
-  });
-
 });

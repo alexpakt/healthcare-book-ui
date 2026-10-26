@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
 import { Modal, Button, TextInput, Select, Stack, Alert, Group } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { useParentChildDoctors, useParentChildren, useParentCreateAppointment } from '../../hooks/useParentData';
+import { useChildDoctors, useChildren } from '../../hooks/useChildData';
+import { useCreateAppointment } from '../../hooks/useAppointmentData';
 import { getMinDateTimeLocal, isNotInFuture } from '../../utils/dateTime';
 
 interface AppointmentRequestFormProps {
@@ -29,11 +30,11 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
 }) => {
   const [formData, setFormData] = useState(EMPTY_FORM);
   const [dateError, setDateError] = useState('');
-  const { data: children } = useParentChildren();
+  const { data: children } = useChildren();
   const selectedChildId = formData.childId ? Number(formData.childId) : undefined;
-  const { data: childDoctors, loading: doctorsLoading, error: doctorsError } = useParentChildDoctors(selectedChildId);
+  const { data: childDoctors, loading: doctorsLoading, error: doctorsError } = useChildDoctors(selectedChildId);
   const doctors = selectedChildId ? childDoctors : null;
-  const { mutate, loading, error, reset } = useParentCreateAppointment();
+  const { mutate, loading, error, reset } = useCreateAppointment();
 
   useSyncStateToProps([opened, initialChildId, initialReason], () => {
     if (opened && (initialChildId || initialReason)) {

@@ -1,25 +1,18 @@
 import { apiClient } from './apiClient';
+import { appointmentService } from './appointmentService';
 import { childService } from './childService';
+import { childHealthRecordService } from './childHealthRecordService';
 import type {
   AssignedChild,
   DoctorAppointment,
   PatientMedicalHistory,
   MedicalHistory,
-  VaccinationHistory,
   AllergyRecord,
   DoctorDashboardData,
 } from '../types/doctor';
 import type { GrowthMeasurement, BirthRecord } from '../types/parent';
-import type { AppointmentStatus, PaginatedResponse } from '../types/common';
+import type { PaginatedResponse } from '../types/common';
 import type { DoctorProfile, UpdateDoctorProfileRequest } from '../types/profile';
-
-export interface CreateAppointmentRequest {
-  childId: number;
-  doctorId: number;
-  appointmentDate: string; // ISO local datetime, e.g. "2026-09-25T14:30:00"
-  reason?: string;
-  notes?: string;
-}
 
 export interface MedicalRecordRequest {
   childId: number;
@@ -73,30 +66,6 @@ const filterPending = (appointments: DoctorAppointment[]): DoctorAppointment[] =
   appointments.filter((apt) => apt.status === 'REQUESTED');
 
 export const doctorService = {
-  /**
-   * Fetches the doctor's full appointment list once. Today's/upcoming/pending
-   * views and getDashboardData() all derive from this instead of each
-   * independently re-fetching the same /api/appointments list.
-   */
-  async getAllAppointments(): Promise<DoctorAppointment[]> {
-    try {
-      const response = await apiClient.get<DoctorAppointment[]>('/api/appointments');
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching appointments:', error);
-      throw error;
-    }
-  },
-  async createAppointment(request: CreateAppointmentRequest): Promise<DoctorAppointment> {
-    try {
-      const response = await apiClient.post<DoctorAppointment>('/api/appointments', request);
-      return response.data;
-    } catch (error) {
-      console.error('Error creating appointment:', error);
-      throw error;
-    }
-  },
-
   async getAssignedChildren(): Promise<AssignedChild[]> {
     try {
       const children = await childService.getMyChildren();
@@ -116,22 +85,22 @@ export const doctorService = {
   },
 
   async getTodayAppointments(): Promise<DoctorAppointment[]> {
-    return filterToday(await this.getAllAppointments());
+    return filterToday(await appointmentService.getAll<DoctorAppointment>());
   },
 
   async getPendingAppointments(): Promise<DoctorAppointment[]> {
-    return filterPending(await this.getAllAppointments());
+    return filterPending(await appointmentService.getAll<DoctorAppointment>());
   },
 
   async getUpcomingAppointments(limit?: number): Promise<DoctorAppointment[]> {
-    return filterUpcoming(await this.getAllAppointments(), limit);
+    return filterUpcoming(await appointmentService.getAll<DoctorAppointment>(), limit);
   },
 
   async getAppointments(
     page: number = 1,
     pageSize: number = 10
   ): Promise<PaginatedResponse<DoctorAppointment>> {
-    const allAppointments = await this.getAllAppointments();
+    const allAppointments = await appointmentService.getAll<DoctorAppointment>();
     const start = (page - 1) * pageSize;
     const end = start + pageSize;
 
@@ -144,37 +113,22 @@ export const doctorService = {
     };
   },
 
-  async updateAppointmentStatus(
-    appointmentId: number,
-    status: AppointmentStatus
-  ): Promise<DoctorAppointment> {
-    try {
-      const response = await apiClient.patch<DoctorAppointment>(`/api/appointments/${appointmentId}/status`, {
-        status,
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Error updating appointment status:', error);
-      throw error;
-    }
-  },
-
   async getPatientMedicalHistory(childId: number): Promise<PatientMedicalHistory> {
     try {
       const [child, medicalRecords, vaccinations, allergies] = await Promise.all([
         childService.getById(childId),
-        apiClient.get<MedicalHistory[]>(`/api/medical-records/child/${childId}`),
-        apiClient.get<VaccinationHistory[]>(`/api/vaccinations/child/${childId}`),
-        apiClient.get<AllergyRecord[]>(`/api/allergies/child/${childId}`),
+        childHealthRecordService.getMedicalRecords(childId),
+        childHealthRecordService.getVaccinations(childId),
+        childHealthRecordService.getAllergies(childId),
       ]);
 
       return {
         childId,
         childName: `${child.firstName} ${child.lastName}`,
         child,
-        medicalRecords: medicalRecords.data || [],
-        vaccinations: vaccinations.data || [],
-        allergies: allergies.data || [],
+        medicalRecords: medicalRecords || [],
+        vaccinations: vaccinations || [],
+        allergies: allergies || [],
       };
     } catch (error) {
       console.error('Error fetching patient medical history:', error);
@@ -202,18 +156,6 @@ export const doctorService = {
     }
   },
 
-  async getChildGrowthMeasurements(childId: number): Promise<GrowthMeasurement[]> {
-    try {
-      const response = await apiClient.get<GrowthMeasurement[]>(
-        `/api/growth-measurements/child/${childId}`
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching growth measurements:', error);
-      throw error;
-    }
-  },
-
   async createGrowthMeasurement(request: GrowthMeasurementRequest): Promise<GrowthMeasurement> {
     try {
       const response = await apiClient.post<GrowthMeasurement>(
@@ -223,18 +165,6 @@ export const doctorService = {
       return response.data;
     } catch (error) {
       console.error('Error creating growth measurement:', error);
-      throw error;
-    }
-  },
-
-  async getGrowthReferenceCurves(childId: number, measurementType: string) {
-    try {
-      const response = await apiClient.get<any[]>(
-        `/api/growth-measurements/references/child/${childId}/type/${measurementType}`
-      );
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching reference curves:', error);
       throw error;
     }
   },
@@ -293,17 +223,6 @@ export const doctorService = {
     }
   },
 
-  async getBirthRecord(childId: number): Promise<BirthRecord | null> {
-    try {
-      const response = await apiClient.get<BirthRecord>(`/api/birth-records/child/${childId}`);
-      // 204 No Content: the child has no birth record yet, which is an expected state
-      return response.status === 204 ? null : response.data;
-    } catch (error) {
-      console.error('Error fetching birth record:', error);
-      throw error;
-    }
-  },
-
   async createBirthRecord(request: BirthRecordRequest): Promise<BirthRecord> {
     try {
       const response = await apiClient.post<BirthRecord>('/api/birth-records', request);
@@ -348,7 +267,7 @@ export const doctorService = {
     try {
       const [assignedChildren, allAppointments] = await Promise.all([
         this.getAssignedChildren(),
-        this.getAllAppointments(),
+        appointmentService.getAll<DoctorAppointment>(),
       ]);
       const todayAppointments = filterToday(allAppointments);
       const upcomingAppointments = filterUpcoming(allAppointments, 5);

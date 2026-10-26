@@ -4,15 +4,14 @@ import { Stack, Title, Tabs, Alert, Button, Center, Loader, Group, Badge, Text }
 import { IconAlertCircle, IconArrowLeft, IconPlus } from '@tabler/icons-react';
 import {
   useDoctorPatientMedicalHistory,
-  useDoctorChildGrowthMeasurements,
   useDoctorCreateGrowthMeasurement,
   useDoctorCreateAllergy,
   useDoctorUpdateAllergy,
   useDoctorDeleteAllergy,
-  useDoctorBirthRecord,
   useDoctorCreateBirthRecord,
   useDoctorUpdateBirthRecord,
 } from '../../hooks/useDoctorData';
+import { useChildGrowthMeasurements, useChildBirthRecord } from '../../hooks/useChildData';
 import { PatientCard } from '../shared/PatientCard';
 import { MedicalRecordsList } from '../shared/MedicalRecordsList';
 import { AllergiesList } from '../shared/AllergiesList';
@@ -29,7 +28,8 @@ import type { MedicalHistory } from '../../types/doctor';
 import type { AllergyRecord } from '../../types/parent';
 import { VaccinationStatusWithHistory } from '../shared/VaccinationStatusWithHistory';
 import type { DoseSelection } from '../shared/VaccinationStatusGrid';
-import { useVaccinationSchedules, useChildAppointments } from '../../hooks/useVaccinationCatalog';
+import { useVaccinationSchedules } from '../../hooks/useVaccinationCatalog';
+import { useChildAppointments } from '../../hooks/useAppointmentData';
 import { DoseActionDialog } from '../doctor/DoseActionDialog';
 import { NewAppointmentForm } from '../doctor/NewAppointmentForm';
 
@@ -39,8 +39,8 @@ export const PatientHistory: React.FC = () => {
   const id = Number(childId);
 
   const { data, loading, error, refetch } = useDoctorPatientMedicalHistory(id);
-  const birthRecordQuery = useDoctorBirthRecord(id);
-  const growthMeasurementsQuery = useDoctorChildGrowthMeasurements(id);
+  const birthRecordQuery = useChildBirthRecord(id);
+  const growthMeasurementsQuery = useChildGrowthMeasurements(id);
   const { mutate: createGrowthMeasurement, loading: growthFormLoading, error: growthError } = useDoctorCreateGrowthMeasurement();
   const { mutate: createAllergy, loading: allergyFormLoading, error: allergyError } = useDoctorCreateAllergy();
   const { mutate: updateAllergy, loading: updateAllergyLoading } = useDoctorUpdateAllergy();
