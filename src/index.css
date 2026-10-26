@@ -18,3 +18,13 @@ body {
 code {
   font-family: ui-monospace, 'Courier New', monospace;
 }
+
+/* Mantine badges clip long labels with an ellipsis; this keeps the full label visible */
+.no-ellipsis-badge {
+  flex-shrink: 0;
+}
+
+.no-ellipsis-badge .mantine-Badge-label {
+  overflow: visible;
+  text-overflow: clip;
+}

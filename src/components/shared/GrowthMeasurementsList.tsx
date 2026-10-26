@@ -69,7 +69,7 @@ export const GrowthMeasurementsList: React.FC<GrowthMeasurementsListProps> = ({
                   <Group gap={6}>
                     <Text>{m.heightCm.toFixed(1)}</Text>
                     {m.percentileHeight && (
-                      <Badge color={getPercentileColor(m.percentileHeight)} size="sm">
+                      <Badge className="no-ellipsis-badge" color={getPercentileColor(m.percentileHeight)} size="sm">
                         p{m.percentileHeight}
                       </Badge>
                     )}
@@ -83,7 +83,7 @@ export const GrowthMeasurementsList: React.FC<GrowthMeasurementsListProps> = ({
                   <Group gap={6}>
                     <Text>{m.weightKg.toFixed(1)}</Text>
                     {m.percentileWeight && (
-                      <Badge color={getPercentileColor(m.percentileWeight)} size="sm">
+                      <Badge className="no-ellipsis-badge" color={getPercentileColor(m.percentileWeight)} size="sm">
                         p{m.percentileWeight}
                       </Badge>
                     )}
@@ -97,7 +97,7 @@ export const GrowthMeasurementsList: React.FC<GrowthMeasurementsListProps> = ({
                   <Group gap={6}>
                     <Text>{m.headCircumferenceCm.toFixed(1)}</Text>
                     {m.percentileHeadCircumference && (
-                      <Badge color={getPercentileColor(m.percentileHeadCircumference)} size="sm">
+                      <Badge className="no-ellipsis-badge" color={getPercentileColor(m.percentileHeadCircumference)} size="sm">
                         p{m.percentileHeadCircumference}
                       </Badge>
                     )}
