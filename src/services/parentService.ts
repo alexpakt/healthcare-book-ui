@@ -1,7 +1,6 @@
 import { apiClient } from './apiClient';
 import { appointmentService } from './appointmentService';
 import { childService } from './childService';
-import { childHealthRecordService } from './childHealthRecordService';
 import type { VaccinationSchedule, ParentDashboardData } from '../types/parent';
 import type { ParentProfile, UpdateParentProfileRequest } from '../types/profile';
 
@@ -38,12 +37,6 @@ export const parentService = {
         appointmentService.getAll(),
       ]);
 
-      const vaccinationPromises = childrenData.map((child) =>
-        childHealthRecordService.getVaccinations(child.id)
-      );
-      const vaccinationsByChild = await Promise.all(vaccinationPromises);
-      const allVaccinations = vaccinationsByChild.flat();
-
       const today = new Date();
       const thirtyDaysLater = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
 
@@ -55,7 +48,6 @@ export const parentService = {
       return {
         children: childrenData,
         upcomingAppointments,
-        vaccinationReminders: allVaccinations,
       };
     } catch (error) {
       console.error('Error fetching dashboard data:', error);

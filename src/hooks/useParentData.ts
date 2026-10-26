@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useApi } from './useApi';
 import { parentService } from '../services/parentService';
-import type { Appointment, VaccinationRecord } from '../types/parent';
+import type { Appointment } from '../types/parent';
 
 export function useParentDashboardData() {
   const fetchFn = useCallback(() => parentService.getDashboardData(), []);
@@ -22,7 +22,6 @@ export function useParentDashboard() {
   return {
     children: dashboardData.data?.children || null,
     appointments: dashboardData.data?.upcomingAppointments as Appointment[] || null,
-    vaccinations: dashboardData.data?.vaccinationReminders as VaccinationRecord[] || null,
     isLoading,
     error: hasError,
     refetch,

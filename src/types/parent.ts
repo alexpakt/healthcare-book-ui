@@ -106,5 +106,4 @@ export interface BirthRecord {
 export interface ParentDashboardData {
   children: Child[];
   upcomingAppointments: Appointment[];
-  vaccinationReminders: VaccinationRecord[];
 }

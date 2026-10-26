@@ -6,7 +6,6 @@ import { useAuth } from '../../hooks/useAuth';
 import { useParentDashboard } from '../../hooks/useParentData';
 import { ChildrenList } from '../parent/ChildrenList';
 import { UpcomingAppointments } from '../parent/UpcomingAppointments';
-import { VaccinationReminders } from '../parent/VaccinationReminders';
 import { DoctorRequestsNotification } from '../parent/DoctorRequestsNotification';
 import { ChildRegistrationForm } from '../parent/ChildRegistrationForm';
 
@@ -17,7 +16,6 @@ export const ParentDashboard: React.FC = () => {
   const {
     children,
     appointments,
-    vaccinations,
     isLoading,
     error,
     refetch,
@@ -45,14 +43,8 @@ export const ParentDashboard: React.FC = () => {
     navigate('/appointments');
   };
 
-  const handleViewVaccinationHistory = () => {
-    // TODO: Navigate to vaccination history page
-    console.log('View vaccination history');
-  };
-
   return (
     <Stack gap="lg">
-      {/* Welcome Section */}
       <div>
         <Title order={2}>Καλώς ήρθατε!</Title>
         <Text c="dimmed">
@@ -60,7 +52,6 @@ export const ParentDashboard: React.FC = () => {
         </Text>
       </div>
 
-      {/* Error Alert */}
       {error && (
         <Alert
           icon={<IconAlertCircle size={16} />}
@@ -83,12 +74,10 @@ export const ParentDashboard: React.FC = () => {
         </Alert>
       )}
 
-      {/* doctor Requests Notification */}
       <div>
         <DoctorRequestsNotification />
       </div>
 
-      {/* Tabs for different sections */}
       <Tabs defaultValue="children" orientation="horizontal">
         <Tabs.List>
           <Tabs.Tab value="children">
@@ -97,12 +86,8 @@ export const ParentDashboard: React.FC = () => {
           <Tabs.Tab value="appointments">
             Ραντεβού
           </Tabs.Tab>
-          <Tabs.Tab value="vaccinations">
-            Εμβολιασμοί
-          </Tabs.Tab>
         </Tabs.List>
 
-        {/* Children Tab */}
         <Tabs.Panel value="children" pt="md">
           <ChildrenList
             items={children}
@@ -113,7 +98,6 @@ export const ParentDashboard: React.FC = () => {
           />
         </Tabs.Panel>
 
-        {/* Appointments Tab */}
         <Tabs.Panel value="appointments" pt="md">
           <UpcomingAppointments
             appointments={appointments as any}
@@ -121,18 +105,8 @@ export const ParentDashboard: React.FC = () => {
             onViewDetails={handleViewAllAppointments}
           />
         </Tabs.Panel>
-
-        {/* Vaccinations Tab */}
-        <Tabs.Panel value="vaccinations" pt="md">
-          <VaccinationReminders
-            vaccinations={vaccinations as any}
-            isLoading={isLoading}
-            onViewDetails={handleViewVaccinationHistory}
-          />
-        </Tabs.Panel>
       </Tabs>
 
-      {/* Child Registration Form Modal */}
       <ChildRegistrationForm
         opened={childFormOpened}
         onClose={() => setChildFormOpened(false)}

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { parentService } from '../parentService';
 import { mockApi } from '../../test/http';
-import type { Appointment, VaccinationRecord } from '../../types/parent';
+import type { Appointment } from '../../types/parent';
 
 // Fixed "now": 21 October 2026, midday local time.
 const NOW = new Date(2026, 9, 21, 12, 0, 0);
@@ -25,17 +25,6 @@ const appointment = (overrides: Partial<Appointment>): Appointment => ({
   appointmentDate: new Date(NOW.getTime() + DAY).toISOString(),
   reason: 'Έλεγχος',
   status: 'SCHEDULED',
-  ...overrides,
-});
-
-const vaccination = (overrides: Partial<VaccinationRecord>): VaccinationRecord => ({
-  id: 1,
-  childId: 1,
-  childName: 'Παιδί1',
-  vaccineName: 'DTaP',
-  doseNumber: 1,
-  administeredDate: '2026-01-10',
-  administeredByDoctorName: 'Ελένη Κωνσταντίνου',
   ...overrides,
 });
 
@@ -75,12 +64,9 @@ describe('parentService.getDashboardData', () => {
         appointment({ id: 3, status: 'REQUESTED', appointmentDate: new Date(NOW.getTime() + 2 * DAY).toISOString() }),
       ]
     );
-    mockApi('get', '/api/vaccinations/child/1', [vaccination({ id: 1 })]);
-    mockApi('get', '/api/vaccinations/child/2', []);
 
     const data = await parentService.getDashboardData();
 
     expect(data.upcomingAppointments.map((a) => a.id)).toEqual([1]);
-    expect(data.vaccinationReminders).toHaveLength(1);
   });
 });
