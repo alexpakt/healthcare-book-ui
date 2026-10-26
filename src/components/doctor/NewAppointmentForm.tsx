@@ -15,6 +15,8 @@ interface NewAppointmentFormProps {
   reason?: string;
 }
 
+const normalize = (text: string) => text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+
 const EMPTY_FORM = {
   childId: '',
   appointmentDate: '',
@@ -101,6 +103,12 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
             onChange={(value) => handleChange('childId', value || '')}
             required
             disabled={loading || childId !== undefined}
+            searchable
+            nothingFoundMessage="Δεν βρέθηκε ασθενής"
+            filter={({ options, search }) => {
+              const query = normalize(search.trim());
+              return options.filter((option) => 'label' in option && normalize(option.label).includes(query));
+            }}
           />
 
           <TextInput
