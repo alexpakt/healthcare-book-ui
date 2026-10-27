@@ -74,7 +74,7 @@ export const PatientHistory: React.FC = () => {
         </Tabs.List>
 
         <Tabs.Panel value="records" pt="md">
-          {visited.has('records') && <RecordsTab childId={id} />}
+          {visited.has('records') && <RecordsTab childId={id} dateOfBirth={child.dateOfBirth} />}
         </Tabs.Panel>
 
         <Tabs.Panel value="vaccinations" pt="md">
@@ -82,7 +82,9 @@ export const PatientHistory: React.FC = () => {
         </Tabs.Panel>
 
         <Tabs.Panel value="allergies" pt="md">
-          {visited.has('allergies') && <AllergiesTab childId={id} childName={childName} />}
+          {visited.has('allergies') && (
+            <AllergiesTab childId={id} childName={childName} dateOfBirth={child.dateOfBirth} />
+          )}
         </Tabs.Panel>
 
         <Tabs.Panel value="growth" pt="md">

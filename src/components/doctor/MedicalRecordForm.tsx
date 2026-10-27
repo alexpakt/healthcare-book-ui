@@ -6,12 +6,13 @@ import {
   useDoctorUpdateMedicalRecord,
 } from '../../hooks/useDoctorData';
 import type { MedicalHistory } from '../../types/doctor';
-import { parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
+import { isBeforeBirthDate, parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
 import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
 
 interface MedicalRecordFormProps {
   opened: boolean;
   childId: number;
+  childDateOfBirth?: string;
   editRecord?: MedicalHistory | null;
   onClose: () => void;
   onSuccess?: () => void;
@@ -27,6 +28,7 @@ const emptyForm = (record?: MedicalHistory | null) => ({
 export const MedicalRecordForm: React.FC<MedicalRecordFormProps> = ({
   opened,
   childId,
+  childDateOfBirth,
   editRecord,
   onClose,
   onSuccess,
@@ -63,12 +65,17 @@ export const MedicalRecordForm: React.FC<MedicalRecordFormProps> = ({
       return;
     }
 
-    if (!parseLocalDate(formData.recordDate)) {
+    const recordDate = parseLocalDate(formData.recordDate);
+    if (!recordDate) {
       setDateError('Η ημερομηνία δεν είναι έγκυρη');
       return;
     }
     if (formData.recordDate > toLocalIsoDate()) {
       setDateError('Η ημερομηνία δεν μπορεί να είναι στο μέλλον');
+      return;
+    }
+    if (isBeforeBirthDate(recordDate, childDateOfBirth)) {
+      setDateError('Η ημερομηνία δεν μπορεί να είναι πριν από την ημερομηνία γέννησης');
       return;
     }
 
@@ -118,6 +125,7 @@ export const MedicalRecordForm: React.FC<MedicalRecordFormProps> = ({
           <TextInput
             label="Ημερομηνία"
             type="date"
+            min={childDateOfBirth?.slice(0, 10)}
             max={toLocalIsoDate()}
             value={formData.recordDate}
             onChange={(e) => handleChange('recordDate', e.target.value)}

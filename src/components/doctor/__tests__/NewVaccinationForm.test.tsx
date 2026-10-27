@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { NewVaccinationForm } from '../NewVaccinationForm';
 import { Route } from 'react-router-dom';
 import type { ReactElement } from 'react';
@@ -61,5 +61,30 @@ describe('NewVaccinationForm opened from a grid dose', () => {
     );
 
     expect(await screen.findByText('Θα καταχωρηθεί')).toBeInTheDocument();
+  });
+
+  it('does not allow an administration date before the child was born', async () => {
+    mockApi('get', '/api/vaccines', [
+      { id: 1, vaccineName: 'DTaP', vaccineNameGr: 'Κοκκύτη', componentVaccineNames: [] },
+    ]);
+
+    renderAsDoctor(
+      <NewVaccinationForm
+        opened
+        onClose={vi.fn()}
+        childId={1}
+        childName="Νίκος"
+        childDateOfBirth="2025-06-01"
+        schedules={schedules}
+        vaccinations={[]}
+        initialVaccineName="DTaP"
+      />
+    );
+
+    const dateInput = await screen.findByLabelText(/Ημερομηνία Χορήγησης/);
+    expect(dateInput).toHaveAttribute('min', '2025-06-01');
+
+    fireEvent.change(dateInput, { target: { value: '2025-05-31' } });
+    expect(dateInput).toBeInvalid();
   });
 });

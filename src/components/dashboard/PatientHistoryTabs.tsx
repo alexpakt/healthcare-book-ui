@@ -37,7 +37,7 @@ import { NewAppointmentForm } from '../doctor/NewAppointmentForm';
 import type { MedicalHistory } from '../../types/doctor';
 import type { AllergyRecord, Child } from '../../types/parent';
 
-export const RecordsTab: React.FC<{ childId: number }> = ({ childId }) => {
+export const RecordsTab: React.FC<{ childId: number; dateOfBirth: string }> = ({ childId, dateOfBirth }) => {
   const { user } = useAuth();
   const records = useChildMedicalRecords(childId);
   const [formOpened, setFormOpened] = useState(false);
@@ -68,6 +68,7 @@ export const RecordsTab: React.FC<{ childId: number }> = ({ childId }) => {
       <MedicalRecordForm
         opened={formOpened}
         childId={childId}
+        childDateOfBirth={dateOfBirth}
         editRecord={editingRecord}
         onClose={() => setFormOpened(false)}
         onSuccess={() => {
@@ -131,6 +132,7 @@ export const VaccinationsTab: React.FC<{ child: Child }> = ({ child }) => {
         opened={formOpened}
         childId={child.id}
         childName={childName}
+        childDateOfBirth={child.dateOfBirth}
         schedules={schedules.data}
         vaccinations={vaccinations.data}
         initialVaccineName={recordVaccineName}
@@ -165,7 +167,11 @@ export const VaccinationsTab: React.FC<{ child: Child }> = ({ child }) => {
   );
 };
 
-export const AllergiesTab: React.FC<{ childId: number; childName: string }> = ({ childId, childName }) => {
+export const AllergiesTab: React.FC<{ childId: number; childName: string; dateOfBirth: string }> = ({
+  childId,
+  childName,
+  dateOfBirth,
+}) => {
   const allergies = useChildAllergies(childId);
   const { mutate: createAllergy, loading: createLoading, error: createError } = useDoctorCreateAllergy();
   const { mutate: updateAllergy, loading: updateLoading } = useDoctorUpdateAllergy();
@@ -228,6 +234,7 @@ export const AllergiesTab: React.FC<{ childId: number; childName: string }> = ({
           setEditingAllergy(null);
         }}
         childName={childName}
+        childDateOfBirth={dateOfBirth}
         onSubmit={handleSave}
         isLoading={createLoading || updateLoading}
         error={createError?.message || null}
@@ -278,6 +285,7 @@ export const GrowthTab: React.FC<{ childId: number; childName: string; dateOfBir
         opened={formOpened}
         childId={childId}
         childName={childName}
+        childDateOfBirth={dateOfBirth}
         onClose={() => setFormOpened(false)}
         onSubmit={handleAdd}
         isLoading={loading}

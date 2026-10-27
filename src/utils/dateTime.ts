@@ -10,6 +10,15 @@ export function isNotInFuture(datetimeLocalValue: string): boolean {
 }
 
 /**
+ * Returns true when the calendar date is before the child's date of birth.
+ * Accepts a YYYY-MM-DD value or an ISO timestamp; returns false when no birth date is known.
+ */
+export function isBeforeBirthDate(date: Date, dateOfBirth?: string): boolean {
+  const birthDate = dateOfBirth ? parseLocalDate(dateOfBirth.slice(0, 10)) : null;
+  return birthDate !== null && date < birthDate;
+}
+
+/**
  * Returns the local calendar date as YYYY-MM-DD.
  */
 export function toLocalIsoDate(date: Date = new Date()): string {

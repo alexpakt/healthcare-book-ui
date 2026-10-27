@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getMinDateTimeLocal, isNotInFuture, parseLocalDate, toLocalIsoDate } from '../dateTime';
+import { getMinDateTimeLocal, isBeforeBirthDate, isNotInFuture, parseLocalDate, toLocalIsoDate } from '../dateTime';
 
 describe('toLocalIsoDate', () => {
   it('returns the local calendar date as YYYY-MM-DD', () => {
@@ -139,5 +139,23 @@ describe('isNotInFuture', () => {
 
   it('treats an empty value as not in the future', () => {
     expect(isNotInFuture('')).toBe(false);
+  });
+});
+
+describe('isBeforeBirthDate', () => {
+  it('is true for a date before the date of birth', () => {
+    expect(isBeforeBirthDate(new Date(2025, 4, 31), '2025-06-01')).toBe(true);
+  });
+
+  it('is false for the date of birth itself', () => {
+    expect(isBeforeBirthDate(new Date(2025, 5, 1), '2025-06-01')).toBe(false);
+  });
+
+  it('accepts an ISO timestamp for the date of birth', () => {
+    expect(isBeforeBirthDate(new Date(2025, 4, 31), '2025-06-01T00:00:00.000Z')).toBe(true);
+  });
+
+  it('is false when no date of birth is known', () => {
+    expect(isBeforeBirthDate(new Date(2025, 4, 31))).toBe(false);
   });
 });

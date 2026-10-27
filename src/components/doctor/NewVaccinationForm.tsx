@@ -18,13 +18,14 @@ import { doctorService, type CreateVaccinationRequest } from '../../services/doc
 import { vaccinationCatalogService, type VaccineCatalogEntry } from '../../services/vaccinationCatalogService';
 import type { VaccinationRecord, VaccinationSchedule } from '../../types/parent';
 import { getNextMissingDoseNumber } from '../../utils/vaccinationStatus';
-import { parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
+import { isBeforeBirthDate, parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
 
 interface NewVaccinationFormProps {
   opened: boolean;
   onClose: () => void;
   childId: number;
   childName: string;
+  childDateOfBirth?: string;
   schedules: VaccinationSchedule[] | null;
   vaccinations: VaccinationRecord[] | null;
   initialVaccineName?: string;
@@ -57,6 +58,7 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
   onClose,
   childId,
   childName,
+  childDateOfBirth,
   schedules,
   vaccinations,
   initialVaccineName,
@@ -153,6 +155,10 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
       setError('Η ημερομηνία χορήγησης δεν μπορεί να είναι στο μέλλον');
       return;
     }
+    if (isBeforeBirthDate(adminDate, childDateOfBirth)) {
+      setError('Η ημερομηνία χορήγησης δεν μπορεί να είναι πριν από την ημερομηνία γέννησης');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -224,6 +230,7 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
               <TextInput
                 label="Ημερομηνία Χορήγησης"
                 type="date"
+                min={childDateOfBirth?.slice(0, 10)}
                 max={toLocalIsoDate()}
                 value={formData.administeredDate}
                 onChange={(e) => handleChange('administeredDate', e.target.value)}

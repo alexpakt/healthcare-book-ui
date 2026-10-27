@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { Modal, Button, Stack, Group, TextInput, Select, Textarea, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import type { AllergyRecord } from '../../types/parent';
-import { parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
+import { isBeforeBirthDate, parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
 
 interface AllergyFormProps {
   opened: boolean;
   onClose: () => void;
   childName: string;
+  childDateOfBirth?: string;
   onSubmit: (data: AllergyFormData) => Promise<void>;
   isLoading?: boolean;
   error?: string | null;
@@ -34,6 +35,7 @@ export const AllergyForm: React.FC<AllergyFormProps> = ({
   opened,
   onClose,
   childName,
+  childDateOfBirth,
   onSubmit,
   isLoading = false,
   error = null,
@@ -78,6 +80,10 @@ export const AllergyForm: React.FC<AllergyFormProps> = ({
     today.setHours(0, 0, 0, 0);
     if (diagnosedDate > today) {
       alert('Η ημερομηνία διάγνωσης δεν μπορεί να είναι στο μέλλον');
+      return;
+    }
+    if (isBeforeBirthDate(diagnosedDate, childDateOfBirth)) {
+      alert('Η ημερομηνία διάγνωσης δεν μπορεί να είναι πριν από την ημερομηνία γέννησης');
       return;
     }
 
@@ -160,6 +166,7 @@ export const AllergyForm: React.FC<AllergyFormProps> = ({
           <TextInput
             label="Ημερομηνία Διάγνωσης"
             type="date"
+            min={childDateOfBirth?.slice(0, 10)}
             value={formData.diagnosedDate}
             onChange={(e) =>
               setFormData((prev) => ({

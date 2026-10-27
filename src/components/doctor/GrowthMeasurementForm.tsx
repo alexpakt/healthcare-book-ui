@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { Modal, Button, Stack, Group, NumberInput, Textarea, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { toLocalIsoDate } from '../../utils/dateTime';
+import { isBeforeBirthDate, parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
 
 interface GrowthMeasurementFormProps {
   opened: boolean;
   onClose: () => void;
   childId: number;
   childName: string;
+  childDateOfBirth?: string;
   onSubmit: (data: GrowthMeasurementFormData) => Promise<void>;
   isLoading?: boolean;
   error?: string | null;
@@ -36,6 +37,7 @@ export const GrowthMeasurementForm: React.FC<GrowthMeasurementFormProps> = ({
   onClose,
   childId,
   childName,
+  childDateOfBirth,
   onSubmit,
   isLoading = false,
   error = null,
@@ -64,6 +66,12 @@ export const GrowthMeasurementForm: React.FC<GrowthMeasurementFormProps> = ({
 
     if (formData.measurementDate > toLocalIsoDate()) {
       alert('Η ημερομηνία μέτρησης δεν μπορεί να είναι στο μέλλον');
+      return;
+    }
+
+    const measurementDate = parseLocalDate(formData.measurementDate);
+    if (measurementDate && isBeforeBirthDate(measurementDate, childDateOfBirth)) {
+      alert('Η ημερομηνία μέτρησης δεν μπορεί να είναι πριν από την ημερομηνία γέννησης');
       return;
     }
 
@@ -96,6 +104,7 @@ export const GrowthMeasurementForm: React.FC<GrowthMeasurementFormProps> = ({
 
           <input
             type="date"
+            min={childDateOfBirth?.slice(0, 10)}
             value={formData.measurementDate}
             onChange={(e) =>
               setFormData((prev) => ({
