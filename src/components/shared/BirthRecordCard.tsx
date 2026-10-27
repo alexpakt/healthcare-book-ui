@@ -120,7 +120,7 @@ export const BirthRecordCard: React.FC<BirthRecordCardProps> = ({
               <IconAlertCircle size={18} style={{ color: '#f59f00', flexShrink: 0 }} />
               <div style={{ flex: 1 }}>
                 <Text size="sm" fw={600}>
-                  Εισαγωγή σε ΔΥΠΑ
+                  Εισαγωγή σε ΜΕΝΝ
                 </Text>
                 {record.nicuDurationDays && (
                   <Text size="sm">Διάρκεια: {record.nicuDurationDays} ημέρες</Text>

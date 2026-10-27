@@ -256,14 +256,14 @@ export const BirthRecordForm: React.FC<BirthRecordFormProps> = ({
           />
 
           <Checkbox
-            label="Εισαγωγή σε ΔΥΠΑ (μονάδα φροντίδας νεογνών)"
+            label="Εισαγωγή σε ΜΕΝΝ (μονάδα φροντίδας νεογνών)"
             checked={formData.nicuAdmission}
             onChange={(e) => setFormData({ ...formData, nicuAdmission: e.currentTarget.checked })}
           />
 
           {formData.nicuAdmission && (
             <NumberInput
-              label="Διάρκεια νοσηλείας ΔΥΠΑ (ημέρες)"
+              label="Διάρκεια νοσηλείας ΜΕΝΝ (ημέρες)"
               placeholder="5"
               value={formData.nicuDurationDays}
               onChange={(val) => setFormData({ ...formData, nicuDurationDays: val as number })}
