@@ -1,165 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Stack, Title, Tabs, Alert, Button, Center, Loader, Group, Badge, Text } from '@mantine/core';
-import { IconAlertCircle, IconArrowLeft, IconPlus } from '@tabler/icons-react';
-import {
-  useDoctorPatientMedicalHistory,
-  useDoctorCreateGrowthMeasurement,
-  useDoctorCreateAllergy,
-  useDoctorUpdateAllergy,
-  useDoctorDeleteAllergy,
-  useDoctorCreateBirthRecord,
-  useDoctorUpdateBirthRecord,
-} from '../../hooks/useDoctorData';
-import { useChildGrowthMeasurements, useChildBirthRecord } from '../../hooks/useChildData';
+import { Stack, Tabs, Alert, Button, Center, Loader, Group, Badge, Text } from '@mantine/core';
+import { IconAlertCircle, IconArrowLeft } from '@tabler/icons-react';
+import { useChild } from '../../hooks/useChildData';
+import { useVisitedTabs } from '../../hooks/useVisitedTabs';
 import { PatientCard } from '../shared/PatientCard';
-import { MedicalRecordsList } from '../shared/MedicalRecordsList';
-import { AllergiesList } from '../shared/AllergiesList';
-import { GrowthChart } from '../shared/GrowthChart';
-import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
-import { GrowthAlertCard } from '../Growth/GrowthAlertCard';
-import { BirthRecordCard } from '../shared/BirthRecordCard';
-import { MedicalRecordForm } from '../doctor/MedicalRecordForm';
-import { GrowthMeasurementForm, type GrowthMeasurementFormData } from '../doctor/GrowthMeasurementForm';
-import { AllergyForm, type AllergyFormData } from '../doctor/AllergyForm';
-import { NewVaccinationForm } from '../doctor/NewVaccinationForm';
-import { BirthRecordForm, type BirthRecordFormData } from '../doctor/BirthRecordForm';
-import type { MedicalHistory } from '../../types/doctor';
-import type { AllergyRecord } from '../../types/parent';
-import { VaccinationStatusWithHistory } from '../shared/VaccinationStatusWithHistory';
-import type { DoseSelection } from '../shared/VaccinationStatusGrid';
-import { useVaccinationSchedules } from '../../hooks/useVaccinationCatalog';
-import { useChildAppointments } from '../../hooks/useAppointmentData';
-import { DoseActionDialog } from '../doctor/DoseActionDialog';
-import { NewAppointmentForm } from '../doctor/NewAppointmentForm';
+import { AllergiesTab, BirthTab, GrowthTab, RecordsTab, VaccinationsTab } from './PatientHistoryTabs';
 
 export const PatientHistory: React.FC = () => {
   const { childId } = useParams<{ childId: string }>();
   const navigate = useNavigate();
   const id = Number(childId);
 
-  const { data, loading, error, refetch } = useDoctorPatientMedicalHistory(id);
-  const birthRecordQuery = useChildBirthRecord(id);
-  const growthMeasurementsQuery = useChildGrowthMeasurements(id);
-  const { mutate: createGrowthMeasurement, loading: growthFormLoading, error: growthError } = useDoctorCreateGrowthMeasurement();
-  const { mutate: createAllergy, loading: allergyFormLoading, error: allergyError } = useDoctorCreateAllergy();
-  const { mutate: updateAllergy, loading: updateAllergyLoading } = useDoctorUpdateAllergy();
-  const { mutate: deleteAllergy } = useDoctorDeleteAllergy();
-  const { mutate: createBirthRecord, loading: birthFormLoading, error: birthError } = useDoctorCreateBirthRecord();
-  const { mutate: updateBirthRecord, loading: birthUpdateLoading } = useDoctorUpdateBirthRecord();
+  const { data: child, loading, error } = useChild(id);
+  const { active, onChange, visited } = useVisitedTabs('records');
 
-  const [formOpened, setFormOpened] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<MedicalHistory | null>(null);
-  const [growthFormOpened, setGrowthFormOpened] = useState(false);
-  const [allergyFormOpened, setAllergyFormOpened] = useState(false);
-  const [editingAllergy, setEditingAllergy] = useState<AllergyRecord | null>(null);
-  const [vaccinationFormOpened, setVaccinationFormOpened] = useState(false);
-  const [recordVaccineName, setRecordVaccineName] = useState<string | undefined>(undefined);
-  const [doseAction, setDoseAction] = useState<DoseSelection | null>(null);
-  const [bookingOpened, setBookingOpened] = useState(false);
-  const [bookingReason, setBookingReason] = useState<string | undefined>(undefined);
-  const schedulesQuery = useVaccinationSchedules();
-  const appointmentsQuery = useChildAppointments(id);
-  const [birthFormOpened, setBirthFormOpened] = useState(false);
-
-  const handleRecordFromDose = () => {
-    if (!doseAction) return;
-    setRecordVaccineName(doseAction.vaccineName);
-    setVaccinationFormOpened(true);
-    setDoseAction(null);
-  };
-
-  const handleScheduleFromDose = () => {
-    if (!doseAction) return;
-    setBookingReason(`Εμβολιασμός: ${doseAction.vaccineName} (${doseAction.recommendedAgeMonths}μ)`);
-    setBookingOpened(true);
-    setDoseAction(null);
-  };
-
-  const handleAddRecord = () => {
-    setEditingRecord(null);
-    setFormOpened(true);
-  };
-
-  const handleEditRecord = (record: MedicalHistory) => {
-    setEditingRecord(record);
-    setFormOpened(true);
-  };
-
-  const handleAddGrowthMeasurement = async (formData: GrowthMeasurementFormData) => {
-    try {
-      await createGrowthMeasurement(formData);
-      await growthMeasurementsQuery.refetch();
-      setGrowthFormOpened(false);
-    } catch (err) {
-      console.error('Error creating growth measurement:', err);
-    }
-  };
-
-  const handleAddAllergy = () => {
-    setEditingAllergy(null);
-    setAllergyFormOpened(true);
-  };
-
-  const handleEditAllergy = (allergy: AllergyRecord) => {
-    setEditingAllergy(allergy);
-    setAllergyFormOpened(true);
-  };
-
-  const handleSaveAllergy = async (formData: AllergyFormData) => {
-    try {
-      if (editingAllergy) {
-        await updateAllergy({
-          allergyId: editingAllergy.id,
-          request: formData,
-        });
-      } else {
-        await createAllergy({
-          childId: id,
-          request: formData,
-        });
-      }
-      await refetch();
-      setAllergyFormOpened(false);
-      setEditingAllergy(null);
-    } catch (err) {
-      console.error('Error saving allergy:', err);
-    }
-  };
-
-  const handleDeleteAllergy = async (allergyId: number) => {
-    if (confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την αλλεργία;')) {
-      try {
-        await deleteAllergy(allergyId);
-        await refetch();
-      } catch (err) {
-        console.error('Error deleting allergy:', err);
-      }
-    }
-  };
-
-  const handleSaveBirthRecord = async (formData: BirthRecordFormData) => {
-    try {
-      if (birthRecordQuery.data) {
-        await updateBirthRecord({
-          childId: id,
-          request: formData,
-        });
-      } else {
-        await createBirthRecord(formData);
-      }
-      await birthRecordQuery.refetch();
-      setBirthFormOpened(false);
-    } catch (err) {
-      console.error('Error saving birth record:', err);
-    }
-  };
-
-  const handleEditBirthRecord = () => {
-    setBirthFormOpened(true);
-  };
-
-  if (loading && !data) {
+  if (loading && !child) {
     return (
       <Center py="xl">
         <Loader />
@@ -167,7 +23,7 @@ export const PatientHistory: React.FC = () => {
     );
   }
 
-  if (error || !data) {
+  if (error || !child) {
     return (
       <Stack gap="lg">
         <Alert icon={<IconAlertCircle size={16} />} color="red" title="Σφάλμα">
@@ -180,6 +36,8 @@ export const PatientHistory: React.FC = () => {
     );
   }
 
+  const childName = `${child.firstName} ${child.lastName}`;
+
   return (
     <Stack gap="lg">
       <Button
@@ -191,24 +49,22 @@ export const PatientHistory: React.FC = () => {
         Πίσω στο ταμπλό
       </Button>
 
-      {data.child && (
-        <PatientCard
-          child={data.child}
-          showAmka={true}
-          footer={
-            data.child.bloodType ? (
-              <Group gap="xs">
-                <Text size="sm" c="dimmed">
-                  Ομάδα αίματος:
-                </Text>
-                <Badge size="sm">{data.child.bloodType}</Badge>
-              </Group>
-            ) : undefined
-          }
-        />
-      )}
+      <PatientCard
+        child={child}
+        showAmka={true}
+        footer={
+          child.bloodType ? (
+            <Group gap="xs">
+              <Text size="sm" c="dimmed">
+                Ομάδα αίματος:
+              </Text>
+              <Badge size="sm">{child.bloodType}</Badge>
+            </Group>
+          ) : undefined
+        }
+      />
 
-      <Tabs defaultValue="records" orientation="horizontal">
+      <Tabs value={active} onChange={onChange} orientation="horizontal" keepMountedMode="display-none">
         <Tabs.List>
           <Tabs.Tab value="records">Ιατρικό Ιστορικό</Tabs.Tab>
           <Tabs.Tab value="vaccinations">Εμβολιασμοί</Tabs.Tab>
@@ -217,198 +73,26 @@ export const PatientHistory: React.FC = () => {
           <Tabs.Tab value="birth">Δεδομένα Γέννησης</Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="birth" pt="md">
-          <Stack gap="md">
-            {birthRecordQuery.loading && !birthRecordQuery.data ? (
-              <Center py="xl">
-                <Loader />
-              </Center>
-            ) : birthRecordQuery.data ? (
-              <BirthRecordCard
-                record={birthRecordQuery.data}
-                onEdit={handleEditBirthRecord}
-                showEditButton={true}
-              />
-            ) : (
-              <Stack gap="md">
-                <Alert icon={<IconAlertCircle size={16} />} color="blue" title="Χωρίς δεδομένα">
-                  Δεν υπάρχουν δεδομένα γέννησης για αυτό το παιδί. Κάντε κλικ στο κουμπί παρακάτω για να προσθέσετε.
-                </Alert>
-                <Button
-                  leftSection={<IconPlus size={16} />}
-                  onClick={() => setBirthFormOpened(true)}
-                  style={{ alignSelf: 'flex-start' }}
-                >
-                  Προσθήκη δεδομένων γέννησης
-                </Button>
-              </Stack>
-            )}
-          </Stack>
-        </Tabs.Panel>
-
         <Tabs.Panel value="records" pt="md">
-          <Stack gap="md">
-            <Button
-              leftSection={<IconPlus size={16} />}
-              onClick={handleAddRecord}
-              style={{ alignSelf: 'flex-start' }}
-            >
-              Νέο Ιατρικό Αρχείο
-            </Button>
-            <MedicalRecordsList records={data.medicalRecords} isLoading={false} onEdit={handleEditRecord} />
-          </Stack>
+          {visited.has('records') && <RecordsTab childId={id} />}
         </Tabs.Panel>
 
         <Tabs.Panel value="vaccinations" pt="md">
-          <Stack gap="md">
-            <Button
-              leftSection={<IconPlus size={16} />}
-              onClick={() => {
-                setRecordVaccineName(undefined);
-                setVaccinationFormOpened(true);
-              }}
-              style={{ alignSelf: 'flex-start' }}
-            >
-              Νέος Εμβολιασμός
-            </Button>
-            {data.child && (
-              <VaccinationStatusWithHistory
-                child={data.child}
-                vaccinations={data.vaccinations}
-                schedules={schedulesQuery.data}
-                appointments={appointmentsQuery.data}
-                viewerRole="DOCTOR"
-                schedulesError={!!schedulesQuery.error}
-                onDoseClick={setDoseAction}
-              />
-            )}
-          </Stack>
+          {visited.has('vaccinations') && <VaccinationsTab child={child} />}
         </Tabs.Panel>
 
         <Tabs.Panel value="allergies" pt="md">
-          <Stack gap="md">
-            <Button
-              leftSection={<IconPlus size={16} />}
-              onClick={handleAddAllergy}
-              style={{ alignSelf: 'flex-start' }}
-            >
-              Νέα Αλλεργία
-            </Button>
-            <AllergiesList
-              allergies={data.allergies}
-              isLoading={false}
-              onEdit={handleEditAllergy}
-              onDelete={handleDeleteAllergy}
-            />
-          </Stack>
+          {visited.has('allergies') && <AllergiesTab childId={id} childName={childName} />}
         </Tabs.Panel>
 
         <Tabs.Panel value="growth" pt="md">
-          <Stack gap="md">
-            <Group justify="space-between">
-              <Title order={3}>Ανάπτυξη</Title>
-              <Button
-                leftSection={<IconPlus size={16} />}
-                onClick={() => setGrowthFormOpened(true)}
-                size="sm"
-              >
-                Νέα μέτρηση
-              </Button>
-            </Group>
-            <GrowthAlertCard childId={id} />
-            <GrowthChart
-              measurements={growthMeasurementsQuery.data}
-              isLoading={growthMeasurementsQuery.loading}
-              childName={data.childName}
-              childId={id}
-            />
-            <GrowthMeasurementsList
-              measurements={growthMeasurementsQuery.data}
-              isLoading={growthMeasurementsQuery.loading}
-            />
-          </Stack>
+          {visited.has('growth') && <GrowthTab childId={id} childName={childName} dateOfBirth={child.dateOfBirth} />}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="birth" pt="md">
+          {visited.has('birth') && <BirthTab childId={id} childName={childName} />}
         </Tabs.Panel>
       </Tabs>
-
-      <MedicalRecordForm
-        opened={formOpened}
-        childId={id}
-        editRecord={editingRecord}
-        onClose={() => setFormOpened(false)}
-        onSuccess={() => {
-          setFormOpened(false);
-          refetch();
-        }}
-      />
-
-      <GrowthMeasurementForm
-        opened={growthFormOpened}
-        childId={id}
-        childName={data?.childName || ''}
-        onClose={() => setGrowthFormOpened(false)}
-        onSubmit={handleAddGrowthMeasurement}
-        isLoading={growthFormLoading}
-        error={growthError?.message || null}
-      />
-
-      <AllergyForm
-        opened={allergyFormOpened}
-        onClose={() => {
-          setAllergyFormOpened(false);
-          setEditingAllergy(null);
-        }}
-        childName={data?.childName || ''}
-        onSubmit={handleSaveAllergy}
-        isLoading={allergyFormLoading || updateAllergyLoading}
-        error={allergyError?.message || null}
-        initialData={editingAllergy || undefined}
-      />
-
-      <NewVaccinationForm
-        opened={vaccinationFormOpened}
-        childId={id}
-        childName={data?.childName || ''}
-        schedules={schedulesQuery.data}
-        vaccinations={data.vaccinations}
-        initialVaccineName={recordVaccineName}
-        onClose={() => setVaccinationFormOpened(false)}
-        onSuccess={() => {
-          setVaccinationFormOpened(false);
-          refetch();
-        }}
-      />
-
-      <DoseActionDialog
-        opened={doseAction !== null}
-        onClose={() => setDoseAction(null)}
-        vaccineLabel={doseAction?.vaccineNameGr ?? ''}
-        doseLabel={doseAction?.doseNumber != null ? `Δόση ${doseAction.doseNumber}` : 'Δόση'}
-        canSchedule={doseAction?.status !== 'SCHEDULED'}
-        onRecord={handleRecordFromDose}
-        onSchedule={handleScheduleFromDose}
-      />
-
-      <NewAppointmentForm
-        opened={bookingOpened}
-        childId={id}
-        reason={bookingReason}
-        onClose={() => setBookingOpened(false)}
-        onSuccess={() => {
-          setBookingOpened(false);
-          appointmentsQuery.refetch();
-        }}
-      />
-
-      <BirthRecordForm
-        opened={birthFormOpened}
-        childId={id}
-        childName={data?.childName || ''}
-        onClose={() => setBirthFormOpened(false)}
-        onSubmit={handleSaveBirthRecord}
-        isLoading={birthFormLoading || birthUpdateLoading}
-        error={birthError?.message || null}
-        existingRecord={birthRecordQuery.data || null}
-      />
     </Stack>
   );
 };

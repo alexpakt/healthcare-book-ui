@@ -1,8 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {Alert, Center, Loader, SegmentedControl, Stack, Text, Title} from '@mantine/core';
 import {IconAlertCircle} from '@tabler/icons-react';
-import {childService} from '../../services/childService';
 import {childHealthRecordService} from '../../services/childHealthRecordService';
 import {parseLocalDate} from '../../utils/dateTime';
 import type {GrowthMeasurement} from '../../types/parent';
@@ -13,6 +12,7 @@ interface GrowthChartProps {
   error?: unknown;
   childName?: string;
   childId?: number;
+  dateOfBirth?: string;
 }
 
 type MeasurementType = 'height' | 'weight' | 'head';
@@ -50,34 +50,21 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
   error,
   childName,
   childId,
+  dateOfBirth,
 }) => {
   const [type, setType] = useState<MeasurementType>('height');
   const [references, setReferences] = useState<ReferencePoint[]>([]);
   const [loadingReferences, setLoadingReferences] = useState(false);
-  const [childAgeInMonths, setChildAgeInMonths] = useState<number | undefined>();
   const isMobile = useIsMobile();
 
-  useEffect(() => {
-    if (!childId) return;
-
-    const fetchChildAge = async () => {
-      try {
-        const child = await childService.getById(childId);
-        const birthDate = parseLocalDate(child.dateOfBirth);
-        if (!birthDate) return;
-        const today = new Date();
-        const ageInMonths = Math.floor(
-          (today.getFullYear() - birthDate.getFullYear()) * 12 +
-          (today.getMonth() - birthDate.getMonth())
-        );
-        setChildAgeInMonths(Math.max(0, ageInMonths));
-      } catch (err) {
-        console.error('Error fetching child data:', err);
-      }
-    };
-
-    fetchChildAge();
-  }, [childId]);
+  const childAgeInMonths = useMemo(() => {
+    const birthDate = dateOfBirth ? parseLocalDate(dateOfBirth) : null;
+    if (!birthDate) return undefined;
+    const today = new Date();
+    const ageInMonths =
+      (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
+    return Math.max(0, ageInMonths);
+  }, [dateOfBirth]);
 
   useEffect(() => {
     if (!childId) return;

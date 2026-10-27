@@ -55,19 +55,6 @@ describe('doctorService endpoints', () => {
     expect(calls[0].method).toBe('DELETE');
     expect(calls[0].path).toBe('/api/allergies/6');
   });
-
-  it('getPatientMedicalHistory combines records, vaccinations and allergies for one child', async () => {
-    mockApi('get', '/api/children/3', { id: 3, firstName: 'Νίκος', lastName: 'Παπαδόπουλος' });
-    mockApi('get', '/api/medical-records/child/3', [{ id: 1 }]);
-    mockApi('get', '/api/vaccinations/child/3', [{ id: 2 }]);
-    mockApi('get', '/api/allergies/child/3', [{ id: 3 }]);
-
-    const history = await doctorService.getPatientMedicalHistory(3);
-
-    expect(history.medicalRecords).toHaveLength(1);
-    expect(history.vaccinations).toHaveLength(1);
-    expect(history.allergies).toHaveLength(1);
-  });
 });
 
 describe('doctorService appointment views', () => {

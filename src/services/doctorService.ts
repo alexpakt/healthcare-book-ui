@@ -1,11 +1,9 @@
 import { apiClient } from './apiClient';
 import { appointmentService } from './appointmentService';
 import { childService } from './childService';
-import { childHealthRecordService } from './childHealthRecordService';
 import type {
   AssignedChild,
   DoctorAppointment,
-  PatientMedicalHistory,
   MedicalHistory,
   AllergyRecord,
   DoctorDashboardData,
@@ -111,29 +109,6 @@ export const doctorService = {
       currentPage: page,
       pageSize: pageSize,
     };
-  },
-
-  async getPatientMedicalHistory(childId: number): Promise<PatientMedicalHistory> {
-    try {
-      const [child, medicalRecords, vaccinations, allergies] = await Promise.all([
-        childService.getById(childId),
-        childHealthRecordService.getMedicalRecords(childId),
-        childHealthRecordService.getVaccinations(childId),
-        childHealthRecordService.getAllergies(childId),
-      ]);
-
-      return {
-        childId,
-        childName: `${child.firstName} ${child.lastName}`,
-        child,
-        medicalRecords: medicalRecords || [],
-        vaccinations: vaccinations || [],
-        allergies: allergies || [],
-      };
-    } catch (error) {
-      console.error('Error fetching patient medical history:', error);
-      throw error;
-    }
   },
 
   async createMedicalRecord(request: MedicalRecordRequest): Promise<MedicalHistory> {

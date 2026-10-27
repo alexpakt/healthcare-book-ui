@@ -4,26 +4,16 @@ import { useMediaQuery } from '@mantine/hooks';
 import { Stack, Title, Text, Tabs, Alert, Button, Paper, Group, Avatar, Badge, Center, Loader } from '@mantine/core';
 import { IconAlertCircle, IconArrowLeft, IconEdit } from '@tabler/icons-react';
 import { getAgeDisplay } from '../../utils/ageCalculator';
+import { useChild } from '../../hooks/useChildData';
+import { useVisitedTabs } from '../../hooks/useVisitedTabs';
 import {
-  useChild,
-  useChildGrowthMeasurements,
-  useChildBirthRecord,
-  useChildVaccinations,
-  useChildMedicalRecords,
-  useChildAllergies,
-} from '../../hooks/useChildData';
-import { AppointmentsTable } from '../shared/AppointmentsTable';
-import { AppointmentRequestForm } from '../parent/AppointmentRequestForm';
-import { VaccinationStatusWithHistory } from '../shared/VaccinationStatusWithHistory';
-import type { DoseSelection } from '../shared/VaccinationStatusGrid';
-import { useChildAppointments, useUpdateAppointmentStatus } from '../../hooks/useAppointmentData';
-import { useAppointmentStatusAction } from '../../hooks/useAppointmentStatusAction';
-import { useVaccinationSchedules } from '../../hooks/useVaccinationCatalog';
-import { MedicalRecordsList } from '../shared/MedicalRecordsList';
-import { AllergiesList } from '../shared/AllergiesList';
-import { GrowthChart } from '../shared/GrowthChart';
-import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
-import { BirthRecordCard } from '../shared/BirthRecordCard';
+  AllergiesTab,
+  AppointmentsTab,
+  BirthTab,
+  GrowthTab,
+  MedicalRecordsTab,
+  VaccinationsTab,
+} from './ChildDetailTabs';
 import { ChildRegistrationForm } from '../parent/ChildRegistrationForm';
 import { formatDate } from '../../utils/dateFormat';
 
@@ -36,31 +26,8 @@ export const ChildDetail: React.FC = () => {
 
   const { data: child, loading: childLoading, error: childError, refetch: refetchChild } = useChild(id);
   const [editOpened, setEditOpened] = useState(false);
+  const { active, onChange, visited } = useVisitedTabs('appointments');
   const isDesktop = useMediaQuery('(min-width: 48em)');
-  const appointmentsQuery = useChildAppointments(id);
-  const vaccinationsQuery = useChildVaccinations(id);
-  const medicalRecordsQuery = useChildMedicalRecords(id);
-  const allergiesQuery = useChildAllergies(id);
-  const growthMeasurementsQuery = useChildGrowthMeasurements(id);
-  const birthRecordQuery = useChildBirthRecord(id);
-  const schedulesQuery = useVaccinationSchedules();
-  const updateStatus = useUpdateAppointmentStatus();
-  const [bookingDose, setBookingDose] = useState<DoseSelection | null>(null);
-  const { actionError, clearActionError, runStatusUpdate } = useAppointmentStatusAction(
-    updateStatus.mutate,
-    appointmentsQuery.refetch
-  );
-
-  const handleCancelAppointment = (appointmentId: number) => runStatusUpdate(appointmentId, 'CANCELLED');
-
-  const handleDoseClick = (dose: DoseSelection) => {
-    setBookingDose(dose);
-  };
-
-  const handleBookingSuccess = async () => {
-    setBookingDose(null);
-    await appointmentsQuery.refetch();
-  };
 
   if (childLoading) {
     return (
@@ -100,12 +67,6 @@ export const ChildDetail: React.FC = () => {
       >
         Πίσω στα παιδιά μου
       </Button>
-
-      {actionError && (
-        <Alert color="red" title="Η ακύρωση απέτυχε" withCloseButton onClose={clearActionError}>
-          {actionError}
-        </Alert>
-      )}
 
       <Paper p="md" radius="md" withBorder>
         <Stack gap="md">
@@ -175,19 +136,7 @@ export const ChildDetail: React.FC = () => {
         onSuccess={refetchChild}
       />
 
-      <AppointmentRequestForm
-        opened={bookingDose !== null}
-        onClose={() => setBookingDose(null)}
-        onSuccess={handleBookingSuccess}
-        initialChildId={id}
-        initialReason={
-          bookingDose
-            ? `Εμβολιασμός: ${bookingDose.vaccineName} (${bookingDose.recommendedAgeMonths}μ)`
-            : undefined
-        }
-      />
-
-      <Tabs defaultValue="appointments" orientation="horizontal">
+      <Tabs value={active} onChange={onChange} orientation="horizontal" keepMountedMode="display-none">
         <Tabs.List>
           <Tabs.Tab value="appointments">Ραντεβού</Tabs.Tab>
           <Tabs.Tab value="vaccinations">Εμβολιασμοί</Tabs.Tab>
@@ -197,68 +146,28 @@ export const ChildDetail: React.FC = () => {
           <Tabs.Tab value="birth">Δεδομένα Γέννησης</Tabs.Tab>
         </Tabs.List>
 
-        <Tabs.Panel value="birth" pt="md">
-          {birthRecordQuery.loading && !birthRecordQuery.data ? (
-            <Center py="xl">
-              <Loader />
-            </Center>
-          ) : birthRecordQuery.data ? (
-            <BirthRecordCard record={birthRecordQuery.data} showEditButton={false} />
-          ) : (
-            <Alert icon={<IconAlertCircle size={16} />} color="blue" title="Χωρίς δεδομένα">
-              Δεν υπάρχουν δεδομένα γέννησης για αυτό το παιδί.
-            </Alert>
-          )}
-        </Tabs.Panel>
-
         <Tabs.Panel value="appointments" pt="md">
-          <AppointmentsTable
-            viewer="parent"
-            title="Ραντεβού"
-            emptyMessage="Δεν υπάρχουν ραντεβού για αυτό το παιδί"
-            appointments={appointmentsQuery.data}
-            isLoading={appointmentsQuery.loading}
-            onCancel={handleCancelAppointment}
-          />
+          {visited.has('appointments') && <AppointmentsTab childId={id} />}
         </Tabs.Panel>
 
         <Tabs.Panel value="vaccinations" pt="md">
-          <VaccinationStatusWithHistory
-            child={child}
-            vaccinations={vaccinationsQuery.data}
-            schedules={schedulesQuery.data}
-            appointments={appointmentsQuery.data}
-            viewerRole="PARENT"
-            isLoading={vaccinationsQuery.loading}
-            schedulesError={!!schedulesQuery.error}
-            onDoseClick={handleDoseClick}
-          />
+          {visited.has('vaccinations') && <VaccinationsTab child={child} />}
         </Tabs.Panel>
 
         <Tabs.Panel value="medical-records" pt="md">
-          <MedicalRecordsList
-            records={medicalRecordsQuery.data}
-            isLoading={medicalRecordsQuery.loading}
-          />
+          {visited.has('medical-records') && <MedicalRecordsTab childId={id} />}
         </Tabs.Panel>
 
         <Tabs.Panel value="allergies" pt="md">
-          <AllergiesList allergies={allergiesQuery.data} isLoading={allergiesQuery.loading} />
+          {visited.has('allergies') && <AllergiesTab childId={id} />}
         </Tabs.Panel>
 
         <Tabs.Panel value="growth" pt="md">
-          <Stack gap="lg">
-            <GrowthChart
-              measurements={growthMeasurementsQuery.data}
-              isLoading={growthMeasurementsQuery.loading}
-              childName={`${child?.firstName} ${child?.lastName}`}
-              childId={id}
-            />
-            <GrowthMeasurementsList
-              measurements={growthMeasurementsQuery.data}
-              isLoading={growthMeasurementsQuery.loading}
-            />
-          </Stack>
+          {visited.has('growth') && <GrowthTab child={child} />}
+        </Tabs.Panel>
+
+        <Tabs.Panel value="birth" pt="md">
+          {visited.has('birth') && <BirthTab childId={id} />}
         </Tabs.Panel>
       </Tabs>
     </Stack>

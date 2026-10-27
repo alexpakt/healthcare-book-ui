@@ -28,11 +28,6 @@ export function useDoctorAppointments(page: number = 1, pageSize: number = 10) {
   return useApi(fetchFn);
 }
 
-export function useDoctorPatientMedicalHistory(childId: number) {
-  const fetchFn = useCallback(() => doctorService.getPatientMedicalHistory(childId), [childId]);
-  return useApi(fetchFn);
-}
-
 export function useDoctorCreateMedicalRecord() {
   return useMutation((request?: MedicalRecordRequest) =>
     doctorService.createMedicalRecord(request!)

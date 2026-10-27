@@ -13,15 +13,6 @@ export interface DoctorAppointment extends Appointment {
   parentName: string;
 }
 
-export interface PatientMedicalHistory {
-  childId: number;
-  childName: string;
-  child: any;
-  medicalRecords: MedicalHistory[];
-  vaccinations: VaccinationHistory[];
-  allergies: AllergyRecord[];
-}
-
 export type MedicalHistory = MedicalRecord;
 export type VaccinationHistory = VaccinationRecord;
 export type { AllergyRecord };
