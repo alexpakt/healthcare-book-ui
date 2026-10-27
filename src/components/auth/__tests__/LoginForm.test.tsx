@@ -19,7 +19,7 @@ describe('LoginForm', () => {
 
   it('sends the entered credentials and navigates home on success', async () => {
     const user = userEvent.setup();
-    const calls = mockApi('post', '/api/auth/login', { token: 't', role: 'ROLE_PARENT', profileId: 1 });
+    const calls = mockApi('post', '/api/auth/login', { role: 'ROLE_PARENT', profileId: 1 });
     renderAuthApp(<>{loginRoute}{homeRoute}</>, { route: '/login', defaultLoginPage: false });
 
     await user.type(screen.getByLabelText(/όνομα χρήστη/i), 'maria');
