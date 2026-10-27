@@ -8,12 +8,14 @@ interface MedicalRecordsListProps {
   records: MedicalRecord[] | null;
   isLoading: boolean;
   onEdit?: (record: MedicalRecord) => void;
+  canEdit?: (record: MedicalRecord) => boolean;
 }
 
 export const MedicalRecordsList: React.FC<MedicalRecordsListProps> = ({
   records,
   isLoading,
   onEdit,
+  canEdit,
 }) => {
   if (isLoading) {
     return (
@@ -51,7 +53,7 @@ export const MedicalRecordsList: React.FC<MedicalRecordsListProps> = ({
                 <Text size="sm" c="dimmed">
                   {formatDate(record.recordDate)}
                 </Text>
-                {onEdit && (
+                {onEdit && (canEdit?.(record) ?? true) && (
                   <Button
                     size="xs"
                     variant="subtle"

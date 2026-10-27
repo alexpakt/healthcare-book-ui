@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, Button, Center, Group, Loader, Stack, Title } from '@mantine/core';
 import { IconAlertCircle, IconPlus } from '@tabler/icons-react';
+import { useAuth } from '../../hooks/useAuth';
 import {
   useDoctorCreateAllergy,
   useDoctorCreateBirthRecord,
@@ -37,6 +38,7 @@ import type { MedicalHistory } from '../../types/doctor';
 import type { AllergyRecord, Child } from '../../types/parent';
 
 export const RecordsTab: React.FC<{ childId: number }> = ({ childId }) => {
+  const { user } = useAuth();
   const records = useChildMedicalRecords(childId);
   const [formOpened, setFormOpened] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MedicalHistory | null>(null);
@@ -56,7 +58,12 @@ export const RecordsTab: React.FC<{ childId: number }> = ({ childId }) => {
       <Button leftSection={<IconPlus size={16} />} onClick={handleAdd} style={{ alignSelf: 'flex-start' }}>
         Νέο Ιατρικό Αρχείο
       </Button>
-      <MedicalRecordsList records={records.data} isLoading={records.loading} onEdit={handleEdit} />
+      <MedicalRecordsList
+        records={records.data}
+        isLoading={records.loading}
+        onEdit={handleEdit}
+        canEdit={(record) => record.doctorId === user?.profileId}
+      />
 
       <MedicalRecordForm
         opened={formOpened}
