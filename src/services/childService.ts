@@ -55,6 +55,10 @@ export const childService = {
     return response.data;
   },
 
+  async unassignDoctor(childId: number, doctorId: number): Promise<void> {
+    await apiClient.delete(`/api/children/${childId}/doctors/${doctorId}`);
+  },
+
   async createChild(childData: CreateChildRequest): Promise<Child> {
     try {
       const response = await apiClient.post<Child>('/api/children', childData);

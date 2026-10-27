@@ -18,6 +18,12 @@ export function useChildDoctors(childId?: number) {
   return useApi(fetchFn, undefined, { skip: childId === undefined });
 }
 
+export function useUnassignDoctor() {
+  return useMutation((payload?: { childId: number; doctorId: number }) =>
+    childService.unassignDoctor(payload!.childId, payload!.doctorId)
+  );
+}
+
 export function useCreateChild() {
   return useMutation((childData?: CreateChildRequest) =>
     childService.createChild(childData!)

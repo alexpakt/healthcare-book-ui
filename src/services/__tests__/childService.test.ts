@@ -28,6 +28,13 @@ describe('childService', () => {
     expect(calls[0].path).toBe('/api/children/3/doctors');
   });
 
+  it('unassignDoctor deletes the doctor from the child', async () => {
+    const calls = mockApi('delete', '/api/children/3/doctors/7', {}, 204);
+    await childService.unassignDoctor(3, 7);
+    expect(calls[0].method).toBe('DELETE');
+    expect(calls[0].path).toBe('/api/children/3/doctors/7');
+  });
+
   it('createChild posts the child data', async () => {
     const data = { firstName: 'Νίκος', lastName: 'Παπαδόπουλος' };
     const calls = mockApi('post', '/api/children', {});

@@ -9,7 +9,7 @@ export interface DoctorChildRequestResponse {
   childId: number;
   childFirstName: string;
   childLastName: string;
-  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'REVOKED';
   requestedAt: string;
   resolvedAt?: string;
   notes?: string;

@@ -34,6 +34,7 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
   const [requestOpened, setRequestOpened] = useState(false);
   const [requestNotes, setRequestNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [requestError, setRequestError] = useState('');
 
   const isAlreadyPatient = foundChild && patients?.some(p => p.id === foundChild.id);
 
@@ -62,9 +63,15 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
     }
   };
 
+  const closeRequestModal = () => {
+    setRequestOpened(false);
+    setRequestError('');
+  };
+
   const handleSendRequest = async () => {
     if (!foundChild) return;
 
+    setRequestError('');
     setSubmitting(true);
     try {
       await doctorChildRequestService.sendConnectionRequest({
@@ -77,7 +84,7 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
       setRequestNotes('');
       setRequestOpened(false);
     } catch (err: any) {
-      setError(
+      setRequestError(
         err.response?.data?.message ||
           'Σφάλμα κατά την αποστολή της αίτησης'
       );
@@ -168,7 +175,7 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
 
       <Modal
         opened={requestOpened}
-        onClose={() => setRequestOpened(false)}
+        onClose={closeRequestModal}
         title="Αίτηση Σύνδεσης Ασθενή"
         centered
       >
@@ -185,8 +192,14 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
             rows={3}
           />
 
+          {requestError && (
+            <Alert icon={<IconAlertCircle size={16} />} color="red" title="Σφάλμα">
+              {requestError}
+            </Alert>
+          )}
+
           <Group justify="flex-end">
-            <Button variant="light" onClick={() => setRequestOpened(false)} disabled={submitting}>
+            <Button variant="light" onClick={closeRequestModal} disabled={submitting}>
               Ακύρωση
             </Button>
             <Button

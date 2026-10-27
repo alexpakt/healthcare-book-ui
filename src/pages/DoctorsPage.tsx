@@ -3,8 +3,9 @@ import { Stack, Title, Text, Alert, Button, Group, Select, Switch } from '@manti
 import { IconAlertCircle, IconRefresh } from '@tabler/icons-react';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { DoctorsTable } from '../components/parent/DoctorsTable';
+import type { DoctorDirectoryEntry } from '../services/directoryService';
 import { useDirectoryDoctors } from '../hooks/useDirectoryData';
-import { useChildDoctors, useChildren } from '../hooks/useChildData';
+import { useChildDoctors, useChildren, useUnassignDoctor } from '../hooks/useChildData';
 
 const DoctorsPage: React.FC = () => {
   const { data: doctors, loading: doctorsLoading, error, refetch } = useDirectoryDoctors();
@@ -14,9 +15,21 @@ const DoctorsPage: React.FC = () => {
 
   const hasChildren = (children?.length ?? 0) > 0;
   const activeChildId = selectedChildId ?? children?.[0]?.id;
-  const { data: connectedDoctors, loading: connectedLoading } = useChildDoctors(
+  const { data: connectedDoctors, loading: connectedLoading, refetch: refetchConnected } = useChildDoctors(
     hasChildren ? activeChildId : undefined
   );
+
+  const { mutate: unassignDoctor, error: unassignError } = useUnassignDoctor();
+
+  const handleUnassign = async (doctor: DoctorDirectoryEntry) => {
+    if (!activeChildId) return;
+    try {
+      await unassignDoctor({ childId: activeChildId, doctorId: doctor.id });
+    } catch {
+      return;
+    }
+    await refetchConnected();
+  };
 
   const showConnectedOnly = onlyConnected && hasChildren;
   const visibleDoctors = showConnectedOnly ? connectedDoctors : doctors;
@@ -39,6 +52,12 @@ const DoctorsPage: React.FC = () => {
                 Δοκιμάστε ξανά
               </Button>
             </Stack>
+          </Alert>
+        )}
+
+        {unassignError && (
+          <Alert icon={<IconAlertCircle size={16} />} color="red" title="Σφάλμα">
+            Η αποσύνδεση του ιατρού απέτυχε. Παρακαλώ δοκιμάστε ξανά.
           </Alert>
         )}
 
@@ -71,6 +90,7 @@ const DoctorsPage: React.FC = () => {
         <DoctorsTable
           doctors={visibleDoctors ?? null}
           isLoading={isLoading}
+          onUnassign={showConnectedOnly ? handleUnassign : undefined}
           emptyMessage={
             showConnectedOnly
               ? 'Δεν υπάρχει συνδεδεμένος ιατρός για αυτό το παιδί. Απενεργοποιήστε το φίλτρο για να δείτε όλους τους ιατρούς.'
