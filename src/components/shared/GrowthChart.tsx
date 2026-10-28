@@ -234,14 +234,14 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
   const renderCustomTooltip = (props: any) => {
     const { active, payload, label } = props;
     if (active && payload && payload.length) {
-      const percentileOrder = ['p03', 'p10', 'p25', 'p50', 'p75', 'p90', 'p97'];
+      const percentileOrder = ['p03', 'p15', 'p25', 'p50', 'p75', 'p85', 'p97'];
       const percentileLabels: Record<string, string> = {
         p03: '3η εκατοστιαία',
-        p10: '10η εκατοστιαία',
+        p10: '15η εκατοστιαία',
         p25: '25η εκατοστιαία',
         p50: '50η εκατοστιαία (διάμεσος)',
         p75: '75η εκατοστιαία',
-        p90: '90η εκατοστιαία',
+        p90: '85η εκατοστιαία',
         p97: '97η εκατοστιαία',
         value: 'Μετρούμενη τιμή',
       };
@@ -321,11 +321,11 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
             {references.length > 0 && (
               <>
                 <Line type="monotone" dataKey="p03" stroke="#ef5350" strokeDasharray="5 5" name="3η εκατοστιαία" isAnimationActive={false} dot={false} strokeWidth={2} />
-                <Line type="monotone" dataKey="p10" stroke="#ff9800" strokeDasharray="5 5" name="10η εκατοστιαία" isAnimationActive={false} dot={false} />
+                <Line type="monotone" dataKey="p15" stroke="#ff9800" strokeDasharray="5 5" name="15η εκατοστιαία" isAnimationActive={false} dot={false} />
                 <Line type="monotone" dataKey="p25" stroke="#b0bec5" strokeDasharray="5 5" name="25η εκατοστιαία" isAnimationActive={false} dot={false} />
                 <Line type="monotone" dataKey="p50" stroke="#4caf50" strokeDasharray="5 5" name="50η εκατοστιαία (διάμεσος)" isAnimationActive={false} dot={false} strokeWidth={2} />
                 <Line type="monotone" dataKey="p75" stroke="#b0bec5" strokeDasharray="5 5" name="75η εκατοστιαία" isAnimationActive={false} dot={false} />
-                <Line type="monotone" dataKey="p90" stroke="#ff9800" strokeDasharray="5 5" name="90η εκατοστιαία" isAnimationActive={false} dot={false} />
+                <Line type="monotone" dataKey="p85" stroke="#ff9800" strokeDasharray="5 5" name="85η εκατοστιαία" isAnimationActive={false} dot={false} />
                 <Line type="monotone" dataKey="p97" stroke="#ef5350" strokeDasharray="5 5" name="97η εκατοστιαία" isAnimationActive={false} dot={false} strokeWidth={2} />
               </>
             )}
