@@ -5,7 +5,6 @@ import type { DoctorAppointment } from '../../types/doctor';
 
 // Fixed "now": 21 October 2026, midday local time.
 const NOW = new Date(2026, 9, 21, 12, 0, 0);
-const DAY = 24 * 60 * 60 * 1000;
 
 const appointment = (overrides: Partial<DoctorAppointment>): DoctorAppointment => ({
   id: 1,
@@ -67,16 +66,6 @@ describe('doctorService appointment views', () => {
     vi.useRealTimers();
   });
 
-  it('getTodayAppointments returns only scheduled appointments on today’s date', async () => {
-    mockApi('get', '/api/appointments', [
-      appointment({ id: 1 }),
-      appointment({ id: 2, status: 'REQUESTED' }),
-      appointment({ id: 3, appointmentDate: new Date(2026, 9, 20, 15).toISOString() }),
-    ]);
-    const today = await doctorService.getTodayAppointments();
-    expect(today.map((a) => a.id)).toEqual([1]);
-  });
-
   it('getPendingAppointments returns only requests awaiting a decision', async () => {
     mockApi('get', '/api/appointments', [
       appointment({ id: 1 }),
@@ -84,17 +73,6 @@ describe('doctorService appointment views', () => {
     ]);
     const pending = await doctorService.getPendingAppointments();
     expect(pending.map((a) => a.id)).toEqual([2]);
-  });
-
-  it('getUpcomingAppointments returns future scheduled appointments up to the limit', async () => {
-    mockApi('get', '/api/appointments', [
-      appointment({ id: 1, appointmentDate: new Date(NOW.getTime() + 1 * DAY).toISOString() }),
-      appointment({ id: 2, appointmentDate: new Date(NOW.getTime() + 2 * DAY).toISOString() }),
-      appointment({ id: 3, appointmentDate: new Date(NOW.getTime() + 3 * DAY).toISOString() }),
-      appointment({ id: 4, appointmentDate: new Date(NOW.getTime() - 1 * DAY).toISOString() }),
-    ]);
-    const upcoming = await doctorService.getUpcomingAppointments(2);
-    expect(upcoming.map((a) => a.id)).toEqual([1, 2]);
   });
 
   it('getAppointments pages the full list and reports totals', async () => {

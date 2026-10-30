@@ -14,16 +14,6 @@ export function useDoctorAssignedChildren() {
   return useApi(fetchFn);
 }
 
-export function useDoctorTodayAppointments() {
-  const fetchFn = useCallback(() => doctorService.getTodayAppointments(), []);
-  return useApi(fetchFn);
-}
-
-export function useDoctorUpcomingAppointments(limit?: number) {
-  const fetchFn = useCallback(() => doctorService.getUpcomingAppointments(limit), [limit]);
-  return useApi(fetchFn);
-}
-
 export function useDoctorAppointments(page: number = 1, pageSize: number = 10) {
   const fetchFn = useCallback(() => doctorService.getAppointments(page, pageSize), [page, pageSize]);
   return useApi(fetchFn);

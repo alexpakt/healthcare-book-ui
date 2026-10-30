@@ -82,16 +82,8 @@ export const doctorService = {
     }
   },
 
-  async getTodayAppointments(): Promise<DoctorAppointment[]> {
-    return filterToday(await appointmentService.getAll<DoctorAppointment>());
-  },
-
   async getPendingAppointments(): Promise<DoctorAppointment[]> {
     return filterPending(await appointmentService.getAll<DoctorAppointment>());
-  },
-
-  async getUpcomingAppointments(limit?: number): Promise<DoctorAppointment[]> {
-    return filterUpcoming(await appointmentService.getAll<DoctorAppointment>(), limit);
   },
 
   async getAppointments(
