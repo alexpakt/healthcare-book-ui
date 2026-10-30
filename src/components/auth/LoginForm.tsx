@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Paper, TextInput, PasswordInput, Button, Group, Text, Stack, Center, Anchor, Alert } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
+import { EchrLogo } from '../dashboard/EchrLogo';
 import { useAuth } from '../../hooks/useAuth';
 
 export const LoginForm: React.FC = () => {
@@ -36,8 +37,9 @@ export const LoginForm: React.FC = () => {
       <Stack gap="lg" style={{ width: '100%', maxWidth: 400 }}>
         <Center>
           <Stack gap={0} align="center">
+            <EchrLogo size={64} />
             <Text fw={700} size="xl">
-              ECHR
+              eCHR
             </Text>
             <Text size="sm" c="dimmed">
               Ηλεκτρονικό Αρχείο Υγείας Παιδιών
@@ -86,7 +88,7 @@ export const LoginForm: React.FC = () => {
 
         <Center>
           <Text size="xs" c="dimmed">
-            © 2026 ECHR. Όλα τα δικαιώματα διατηρούνται.
+            © 2026 eCHR. Όλα τα δικαιώματα διατηρούνται.
           </Text>
         </Center>
       </Stack>

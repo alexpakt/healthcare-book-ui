@@ -25,6 +25,7 @@ import {
   IconServerCog,
   IconStethoscope,
 } from '@tabler/icons-react';
+import { EchrLogo } from './EchrLogo';
 import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import type { UserRole } from '../../types/common';
@@ -117,7 +118,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <Group justify="space-between" h="100%" px="md">
           <Group gap="sm">
             <Burger opened={navOpened} onClick={toggleNav} hiddenFrom="sm" size="sm" />
-            <Title order={3}>ECHR</Title>
+            <Group gap={8} wrap="nowrap">
+              <EchrLogo />
+              <Title order={3}>eCHR</Title>
+            </Group>
           </Group>
           <Group gap="md">
             <Menu position="bottom-end" shadow="md">
