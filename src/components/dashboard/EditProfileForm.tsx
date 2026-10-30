@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {Paper, TextInput, Button, Group, Stack, Alert, Center, Loader, Title} from '@mantine/core';
 import { IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
@@ -32,7 +32,7 @@ export const EditProfileForm: React.FC = () => {
   const isDoctor = user?.role === 'ROLE_DOCTOR';
   const isSupportedRole = user?.role === 'ROLE_DOCTOR' || user?.role === 'ROLE_PARENT';
 
-  const [formData, setFormData] = useState<ProfileFormData>(EMPTY_FORM);
+  const [edits, setEdits] = useState<Partial<ProfileFormData>>({});
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -46,40 +46,27 @@ export const EditProfileForm: React.FC = () => {
   const loadError = activeProfile.error?.message || '';
   const isSaving = isSavingDoctor || isSavingParent;
 
-  useEffect(() => {
-    if (doctorProfile.data) {
-      const profile = doctorProfile.data;
-      setFormData({
-        ...EMPTY_FORM,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        amka: profile.amka,
-        email: profile.email,
-        phoneNumber: profile.phoneNumber || '',
-        specialization: profile.specialization,
-        licenseNumber: profile.licenseNumber,
-        address: profile.address || '',
-      });
-    }
-  }, [doctorProfile.data]);
-
-  useEffect(() => {
-    if (parentProfile.data) {
-      const profile = parentProfile.data;
-      setFormData({
-        ...EMPTY_FORM,
-        firstName: profile.firstName,
-        lastName: profile.lastName,
-        email: profile.email,
-        phoneNumber: profile.phoneNumber || '',
-        address: profile.address || '',
-      });
-    }
-  }, [parentProfile.data]);
+  const loadedData: ProfileFormData = {
+    ...EMPTY_FORM,
+    ...(activeProfile.data && {
+      firstName: activeProfile.data.firstName,
+      lastName: activeProfile.data.lastName,
+      email: activeProfile.data.email,
+      phoneNumber: activeProfile.data.phoneNumber || '',
+      address: activeProfile.data.address || '',
+    }),
+    ...(isDoctor &&
+      doctorProfile.data && {
+        amka: doctorProfile.data.amka,
+        specialization: doctorProfile.data.specialization,
+        licenseNumber: doctorProfile.data.licenseNumber,
+      }),
+  };
+  const formData: ProfileFormData = { ...loadedData, ...edits };
 
   const handleFieldChange = (field: keyof ProfileFormData, value: string) => {
     setSaveSuccess(false);
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setEdits((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

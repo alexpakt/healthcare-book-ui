@@ -102,7 +102,7 @@ export function useDoctorUpdateBirthRecord() {
 }
 
 export function useDoctorProfile(skip: boolean = false) {
-  const fetchFn = useCallback(() => doctorService.getMyProfile(), [skip]);
+  const fetchFn = useCallback(() => doctorService.getMyProfile(), []);
   return useApi(fetchFn, undefined, { skip });
 }
 

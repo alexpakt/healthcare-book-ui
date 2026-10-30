@@ -8,6 +8,6 @@ export function useVaccinationSchedules() {
 }
 
 export function useAllVaccines(skip: boolean = false) {
-  const fetchFn = useCallback(() => vaccinationCatalogService.getAllVaccines(), [skip]);
+  const fetchFn = useCallback(() => vaccinationCatalogService.getAllVaccines(), []);
   return useApi(fetchFn, undefined, { skip });
 }

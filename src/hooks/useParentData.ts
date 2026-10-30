@@ -10,7 +10,7 @@ export function useParentDashboardData() {
 }
 
 export function useParentProfile(skip: boolean = false) {
-  const fetchFn = useCallback(() => parentService.getMyProfile(), [skip]);
+  const fetchFn = useCallback(() => parentService.getMyProfile(), []);
   return useApi(fetchFn, undefined, { skip });
 }
 

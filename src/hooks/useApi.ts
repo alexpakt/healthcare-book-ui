@@ -52,6 +52,8 @@ export function useApi<T>(
     }
   }, [fetchFn]);
 
+  const skip = options.skip;
+
   useEffect(() => {
     if (optionsRef.current.skip) return;
 
@@ -64,7 +66,7 @@ export function useApi<T>(
     return () => {
       isMounted = false;
     };
-  }, [fetchData]);
+  }, [fetchData, skip]);
 
   const refetch = useCallback(async () => {
     await fetchData();
