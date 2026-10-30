@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { doctorService } from '../services/doctorService';
+import type { UpdateDoctorProfileRequest } from '../types/profile';
 import type { MedicalRecordRequest, GrowthMeasurementRequest, BirthRecordRequest } from '../services/doctorService';
 
 export function useDoctorDashboardData() {
@@ -91,6 +92,17 @@ export function useDoctorUpdateBirthRecord() {
   return useMutation(
     (payload?: { childId: number; request: BirthRecordRequest }) =>
       doctorService.updateBirthRecord(payload!.childId, payload!.request)
+  );
+}
+
+export function useDoctorProfile(skip: boolean = false) {
+  const fetchFn = useCallback(() => doctorService.getMyProfile(), [skip]);
+  return useApi(fetchFn, undefined, { skip });
+}
+
+export function useDoctorUpdateProfile() {
+  return useMutation((request?: UpdateDoctorProfileRequest) =>
+    doctorService.updateMyProfile(request!)
   );
 }
 

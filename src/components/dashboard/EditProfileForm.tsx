@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import {Paper, TextInput, Button, Group, Stack, Alert, Center, Loader, Title} from '@mantine/core';
 import { IconAlertCircle, IconCheck } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
-import { doctorService } from '../../services/doctorService';
-import { parentService } from '../../services/parentService';
+import { useDoctorProfile, useDoctorUpdateProfile } from '../../hooks/useDoctorData';
+import { useParentProfile, useParentUpdateProfile } from '../../hooks/useParentData';
 
 interface ProfileFormData {
   firstName: string;
@@ -33,57 +33,49 @@ export const EditProfileForm: React.FC = () => {
   const isSupportedRole = user?.role === 'ROLE_DOCTOR' || user?.role === 'ROLE_PARENT';
 
   const [formData, setFormData] = useState<ProfileFormData>(EMPTY_FORM);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadError, setLoadError] = useState('');
-  const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const loadProfile = async () => {
-    setIsLoading(true);
-    setLoadError('');
-    try {
-      if (isDoctor) {
-        const profile = await doctorService.getMyProfile();
-        setFormData({
-          ...EMPTY_FORM,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          amka: profile.amka,
-          email: profile.email,
-          phoneNumber: profile.phoneNumber || '',
-          specialization: profile.specialization,
-          licenseNumber: profile.licenseNumber,
-          address: profile.address || '',
-        });
-      } else {
-        const profile = await parentService.getMyProfile();
-        setFormData({
-          ...EMPTY_FORM,
-          firstName: profile.firstName,
-          lastName: profile.lastName,
-          email: profile.email,
-          phoneNumber: profile.phoneNumber || '',
-          address: profile.address || '',
-        });
-      }
-    } catch (err: any) {
-      setLoadError(
-        err.response?.data?.message || err.message || 'Αποτυχία φόρτωσης στοιχείων προφίλ.'
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const doctorProfile = useDoctorProfile(!isDoctor);
+  const parentProfile = useParentProfile(isDoctor || !isSupportedRole);
+  const { mutate: updateDoctorProfile, loading: isSavingDoctor } = useDoctorUpdateProfile();
+  const { mutate: updateParentProfile, loading: isSavingParent } = useParentUpdateProfile();
+
+  const activeProfile = isDoctor ? doctorProfile : parentProfile;
+  const isLoading = isSupportedRole && activeProfile.loading;
+  const loadError = activeProfile.error?.message || '';
+  const isSaving = isSavingDoctor || isSavingParent;
 
   useEffect(() => {
-    if (!isSupportedRole) {
-      setIsLoading(false);
-      return;
+    if (doctorProfile.data) {
+      const profile = doctorProfile.data;
+      setFormData({
+        ...EMPTY_FORM,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        amka: profile.amka,
+        email: profile.email,
+        phoneNumber: profile.phoneNumber || '',
+        specialization: profile.specialization,
+        licenseNumber: profile.licenseNumber,
+        address: profile.address || '',
+      });
     }
-    loadProfile();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDoctor, isSupportedRole]);
+  }, [doctorProfile.data]);
+
+  useEffect(() => {
+    if (parentProfile.data) {
+      const profile = parentProfile.data;
+      setFormData({
+        ...EMPTY_FORM,
+        firstName: profile.firstName,
+        lastName: profile.lastName,
+        email: profile.email,
+        phoneNumber: profile.phoneNumber || '',
+        address: profile.address || '',
+      });
+    }
+  }, [parentProfile.data]);
 
   const handleFieldChange = (field: keyof ProfileFormData, value: string) => {
     setSaveSuccess(false);
@@ -94,11 +86,10 @@ export const EditProfileForm: React.FC = () => {
     e.preventDefault();
     setSaveError('');
     setSaveSuccess(false);
-    setIsSaving(true);
 
     try {
       if (isDoctor) {
-        await doctorService.updateMyProfile({
+        await updateDoctorProfile({
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
@@ -108,7 +99,7 @@ export const EditProfileForm: React.FC = () => {
           address: formData.address || undefined,
         });
       } else {
-        await parentService.updateMyProfile({
+        await updateParentProfile({
           firstName: formData.firstName,
           lastName: formData.lastName,
           email: formData.email,
@@ -119,10 +110,8 @@ export const EditProfileForm: React.FC = () => {
       setSaveSuccess(true);
     } catch (err: any) {
       setSaveError(
-        err.response?.data?.message || err.message || 'Αποτυχία ενημέρωσης στοιχείων προφίλ.'
+        err.message || 'Αποτυχία ενημέρωσης στοιχείων προφίλ.'
       );
-    } finally {
-      setIsSaving(false);
     }
   };
 
@@ -147,7 +136,7 @@ export const EditProfileForm: React.FC = () => {
       <Alert icon={<IconAlertCircle size={16} />} color="red" title="Σφάλμα Φόρτωσης">
         <Stack gap="sm">
           <div>{loadError}</div>
-          <Button size="xs" variant="light" onClick={loadProfile}>
+          <Button size="xs" variant="light" onClick={activeProfile.refetch}>
             Δοκιμάστε ξανά
           </Button>
         </Stack>

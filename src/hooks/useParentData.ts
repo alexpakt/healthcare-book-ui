@@ -1,11 +1,23 @@
 import { useCallback } from 'react';
-import { useApi } from './useApi';
+import { useApi, useMutation } from './useApi';
 import { parentService } from '../services/parentService';
 import type { Appointment } from '../types/parent';
+import type { UpdateParentProfileRequest } from '../types/profile';
 
 export function useParentDashboardData() {
   const fetchFn = useCallback(() => parentService.getDashboardData(), []);
   return useApi(fetchFn);
+}
+
+export function useParentProfile(skip: boolean = false) {
+  const fetchFn = useCallback(() => parentService.getMyProfile(), [skip]);
+  return useApi(fetchFn, undefined, { skip });
+}
+
+export function useParentUpdateProfile() {
+  return useMutation((request?: UpdateParentProfileRequest) =>
+    parentService.updateMyProfile(request!)
+  );
 }
 
 export function useParentDashboard() {
