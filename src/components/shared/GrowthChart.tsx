@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from 'recharts';
 import {Alert, Center, Loader, SegmentedControl, Stack, Text, Title} from '@mantine/core';
 import {IconAlertCircle} from '@tabler/icons-react';
-import {childHealthRecordService} from '../../services/childHealthRecordService';
+import {useGrowthReferenceCurves} from '../../hooks/useChildData';
 import {parseLocalDate} from '../../utils/dateTime';
 import type {GrowthMeasurement} from '../../types/parent';
 
@@ -53,9 +53,11 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
   dateOfBirth,
 }) => {
   const [type, setType] = useState<MeasurementType>('height');
-  const [references, setReferences] = useState<ReferencePoint[]>([]);
-  const [loadingReferences, setLoadingReferences] = useState(false);
   const isMobile = useIsMobile();
+  const measurementTypeKey = type === 'height' ? 'HEIGHT' : type === 'weight' ? 'WEIGHT' : 'HEAD_CIRCUMFERENCE';
+  const { data: referenceData, loading: referencesLoading } = useGrowthReferenceCurves(childId, measurementTypeKey);
+  const references: ReferencePoint[] = referenceData ?? [];
+  const loadingReferences = !!childId && referencesLoading;
 
   const childAgeInMonths = useMemo(() => {
     const birthDate = dateOfBirth ? parseLocalDate(dateOfBirth) : null;
@@ -65,25 +67,6 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
       (today.getFullYear() - birthDate.getFullYear()) * 12 + (today.getMonth() - birthDate.getMonth());
     return Math.max(0, ageInMonths);
   }, [dateOfBirth]);
-
-  useEffect(() => {
-    if (!childId) return;
-
-    const fetchReferences = async () => {
-      try {
-        setLoadingReferences(true);
-        const measurementTypeKey = type === 'height' ? 'HEIGHT' : type === 'weight' ? 'WEIGHT' : 'HEAD_CIRCUMFERENCE';
-        const data = await childHealthRecordService.getGrowthReferenceCurves(childId, measurementTypeKey);
-        setReferences(data);
-      } catch (err) {
-        console.error('Error fetching reference curves:', err);
-      } finally {
-        setLoadingReferences(false);
-      }
-    };
-
-    fetchReferences();
-  }, [childId, type]);
 
   if (isLoading || loadingReferences) {
     return (

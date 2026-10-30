@@ -66,3 +66,19 @@ export function useChildAllergies(childId: number) {
   const fetchFn = useCallback(() => childHealthRecordService.getAllergies(childId), [childId]);
   return useApi(fetchFn);
 }
+
+export function useSearchChildByAmka() {
+  return useMutation((amka?: string) => childService.searchByAmka(amka!));
+}
+
+export function useGrowthReferenceCurves(
+  childId: number | undefined,
+  measurementType: string
+) {
+  const skip = !childId;
+  const fetchFn = useCallback(
+    () => childHealthRecordService.getGrowthReferenceCurves(childId!, measurementType),
+    [childId, measurementType]
+  );
+  return useApi(fetchFn, undefined, { skip });
+}

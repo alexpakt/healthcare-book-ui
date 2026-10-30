@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Table, Text, Stack, Center, Loader, Badge, Button } from '@mantine/core';
 import { IconArrowRight } from '@tabler/icons-react';
 import { getAgeDisplay } from '../../utils/ageCalculator';
 import { SearchChildForm } from './SearchChildForm';
-import { doctorChildRequestService, type DoctorChildRequestResponse } from '../../services/doctorChildRequestService';
+import { useSentPendingChildRequests } from '../../hooks/useDoctorChildRequests';
 import type { AssignedChild } from '../../types/doctor';
 
 interface PatientsTableProps {
@@ -17,23 +17,8 @@ export const PatientsTable: React.FC<PatientsTableProps> = ({
   isLoading,
   onViewHistory,
 }) => {
-  const [pendingRequests, setPendingRequests] = useState<DoctorChildRequestResponse[]>([]);
-  const [loadingRequests, setLoadingRequests] = useState(false);
-
-  useEffect(() => {
-    const fetchPendingRequests = async () => {
-      setLoadingRequests(true);
-      try {
-        const requests = await doctorChildRequestService.getSentPendingRequests();
-        setPendingRequests(requests);
-      } catch (error) {
-        console.error('Error fetching pending requests:', error);
-      } finally {
-        setLoadingRequests(false);
-      }
-    };
-    fetchPendingRequests();
-  }, []);
+  const { data, loading: loadingRequests } = useSentPendingChildRequests();
+  const pendingRequests = data ?? [];
 
   if (isLoading || loadingRequests) {
     return (

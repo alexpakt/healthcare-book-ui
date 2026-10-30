@@ -15,8 +15,8 @@ import {
   Loader,
 } from '@mantine/core';
 import { IconAlertCircle, IconSearch } from '@tabler/icons-react';
-import { childService } from '../../services/childService';
-import { doctorChildRequestService } from '../../services/doctorChildRequestService';
+import { useSearchChildByAmka } from '../../hooks/useChildData';
+import { useSendConnectionRequest } from '../../hooks/useDoctorChildRequests';
 import type { ChildRecord } from '../../services/childService';
 import type { AssignedChild } from '../../types/doctor';
 import { formatDate } from '../../utils/dateFormat';
@@ -28,13 +28,13 @@ interface SearchChildFormProps {
 export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) => {
   const navigate = useNavigate();
   const [amka, setAmka] = useState('');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [foundChild, setFoundChild] = useState<ChildRecord | null>(null);
   const [requestOpened, setRequestOpened] = useState(false);
   const [requestNotes, setRequestNotes] = useState('');
-  const [submitting, setSubmitting] = useState(false);
   const [requestError, setRequestError] = useState('');
+  const { mutate: searchChild, loading } = useSearchChildByAmka();
+  const { mutate: sendConnectionRequest, loading: submitting } = useSendConnectionRequest();
 
   const isAlreadyPatient = foundChild && patients?.some(p => p.id === foundChild.id);
 
@@ -50,16 +50,13 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
     }
 
     setError('');
-    setLoading(true);
 
     try {
-      const child = await childService.searchByAmka(amka);
+      const child = await searchChild(amka);
       setFoundChild(child);
     } catch {
       setError('Δεν υπάρχει αυτός ο ΑΜΚΑ καταχωρημένος στην βάση δεδομένων.');
       setFoundChild(null);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -72,9 +69,8 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
     if (!foundChild) return;
 
     setRequestError('');
-    setSubmitting(true);
     try {
-      await doctorChildRequestService.sendConnectionRequest({
+      await sendConnectionRequest({
         childId: foundChild.id,
         notes: requestNotes || undefined,
       });
@@ -84,12 +80,7 @@ export const SearchChildForm: React.FC<SearchChildFormProps> = ({ patients }) =>
       setRequestNotes('');
       setRequestOpened(false);
     } catch (err: any) {
-      setRequestError(
-        err.response?.data?.message ||
-          'Σφάλμα κατά την αποστολή της αίτησης'
-      );
-    } finally {
-      setSubmitting(false);
+      setRequestError(err.message || 'Σφάλμα κατά την αποστολή της αίτησης');
     }
   };
 

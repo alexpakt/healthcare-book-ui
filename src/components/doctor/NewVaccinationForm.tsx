@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -14,8 +14,9 @@ import {
   Center,
 } from '@mantine/core';
 import { IconAlertCircle, IconInfoCircle } from '@tabler/icons-react';
-import { doctorService, type CreateVaccinationRequest } from '../../services/doctorService';
-import { vaccinationCatalogService, type VaccineCatalogEntry } from '../../services/vaccinationCatalogService';
+import { useDoctorCreateVaccination } from '../../hooks/useDoctorData';
+import type { CreateVaccinationRequest } from '../../services/doctorService';
+import { useAllVaccines } from '../../hooks/useVaccinationCatalog';
 import type { VaccinationRecord, VaccinationSchedule } from '../../types/parent';
 import { getNextMissingDoseNumber } from '../../utils/vaccinationStatus';
 import { isBeforeBirthDate, parseLocalDate, toLocalIsoDate } from '../../utils/dateTime';
@@ -67,29 +68,12 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
 }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState<Omit<VaccinationFormData, 'childId'>>(EMPTY_FORM);
-  const [catalog, setCatalog] = useState<VaccineCatalogEntry[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingCatalog, setLoadingCatalog] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchVaccines = async () => {
-      try {
-        setLoadingCatalog(true);
-
-        setCatalog(await vaccinationCatalogService.getAllVaccines());
-      } catch (err) {
-        console.error('Error loading vaccines:', err);
-        setError('Αποτυχία φόρτωσης καταλόγου εμβολίων');
-      } finally {
-        setLoadingCatalog(false);
-      }
-    };
-
-    if (opened) {
-      fetchVaccines();
-    }
-  }, [opened]);
+  const { data: catalogData, loading: catalogLoading, error: catalogError } = useAllVaccines(!opened);
+  const { mutate: createVaccination, loading } = useDoctorCreateVaccination();
+  const catalog = catalogData ?? [];
+  const loadingCatalog = opened && catalogLoading;
+  const displayedError = error ?? (opened && catalogError ? 'Αποτυχία φόρτωσης καταλόγου εμβολίων' : null);
 
   useSyncStateToProps([opened, initialVaccineName], () => {
     if (opened && initialVaccineName) {
@@ -160,11 +144,10 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
       return;
     }
 
-    setLoading(true);
     setError(null);
 
     try {
-      await doctorService.createVaccination({
+      await createVaccination({
         childId,
         ...formData,
         administeredByDoctorId: user?.profileId,
@@ -176,8 +159,6 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
     } catch (err) {
       console.error('Error creating vaccination:', err);
       setError('Αποτυχία καταχώρησης εμβολιασμού. Προσπαθήστε ξανά.');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -191,9 +172,9 @@ export const NewVaccinationForm: React.FC<NewVaccinationFormProps> = ({
             Παιδί: <strong>{childName}</strong>
           </Text>
 
-          {error && (
+          {displayedError && (
             <Alert icon={<IconAlertCircle size={16} />} color="red" title="Σφάλμα">
-              {error}
+              {displayedError}
             </Alert>
           )}
 

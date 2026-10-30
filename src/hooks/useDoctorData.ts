@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { doctorService } from '../services/doctorService';
 import type { UpdateDoctorProfileRequest } from '../types/profile';
-import type { MedicalRecordRequest, GrowthMeasurementRequest, BirthRecordRequest } from '../services/doctorService';
+import type { MedicalRecordRequest, GrowthMeasurementRequest, BirthRecordRequest, CreateVaccinationRequest } from '../services/doctorService';
 
 export function useDoctorDashboardData() {
   const fetchFn = useCallback(() => doctorService.getDashboardData(), []);
@@ -45,6 +45,12 @@ export function useDoctorUpdateMedicalRecord() {
 export function useDoctorCreateGrowthMeasurement() {
   return useMutation((request?: GrowthMeasurementRequest) =>
     doctorService.createGrowthMeasurement(request!)
+  );
+}
+
+export function useDoctorCreateVaccination() {
+  return useMutation((request?: CreateVaccinationRequest) =>
+    doctorService.createVaccination(request!)
   );
 }
 

@@ -2,28 +2,18 @@ import React, { useEffect, useState } from 'react';
 import { Badge, Button, Modal, Stack } from '@mantine/core';
 import { IconBell } from '@tabler/icons-react';
 import { DoctorConnectionRequests } from './DoctorConnectionRequests';
-import { doctorChildRequestService } from '../../services/doctorChildRequestService';
+import { usePendingChildRequests } from '../../hooks/useDoctorChildRequests';
 
 export const DoctorRequestsNotification: React.FC = () => {
   const [modalOpened, setModalOpened] = useState(false);
-  const [pendingCount, setPendingCount] = useState(0);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const { data, refetch } = usePendingChildRequests();
+  const pendingCount = data?.length ?? 0;
 
   useEffect(() => {
-    const fetchPendingCount = async () => {
-      try {
-        const requests = await doctorChildRequestService.getPendingRequests();
-        setPendingCount(requests.length);
-      } catch (error) {
-        console.error('Error fetching pending requests count:', error);
-      }
-    };
-
-    fetchPendingCount();
     // Poll for new requests every 30 seconds
-    const interval = setInterval(fetchPendingCount, 30000);
+    const interval = setInterval(refetch, 30000);
     return () => clearInterval(interval);
-  }, [refreshKey]);
+  }, [refetch]);
 
   if (pendingCount === 0) {
     return null;
@@ -49,7 +39,7 @@ export const DoctorRequestsNotification: React.FC = () => {
         opened={modalOpened}
         onClose={() => {
           setModalOpened(false);
-          setRefreshKey((key) => key + 1);
+          refetch();
         }}
         title="Αιτήσεις Σύνδεσης από Γιατρούς"
         size="lg"

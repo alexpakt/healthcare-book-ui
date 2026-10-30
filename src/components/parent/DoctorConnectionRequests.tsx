@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   Text,
@@ -13,39 +13,28 @@ import {
   Textarea,
 } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
-import { doctorChildRequestService, type DoctorChildRequestResponse } from '../../services/doctorChildRequestService';
+import {
+  usePendingChildRequests,
+  useApproveChildRequest,
+  useRejectChildRequest,
+} from '../../hooks/useDoctorChildRequests';
 import { formatDate } from '../../utils/dateFormat';
 
 export const DoctorConnectionRequests: React.FC = () => {
-  const [requests, setRequests] = useState<DoctorChildRequestResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const { data, loading: loadingRequests, error: loadError, refetch } = usePendingChildRequests();
+  const { mutate: approveRequest } = useApproveChildRequest();
+  const { mutate: rejectRequest, loading: rejecting } = useRejectChildRequest();
+  const requests = data ?? [];
+  const loading = loadingRequests && !data;
+  const error = loadError ? 'Σφάλμα κατά τη φόρτωση των αιτήσεων' : '';
   const [rejectModalOpened, setRejectModalOpened] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
   const [selectedRequestId, setSelectedRequestId] = useState<number | null>(null);
-  const [rejecting, setRejecting] = useState(false);
-
-  useEffect(() => {
-    const fetchRequests = async () => {
-      try {
-        const data = await doctorChildRequestService.getPendingRequests();
-        setRequests(data);
-        setError('');
-      } catch (err: any) {
-        setError('Σφάλμα κατά τη φόρτωση των αιτήσεων');
-        console.error('Error fetching requests:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRequests();
-  }, []);
 
   const handleApprove = async (requestId: number) => {
     try {
-      await doctorChildRequestService.approveRequest(requestId);
-      setRequests(requests.filter(r => r.id !== requestId));
+      await approveRequest(requestId);
+      await refetch();
       alert('Η σύνδεση εγκρίθηκε επιτυχώς');
     } catch (err: any) {
       alert('Σφάλμα κατά την έγκριση της σύνδεσης');
@@ -62,17 +51,14 @@ export const DoctorConnectionRequests: React.FC = () => {
   const handleRejectConfirm = async () => {
     if (!selectedRequestId) return;
 
-    setRejecting(true);
     try {
-      await doctorChildRequestService.rejectRequest(selectedRequestId, rejectReason || undefined);
-      setRequests(requests.filter(r => r.id !== selectedRequestId));
+      await rejectRequest({ requestId: selectedRequestId, reason: rejectReason || undefined });
+      await refetch();
       setRejectModalOpened(false);
       alert('Η σύνδεση απορρίφθηκε');
     } catch (err: any) {
       alert('Σφάλμα κατά την απόρριψη της σύνδεσης');
       console.error('Error rejecting request:', err);
-    } finally {
-      setRejecting(false);
     }
   };
 
