@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Paper, PasswordInput, Button, Group, Stack, Alert, Title } from '@mantine/core';
 import { IconAlertCircle, IconCheck } from '@tabler/icons-react';
-import { authService } from '../../services/authService';
+import { useChangePassword } from '../../hooks/useChangePassword';
 
 const EMPTY_FORM = {
   currentPassword: '',
@@ -11,9 +11,9 @@ const EMPTY_FORM = {
 
 export const ChangePasswordForm: React.FC = () => {
   const [formData, setFormData] = useState(EMPTY_FORM);
-  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const { mutate: changePassword, loading: isSaving } = useChangePassword();
 
   const handleFieldChange = (field: keyof typeof EMPTY_FORM, value: string) => {
     setSuccess(false);
@@ -30,9 +30,8 @@ export const ChangePasswordForm: React.FC = () => {
       return;
     }
 
-    setIsSaving(true);
     try {
-      await authService.changePassword({
+      await changePassword({
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
       });
@@ -40,10 +39,8 @@ export const ChangePasswordForm: React.FC = () => {
       setSuccess(true);
     } catch (err: any) {
       setError(
-        err.response?.data?.message || err.message || 'Αποτυχία αλλαγής κωδικού πρόσβασης.'
+        err.message || 'Αποτυχία αλλαγής κωδικού πρόσβασης.'
       );
-    } finally {
-      setIsSaving(false);
     }
   };
 
