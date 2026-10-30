@@ -1,4 +1,4 @@
-import type { Appointment, MedicalRecord, VaccinationRecord, AllergyRecord } from './parent';
+import type { Appointment, MedicalRecord, AllergyRecord } from './parent';
 
 export interface AssignedChild {
   id: number;
@@ -14,7 +14,6 @@ export interface DoctorAppointment extends Appointment {
 }
 
 export type MedicalHistory = MedicalRecord;
-export type VaccinationHistory = VaccinationRecord;
 export type { AllergyRecord };
 
 export interface DoctorDashboardData {
