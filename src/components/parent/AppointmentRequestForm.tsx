@@ -6,7 +6,7 @@ import { useChildDoctors, useChildren } from '../../hooks/useChildData';
 import { useAppointments, useCreateAppointment } from '../../hooks/useAppointmentData';
 import { isNotInFuture } from '../../utils/dateTime';
 import { getBookedSlots } from '../../utils/slots';
-import { SlotPicker } from './SlotPicker';
+import { SlotPicker } from '../shared/SlotPicker';
 
 interface AppointmentRequestFormProps {
   opened: boolean;

@@ -4,8 +4,10 @@ import { Modal, Button, TextInput, Select, Stack, Alert, Group } from '@mantine/
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useDoctorAssignedChildren } from '../../hooks/useDoctorData';
-import { useCreateAppointment } from '../../hooks/useAppointmentData';
-import { getMinDateTimeLocal, isNotInFuture } from '../../utils/dateTime';
+import { useAppointments, useCreateAppointment } from '../../hooks/useAppointmentData';
+import { isNotInFuture } from '../../utils/dateTime';
+import { getBookedSlots } from '../../utils/slots';
+import { SlotPicker } from '../shared/SlotPicker';
 
 interface NewAppointmentFormProps {
   opened: boolean;
@@ -35,6 +37,8 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
   const [dateError, setDateError] = useState('');
   const { data: patients } = useDoctorAssignedChildren();
   const { mutate, loading, error, reset } = useCreateAppointment();
+  const { data: appointments, refetch: refetchAppointments } = useAppointments();
+  const bookedSlots = getBookedSlots(appointments, user?.profileId ?? 0);
 
   useSyncStateToProps([opened, childId, reason], () => {
     if (opened) {
@@ -78,6 +82,7 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
       });
       setFormData(EMPTY_FORM);
       reset();
+      void refetchAppointments();
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -86,7 +91,7 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
   };
 
   return (
-    <Modal opened={opened} onClose={handleClose} title="Νέο Ραντεβού" size="md" centered>
+    <Modal opened={opened} onClose={handleClose} title="Νέο Ραντεβού" size="xl" centered>
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           {error && (
@@ -111,15 +116,14 @@ export const NewAppointmentForm: React.FC<NewAppointmentFormProps> = ({
             }}
           />
 
-          <TextInput
+          <SlotPicker
             label="Ημερομηνία & Ώρα"
-            type="datetime-local"
-            min={getMinDateTimeLocal()}
             value={formData.appointmentDate}
-            onChange={(e) => {
+            onChange={(value) => {
               setDateError('');
-              handleChange('appointmentDate', e.target.value);
+              handleChange('appointmentDate', value);
             }}
+            disabledSlots={bookedSlots}
             error={dateError}
             required
             disabled={loading}

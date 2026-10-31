@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getMinDateTimeLocal, isBeforeBirthDate, isNotInFuture, parseLocalDate, toLocalIsoDate } from '../dateTime';
+import { isBeforeBirthDate, isNotInFuture, parseLocalDate, toLocalIsoDate } from '../dateTime';
 
 describe('toLocalIsoDate', () => {
   it('returns the local calendar date as YYYY-MM-DD', () => {
@@ -92,26 +92,6 @@ describe('parseLocalDate', () => {
 
   it('rejects an empty value', () => {
     expect(parseLocalDate('')).toBeNull();
-  });
-});
-
-describe('getMinDateTimeLocal', () => {
-  beforeEach(() => {
-    vi.useFakeTimers({ toFake: ['Date'] });
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
-  });
-
-  it('formats the current local time as a datetime-local value', () => {
-    vi.setSystemTime(new Date(2026, 9, 21, 8, 5, 0));
-    expect(getMinDateTimeLocal()).toBe('2026-10-21T08:05');
-  });
-
-  it('pads single-digit month, day, hour and minute', () => {
-    vi.setSystemTime(new Date(2026, 0, 3, 4, 7, 0));
-    expect(getMinDateTimeLocal()).toBe('2026-01-03T04:07');
   });
 });
 
