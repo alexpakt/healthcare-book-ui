@@ -46,7 +46,7 @@ export const ParentDashboard: React.FC = () => {
   return (
     <Stack gap="lg">
       <div>
-        <Title order={2}>Καλώς ήρθατε!</Title>
+        <Title order={2}>Καλώς ήρθατε, {user.username}!</Title>
         <Text c="dimmed">
           Εδώ μπορείτε να διαχειριστείτε το ηλεκτρονικό αρχείο υγείας των παιδιών σας
         </Text>
