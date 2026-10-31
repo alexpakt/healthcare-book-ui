@@ -3,8 +3,10 @@ import { useSyncStateToProps } from '../../hooks/useSyncStateToProps';
 import { Modal, Button, TextInput, Select, Stack, Alert, Group } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useChildDoctors, useChildren } from '../../hooks/useChildData';
-import { useCreateAppointment } from '../../hooks/useAppointmentData';
-import { getMinDateTimeLocal, isNotInFuture } from '../../utils/dateTime';
+import { useAppointments, useCreateAppointment } from '../../hooks/useAppointmentData';
+import { isNotInFuture } from '../../utils/dateTime';
+import { getBookedSlots } from '../../utils/slots';
+import { SlotPicker } from './SlotPicker';
 
 interface AppointmentRequestFormProps {
   opened: boolean;
@@ -35,6 +37,8 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
   const { data: childDoctors, loading: doctorsLoading, error: doctorsError } = useChildDoctors(selectedChildId);
   const doctors = selectedChildId ? childDoctors : null;
   const { mutate, loading, error, reset } = useCreateAppointment();
+  const { data: appointments, refetch: refetchAppointments } = useAppointments();
+  const bookedSlots = getBookedSlots(appointments, Number(formData.doctorId));
 
   useSyncStateToProps([opened, initialChildId, initialReason], () => {
     if (opened && (initialChildId || initialReason)) {
@@ -46,12 +50,32 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
     }
   });
 
+  // A parent with a single child gets that child preselected; a selected child with a single doctor gets that doctor.
+  useSyncStateToProps([opened, children], () => {
+    if (opened && children?.length === 1) {
+      const onlyChildId = String(children[0].id);
+      setFormData((prev) => (prev.childId ? prev : { ...prev, childId: onlyChildId }));
+    }
+  });
+
+  useSyncStateToProps([opened, childDoctors, doctorsLoading], () => {
+    if (opened && selectedChildId && !doctorsLoading && childDoctors?.length === 1) {
+      const onlyDoctorId = String(childDoctors[0].id);
+      setFormData((prev) => (prev.doctorId ? prev : { ...prev, doctorId: onlyDoctorId }));
+    }
+  });
+
   const handleChange = (field: keyof typeof EMPTY_FORM, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleChildChange = (value: string | null) => {
-    setFormData((prev) => ({ ...prev, childId: value || '', doctorId: '' }));
+    setFormData((prev) => ({ ...prev, childId: value || '', doctorId: '', appointmentDate: '' }));
+  };
+
+  const handleDoctorChange = (value: string | null) => {
+    setFormData((prev) => ({ ...prev, doctorId: value || '', appointmentDate: '' }));
+    setDateError('');
   };
 
   const handleClose = () => {
@@ -82,6 +106,7 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
       });
       setFormData(EMPTY_FORM);
       reset();
+      void refetchAppointments();
       onSuccess?.();
       onClose();
     } catch (err) {
@@ -90,7 +115,7 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
   };
 
   return (
-    <Modal opened={opened} onClose={handleClose} title="Αίτημα Ραντεβού" size="md" centered>
+    <Modal opened={opened} onClose={handleClose} title="Αίτημα Ραντεβού" size="xl" centered>
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
           {error && (
@@ -123,24 +148,23 @@ export const AppointmentRequestForm: React.FC<AppointmentRequestFormProps> = ({
               label: `${d.firstName} ${d.lastName} — ${d.specialization}`,
             }))}
             value={formData.doctorId}
-            onChange={(value) => handleChange('doctorId', value || '')}
+            onChange={handleDoctorChange}
             required
             disabled={loading || !selectedChildId || doctorsLoading}
             searchable
           />
 
-          <TextInput
+          <SlotPicker
             label="Ημερομηνία & Ώρα"
-            type="datetime-local"
-            min={getMinDateTimeLocal()}
             value={formData.appointmentDate}
-            onChange={(e) => {
+            onChange={(value) => {
               setDateError('');
-              handleChange('appointmentDate', e.target.value);
+              handleChange('appointmentDate', value);
             }}
+            disabledSlots={bookedSlots}
             error={dateError}
             required
-            disabled={loading}
+            disabled={loading || !formData.doctorId}
           />
 
           <TextInput

@@ -1,0 +1,3 @@
+.slot:not(:disabled):not([aria-pressed='true']):hover {
+  background-color: var(--mantine-color-default-hover);
+}
