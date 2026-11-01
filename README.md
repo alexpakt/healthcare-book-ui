@@ -90,8 +90,7 @@ src/
 │   ├── dashboard/    # Dashboard layouts and parent/doctor dashboard views
 │   ├── doctor/       # Doctor forms: records, vaccinations, growth, appointments
 │   ├── parent/       # Parent views: children, appointments, doctor requests
-│   ├── shared/       # Components used by both roles (charts, lists, status)
-│   └── Growth/       # Growth alert components
+│   └── shared/       # Components used by both roles (charts, lists, status)
 ├── context/          # AuthContext: current user and session state
 ├── hooks/            # Data and state hooks (useApi, useParentData, useVaccinationStatus, ...)
 ├── pages/            # Route-level pages
@@ -119,7 +118,7 @@ src/
 | Path                  | Access        | Purpose                          |
 | --------------------- | ------------- | -------------------------------- |
 | `/login`              | Public        | Log in                           |
-| `/register`           | Public        | Register a parent account        |
+| `/register`           | Public        | Register a parent or doctor      |
 | `/`                   | Logged in     | Dashboard for the current role   |
 | `/appointments`       | Logged in     | Appointments                     |
 | `/children`           | Parent        | Manage children                  |

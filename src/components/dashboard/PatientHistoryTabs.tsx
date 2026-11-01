@@ -23,7 +23,7 @@ import { MedicalRecordsList } from '../shared/MedicalRecordsList';
 import { AllergiesList } from '../shared/AllergiesList';
 import { GrowthChart } from '../shared/GrowthChart';
 import { GrowthMeasurementsList } from '../shared/GrowthMeasurementsList';
-import { GrowthAlertCard } from '../Growth/GrowthAlertCard';
+import { GrowthAlertCard } from '../doctor/GrowthAlertCard';
 import { BirthRecordCard } from '../shared/BirthRecordCard';
 import { VaccinationStatusWithHistory } from '../shared/VaccinationStatusWithHistory';
 import type { DoseSelection } from '../shared/VaccinationStatusGrid';
