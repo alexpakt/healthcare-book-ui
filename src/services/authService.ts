@@ -5,7 +5,7 @@ import type {
   RegisterParentRequest,
   RegisterDoctorRequest,
   ChangePasswordRequest,
-  CurrentUserResponse,
+  AuthUser,
 } from '../types/auth';
 
 export const authService = {
@@ -34,8 +34,8 @@ export const authService = {
     await apiClient.post('/api/auth/change-password', data);
   },
 
-  async me(): Promise<CurrentUserResponse> {
-    const response = await apiClient.get<CurrentUserResponse>('/api/auth/me');
+  async me(): Promise<AuthUser> {
+    const response = await apiClient.get<AuthUser>('/api/auth/me');
     return response.data;
   },
 

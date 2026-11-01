@@ -5,7 +5,7 @@ import LoadingScreen from '../shared/LoadingScreen';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'ROLE_PARENT' | 'ROLE_DOCTOR' | 'ROLE_ADMIN';
+  requiredRole?: 'ROLE_PARENT' | 'ROLE_DOCTOR';
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({

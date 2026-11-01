@@ -12,7 +12,7 @@ export interface ErrorResponse {
   timestamp: string;
 }
 
-export type UserRole = 'ROLE_PARENT' | 'ROLE_DOCTOR' | 'ROLE_ADMIN';
+export type UserRole = 'ROLE_PARENT' | 'ROLE_DOCTOR';
 
 export type AppointmentStatus = 'REQUESTED' | 'SCHEDULED' | 'DECLINED' | 'COMPLETED' | 'CANCELLED';
 

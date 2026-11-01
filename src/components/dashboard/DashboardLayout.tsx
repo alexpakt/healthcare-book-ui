@@ -22,7 +22,6 @@ import {
   IconCalendar,
   IconMedicalCross,
   IconSettings,
-  IconServerCog,
   IconStethoscope,
 } from '@tabler/icons-react';
 import { EchrLogo } from './EchrLogo';
@@ -55,12 +54,6 @@ const getNavItemsByRole = (role: UserRole): NavItem[] => {
       { label: 'Αρχική σελίδα', icon: <IconHome size={16} />, path: '/' },
       { label: 'Ασθενείς', icon: <IconUsers size={16} />, path: '/patients' },
       { label: 'Ραντεβού', icon: <IconCalendar size={16} />, path: '/appointments' },
-    ],
-    ROLE_ADMIN: [
-      { label: 'Αρχική σελίδα', icon: <IconHome size={16} />, path: '/' },
-      { label: 'Χρήστες', icon: <IconUsers size={16} />, path: '/users' },
-      { label: 'Σύστημα', icon: <IconServerCog size={16} />, path: '/system' },
-      { label: 'Ρυθμίσεις', icon: <IconSettings size={16} />, path: '/settings' },
     ],
   };
 

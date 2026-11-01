@@ -1,5 +1,7 @@
+import type { UserRole } from './common';
+
 export interface AuthResponse {
-  role: 'ROLE_PARENT' | 'ROLE_DOCTOR' | 'ROLE_ADMIN';
+  role: UserRole;
   profileId: number;
 }
 
@@ -35,15 +37,9 @@ export interface RegisterDoctorRequest {
   licenseNumber: string;
 }
 
-export interface CurrentUserResponse {
-  username: string;
-  role: 'ROLE_PARENT' | 'ROLE_DOCTOR' | 'ROLE_ADMIN';
-  profileId: number;
-}
-
 export interface AuthUser {
   username: string;
-  role: 'ROLE_PARENT' | 'ROLE_DOCTOR' | 'ROLE_ADMIN';
+  role: UserRole;
   profileId: number;
 }
 
