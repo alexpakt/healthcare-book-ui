@@ -43,7 +43,7 @@ describe('DoctorAppointments status errors', () => {
   });
 
   it('clears the error when the next status update succeeds', async () => {
-    mockApi('get', '/api/appointments', [scheduled]);
+    const listCalls = mockApi('get', '/api/appointments', [scheduled]);
     mockApi('get', '/api/children', []);
     mockApi('patch', '/api/appointments/1/status', { status: 403, message: 'Denied' }, 403);
 
@@ -55,5 +55,7 @@ describe('DoctorAppointments status errors', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Ακύρωση/ }));
 
     await waitFor(() => expect(screen.queryByText('Denied')).not.toBeInTheDocument());
+    // The list reloads after each status update; let the last reload finish before the test ends.
+    await waitFor(() => expect(listCalls).toHaveLength(3));
   });
 });
