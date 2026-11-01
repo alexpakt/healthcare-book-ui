@@ -56,7 +56,6 @@ export const PatientsTable: React.FC<PatientsTableProps> = ({
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {/* Assigned Patients */}
           {patients?.map((patient) => {
             const ageDisplay = getAgeDisplay(patient.dateOfBirth);
             return (
@@ -87,7 +86,6 @@ export const PatientsTable: React.FC<PatientsTableProps> = ({
             );
           })}
 
-          {/* Pending Requests */}
           {pendingRequests.map((request) => (
             <Table.Tr key={`pending-${request.id}`} opacity={0.6}>
               <Table.Td>

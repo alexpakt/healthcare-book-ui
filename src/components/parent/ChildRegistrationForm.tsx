@@ -167,7 +167,6 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
     >
       <form onSubmit={handleSubmit}>
         <Stack gap="md">
-          {/* Error Alert */}
           {error && (
             <Alert
               icon={<IconAlertCircle size={16} />}
@@ -178,7 +177,6 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             </Alert>
           )}
 
-          {/* First Name */}
           <TextInput
             label="Όνομα"
             placeholder="π.χ. Παναγιώτης"
@@ -188,7 +186,6 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             disabled={loading}
           />
 
-          {/* Last Name */}
           <TextInput
             label="Επώνυμο"
             placeholder="π.χ. Παπαδόπουλος"
@@ -198,7 +195,6 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             disabled={loading}
           />
 
-          {/* AMKA */}
           <TextInput
             label="AMKA (Αριθμός Μητρώου Κοινωνικής Ασφάλισης)"
             placeholder="11 ψηφία"
@@ -215,7 +211,6 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             error={formData.amka && !/^\d{11}$/.test(formData.amka) ? 'Πρέπει να είναι ακριβώς 11 ψηφία' : false}
           />
 
-          {/* Date of Birth */}
           <TextInput
             label="Ημερομηνία Γέννησης"
             placeholder="DD/MM/YYYY"
@@ -228,7 +223,6 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             disabled={loading}
           />
 
-          {/* Gender */}
           <Select
             label="Φύλο"
             placeholder="Επιλέξτε φύλο"
@@ -242,7 +236,6 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             disabled={loading}
           />
 
-          {/* Blood Type */}
           <Select
             label="Ομάδα Αίματος (Προαιρετικό)"
             placeholder="Επιλέξτε ομάδα αίματος"
@@ -254,7 +247,6 @@ export const ChildRegistrationForm: React.FC<ChildRegistrationFormProps> = ({
             searchable
           />
 
-          {/* Action Buttons */}
           <Group justify="flex-end">
             <Button
               variant="light"

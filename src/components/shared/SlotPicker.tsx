@@ -14,7 +14,6 @@ import {
 } from '../../utils/slots';
 
 interface SlotPickerProps {
-  /** Selected slot as local "YYYY-MM-DDTHH:mm", or '' when nothing is selected. */
   value: string;
   onChange: (value: string) => void;
   /** Slots that cannot be picked, in the same format as `value`. */

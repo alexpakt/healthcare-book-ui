@@ -313,7 +313,6 @@ export const GrowthChart: React.FC<GrowthChartProps> = ({
               </>
             )}
 
-            {/* Child's measurements */}
             <Line
               type="monotone"
               dataKey="value"

@@ -12,7 +12,6 @@ const Dashboard: React.FC = () => {
     return <LoadingScreen />;
   }
 
-  // Route to appropriate dashboard based on role
   if (user?.role === 'ROLE_PARENT') {
     return <ParentDashboardPage />;
   }

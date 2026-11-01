@@ -9,9 +9,6 @@ export interface DoseState {
   scheduledAppointment?: Appointment;
 }
 
-/**
- * For a recorded vaccination, status is COMPLETED if it was administered.
- */
 export function getVaccinationStatus(vaccination: VaccinationRecord): VaccinationStatus {
   if (vaccination.administeredDate) {
     return 'COMPLETED';

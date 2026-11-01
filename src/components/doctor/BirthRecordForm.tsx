@@ -111,7 +111,6 @@ export const BirthRecordForm: React.FC<BirthRecordFormProps> = ({
       return;
     }
 
-    // Validate Apgar scores
     if (formData.apgarScore1Min < 0 || formData.apgarScore1Min > 10) {
       alert('Το σκορ Apgar 1 λεπτού πρέπει να είναι μεταξύ 0 και 10');
       return;
@@ -122,25 +121,21 @@ export const BirthRecordForm: React.FC<BirthRecordFormProps> = ({
       return;
     }
 
-    // Validate gestational age
     if (formData.gestationalAgeWeeks < 22 || formData.gestationalAgeWeeks > 45) {
       alert('Η εγκυμοσύνη πρέπει να είναι μεταξύ 22 και 45 εβδομάδων');
       return;
     }
 
-    // Validate weight range
     if (formData.birthWeightGrams < 500 || formData.birthWeightGrams > 6000) {
       alert('Το βάρος γέννησης πρέπει να είναι μεταξύ 500g και 6000g');
       return;
     }
 
-    // Validate length range
     if (formData.birthLengthCm < 30 || formData.birthLengthCm > 60) {
       alert('Το μήκος γέννησης πρέπει να είναι μεταξύ 30cm και 60cm');
       return;
     }
 
-    // Validate head circumference range
     if (formData.birthHeadCircumferenceCm < 20 || formData.birthHeadCircumferenceCm > 45) {
       alert('Η περίμετρος κεφαλής πρέπει να είναι μεταξύ 20cm και 45cm');
       return;

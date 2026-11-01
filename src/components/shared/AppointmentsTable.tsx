@@ -8,13 +8,11 @@ import { AppointmentStatusBadge } from './AppointmentStatusBadge';
 type AppointmentRow = Appointment & { parentName?: string };
 
 interface AppointmentsTableProps {
-  /** Who is looking at the table: shows the other party's column and decides what can be cancelled */
   viewer: 'parent' | 'doctor';
   title: string;
   emptyMessage: string;
   appointments: AppointmentRow[] | null;
   isLoading: boolean;
-  /** Shows a "view all" button under the table */
   onViewAll?: () => void;
   onMarkCompleted?: (appointmentId: number) => void;
   onAccept?: (appointmentId: number) => void;
@@ -36,8 +34,6 @@ export const AppointmentsTable: React.FC<AppointmentsTableProps> = ({
 }) => {
   const showActionsColumn = Boolean(onMarkCompleted || onAccept || onDecline || onCancel);
 
-  // A doctor answers a request (accept/decline) and cancels only what is scheduled;
-  // a parent may also withdraw a request that has not been answered yet.
   const canCancel = (status: Appointment['status']) =>
     status === 'SCHEDULED' || (viewer === 'parent' && status === 'REQUESTED');
 

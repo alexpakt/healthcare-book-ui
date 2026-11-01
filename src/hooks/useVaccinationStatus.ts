@@ -7,9 +7,6 @@ interface UseVaccinationStatusProps {
   vaccinations: VaccinationRecord[] | null;
 }
 
-/**
- * Calculate child's age in months based on date of birth
- */
 export const calculateAgeInMonths = (dateOfBirth: string): number => {
   const today = new Date();
   const birthDate = parseLocalDate(dateOfBirth);
@@ -26,10 +23,6 @@ export const calculateAgeInMonths = (dateOfBirth: string): number => {
   return years * 12 + months;
 };
 
-/**
- * Custom hook for vaccination status calculation
- * Returns child's age in months for use with VaccinationStatus component
- */
 export const useVaccinationStatus = ({ child, vaccinations }: UseVaccinationStatusProps) => {
   const ageInMonths = useMemo(
     () => calculateAgeInMonths(child.dateOfBirth),

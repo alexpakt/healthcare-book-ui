@@ -8,7 +8,6 @@ import { formatDate } from '../../utils/dateFormat';
 
 export type ViewerRole = 'PARENT' | 'DOCTOR';
 
-/** The dose a user clicked on in the grid. */
 export interface DoseSelection {
   vaccineName: string;
   vaccineNameGr: string;
@@ -129,7 +128,6 @@ export const VaccinationStatusGrid: React.FC<VaccinationStatusGridProps> = ({
     );
   }
 
-  // Get all unique dose numbers across all vaccines
   const allDoseNumbers = new Set<number>();
   vaccineRows.forEach((row) => {
     row.doses.forEach((dose) => {
