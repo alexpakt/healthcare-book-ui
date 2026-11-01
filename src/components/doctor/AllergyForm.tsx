@@ -118,7 +118,7 @@ export const AllergyForm: React.FC<AllergyFormProps> = ({
           )}
 
           <TextInput
-            label="Αλλεργένιο"
+            label="Αλλεργιογόνο"
             placeholder="π.χ. Φυστίκια, Γάλα, Ψάρι"
             value={formData.allergen}
             onChange={(e) =>
