@@ -1,11 +1,12 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import type {UserRole} from "../../types/common.ts";
 import LoadingScreen from '../shared/LoadingScreen';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'ROLE_PARENT' | 'ROLE_DOCTOR';
+  requiredRole?: UserRole;
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
