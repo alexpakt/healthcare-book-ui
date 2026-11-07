@@ -5,13 +5,11 @@ import type { Appointment } from '../types/parent';
 import type { UpdateParentProfileRequest } from '../types/profile';
 
 export function useParentDashboardData() {
-  const fetchFn = useCallback(() => parentService.getDashboardData(), []);
-  return useApi(fetchFn);
+  return useApi(() => parentService.getDashboardData(), []);
 }
 
 export function useParentProfile(skip: boolean = false) {
-  const fetchFn = useCallback(() => parentService.getMyProfile(), []);
-  return useApi(fetchFn, undefined, { skip });
+  return useApi(() => parentService.getMyProfile(), [], { skip });
 }
 
 export function useParentUpdateProfile() {

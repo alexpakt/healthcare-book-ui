@@ -66,12 +66,28 @@ describe('useApi', () => {
     expect(fetchFn).toHaveBeenCalledTimes(2);
   });
 
-  it('calls onSuccess with the data', async () => {
-    // The fetch function is defined outside the hook, as the app's hooks do with useCallback.
-    const onSuccess = vi.fn();
-    const fetchStable = async () => 'ok';
-    renderHook(() => useApi(fetchStable, [], { onSuccess }));
-    await waitFor(() => expect(onSuccess).toHaveBeenCalledWith('ok'));
+  it('fetches again when a dependency changes', async () => {
+    const { result, rerender } = renderHook(({ id }) => useApi(async () => `child-${id}`, [id]), {
+      initialProps: { id: 1 },
+    });
+    await waitFor(() => expect(result.current.data).toBe('child-1'));
+
+    rerender({ id: 2 });
+    await waitFor(() => expect(result.current.data).toBe('child-2'));
+  });
+
+  it('ignores a slow response that arrives after a newer one', async () => {
+    const resolvers: Record<number, (v: string) => void> = {};
+    const fetchById = (id: number) => new Promise<string>((resolve) => (resolvers[id] = resolve));
+    const { result, rerender } = renderHook(({ id }) => useApi(() => fetchById(id), [id]), {
+      initialProps: { id: 1 },
+    });
+    rerender({ id: 2 });
+
+    await act(async () => resolvers[2]('second'));
+    await act(async () => resolvers[1]('first'));
+
+    expect(result.current.data).toBe('second');
   });
 });
 

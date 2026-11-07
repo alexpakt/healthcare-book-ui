@@ -7,75 +7,54 @@ interface UseApiState<T> {
   error: ErrorResponse | null;
 }
 
-interface UseApiOptions extends ApiQueryOptions {
-  onSuccess?: (data: any) => void;
-  onError?: (error: ErrorResponse) => void;
+function toErrorResponse(err: any): ErrorResponse {
+  return {
+    message: err.response?.data?.message || err.message || 'An error occurred',
+    status: err.response?.status || 500,
+    timestamp: new Date().toISOString(),
+  };
 }
 
 /**
- * Generic hook for fetching data from API
- * Handles loading, error states, and refetching
+ * Fetches data on mount and again whenever a value in `dependencies` changes.
+ * `refetch` forces a new fetch.
  */
 export function useApi<T>(
   fetchFn: () => Promise<T>,
-  _dependencies?: React.DependencyList,
-  options: UseApiOptions = {}
-): UseApiState<T> & { refetch: () => Promise<void> } {
-  const [state, setState] = useState<UseApiState<T>>({
-    data: null,
-    loading: true,
-    error: null,
-  });
-
-  // Use ref to store options so they don't affect dependencies
-  const optionsRef = useRef(options);
+  dependencies: React.DependencyList = [],
+  { skip = false }: ApiQueryOptions = {}
+): UseApiState<T> & { refetch: () => void } {
+  const [state, setState] = useState<UseApiState<T>>({ data: null, loading: true, error: null });
+  const [reloadCount, setReloadCount] = useState(0);
 
   useEffect(() => {
-    optionsRef.current = options;
-  }, [options]);
+    if (skip) return;
 
-  const fetchData = useCallback(async () => {
-    try {
-      setState((prev) => ({ ...prev, loading: true, error: null }));
-      const data = await fetchFn();
-      setState({ data, loading: false, error: null });
-      optionsRef.current.onSuccess?.(data);
-    } catch (err: any) {
-      const error: ErrorResponse = {
-        message: err.response?.data?.message || err.message || 'An error occurred',
-        status: err.response?.status || 500,
-        timestamp: new Date().toISOString(),
-      };
-      setState({ data: null, loading: false, error });
-      optionsRef.current.onError?.(error);
-      console.error('API Error:', error);
-    }
-  }, [fetchFn]);
-
-  const skip = options.skip;
-
-  useEffect(() => {
-    if (optionsRef.current.skip) return;
-
-    let isMounted = true;
-
-    fetchData().then(() => {
-      if (!isMounted) return;
-    });
+    // Set on cleanup so a response from an outdated request is ignored
+    let cancelled = false;
+    // oxlint-disable-next-line react/set-state-in-effect -- the effect starts the fetch, so loading must be set here
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+    fetchFn()
+      .then((data) => {
+        if (!cancelled) setState({ data, loading: false, error: null });
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        const error = toErrorResponse(err);
+        console.error('API Error:', error);
+        setState({ data: null, loading: false, error });
+      });
 
     return () => {
-      isMounted = false;
+      cancelled = true;
     };
-  }, [fetchData, skip]);
+    // fetchFn is a new function every render, so the caller's dependencies decide when to refetch
+    // oxlint-disable-next-line react-hooks/exhaustive-deps
+  }, [skip, reloadCount, ...dependencies]);
 
-  const refetch = useCallback(async () => {
-    await fetchData();
-  }, [fetchData]);
+  const refetch = () => setReloadCount((count) => count + 1);
 
-  return {
-    ...state,
-    refetch,
-  };
+  return { ...state, refetch };
 }
 
 /**
@@ -116,11 +95,7 @@ export function useMutation<T, V = any>(
         optionsRef.current.onSuccess?.(result);
         return result;
       } catch (err: any) {
-        const error: ErrorResponse = {
-          message: err.response?.data?.message || err.message || 'An error occurred',
-          status: err.response?.status || 500,
-          timestamp: new Date().toISOString(),
-        };
+        const error = toErrorResponse(err);
         setState({ data: null, loading: false, error });
         optionsRef.current.onError?.(error);
         throw error;

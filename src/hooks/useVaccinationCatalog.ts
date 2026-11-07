@@ -1,13 +1,10 @@
-import { useCallback } from 'react';
 import { useApi } from './useApi';
 import { vaccinationCatalogService } from '../services/vaccinationCatalogService';
 
 export function useVaccinationSchedules() {
-  const fetchFn = useCallback(() => vaccinationCatalogService.getVaccinationSchedules(), []);
-  return useApi(fetchFn);
+  return useApi(() => vaccinationCatalogService.getVaccinationSchedules(), []);
 }
 
 export function useAllVaccines(skip: boolean = false) {
-  const fetchFn = useCallback(() => vaccinationCatalogService.getAllVaccines(), []);
-  return useApi(fetchFn, undefined, { skip });
+  return useApi(() => vaccinationCatalogService.getAllVaccines(), [], { skip });
 }

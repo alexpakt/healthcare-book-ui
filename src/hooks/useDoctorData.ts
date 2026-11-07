@@ -5,18 +5,15 @@ import type { UpdateDoctorProfileRequest } from '../types/profile';
 import type { MedicalRecordRequest, GrowthMeasurementRequest, BirthRecordRequest, CreateVaccinationRequest } from '../services/doctorService';
 
 export function useDoctorDashboardData() {
-  const fetchFn = useCallback(() => doctorService.getDashboardData(), []);
-  return useApi(fetchFn);
+  return useApi(() => doctorService.getDashboardData(), []);
 }
 
 export function useDoctorAssignedChildren() {
-  const fetchFn = useCallback(() => doctorService.getAssignedChildren(), []);
-  return useApi(fetchFn);
+  return useApi(() => doctorService.getAssignedChildren(), []);
 }
 
 export function useDoctorAppointments(page: number = 1, pageSize: number = 10) {
-  const fetchFn = useCallback(() => doctorService.getAppointments(page, pageSize), [page, pageSize]);
-  return useApi(fetchFn);
+  return useApi(() => doctorService.getAppointments(page, pageSize), [page, pageSize]);
 }
 
 export function useDoctorCreateMedicalRecord() {
@@ -92,8 +89,7 @@ export function useDoctorUpdateBirthRecord() {
 }
 
 export function useDoctorProfile(skip: boolean = false) {
-  const fetchFn = useCallback(() => doctorService.getMyProfile(), []);
-  return useApi(fetchFn, undefined, { skip });
+  return useApi(() => doctorService.getMyProfile(), [], { skip });
 }
 
 export function useDoctorUpdateProfile() {

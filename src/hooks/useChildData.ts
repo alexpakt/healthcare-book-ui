@@ -1,21 +1,17 @@
-import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { childService, type CreateChildRequest } from '../services/childService';
 import { childHealthRecordService } from '../services/childHealthRecordService';
 
 export function useChildren() {
-  const fetchFn = useCallback(() => childService.getMyChildren(), []);
-  return useApi(fetchFn);
+  return useApi(() => childService.getMyChildren(), []);
 }
 
 export function useChild(childId: number) {
-  const fetchFn = useCallback(() => childService.getById(childId), [childId]);
-  return useApi(fetchFn);
+  return useApi(() => childService.getById(childId), [childId]);
 }
 
 export function useChildDoctors(childId?: number) {
-  const fetchFn = useCallback(() => childService.getChildDoctors(childId!), [childId]);
-  return useApi(fetchFn, undefined, { skip: childId === undefined });
+  return useApi(() => childService.getChildDoctors(childId!), [childId], { skip: childId === undefined });
 }
 
 export function useUnassignDoctor() {
@@ -43,28 +39,23 @@ export function useDeleteChild() {
 }
 
 export function useChildGrowthMeasurements(childId: number) {
-  const fetchFn = useCallback(() => childHealthRecordService.getGrowthMeasurements(childId), [childId]);
-  return useApi(fetchFn);
+  return useApi(() => childHealthRecordService.getGrowthMeasurements(childId), [childId]);
 }
 
 export function useChildBirthRecord(childId: number) {
-  const fetchFn = useCallback(() => childHealthRecordService.getBirthRecord(childId), [childId]);
-  return useApi(fetchFn);
+  return useApi(() => childHealthRecordService.getBirthRecord(childId), [childId]);
 }
 
 export function useChildVaccinations(childId: number) {
-  const fetchFn = useCallback(() => childHealthRecordService.getVaccinations(childId), [childId]);
-  return useApi(fetchFn);
+  return useApi(() => childHealthRecordService.getVaccinations(childId), [childId]);
 }
 
 export function useChildMedicalRecords(childId: number) {
-  const fetchFn = useCallback(() => childHealthRecordService.getMedicalRecords(childId), [childId]);
-  return useApi(fetchFn);
+  return useApi(() => childHealthRecordService.getMedicalRecords(childId), [childId]);
 }
 
 export function useChildAllergies(childId: number) {
-  const fetchFn = useCallback(() => childHealthRecordService.getAllergies(childId), [childId]);
-  return useApi(fetchFn);
+  return useApi(() => childHealthRecordService.getAllergies(childId), [childId]);
 }
 
 export function useSearchChildByAmka() {
@@ -76,9 +67,9 @@ export function useGrowthReferenceCurves(
   measurementType: string
 ) {
   const skip = !childId;
-  const fetchFn = useCallback(
+  return useApi(
     () => childHealthRecordService.getGrowthReferenceCurves(childId!, measurementType),
-    [childId, measurementType]
+    [childId, measurementType],
+    { skip }
   );
-  return useApi(fetchFn, undefined, { skip });
 }

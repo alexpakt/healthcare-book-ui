@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import {
   doctorChildRequestService,
@@ -6,13 +5,11 @@ import {
 } from '../services/doctorChildRequestService';
 
 export function usePendingChildRequests() {
-  const fetchFn = useCallback(() => doctorChildRequestService.getPendingRequests(), []);
-  return useApi(fetchFn);
+  return useApi(() => doctorChildRequestService.getPendingRequests(), []);
 }
 
 export function useSentPendingChildRequests() {
-  const fetchFn = useCallback(() => doctorChildRequestService.getSentPendingRequests(), []);
-  return useApi(fetchFn);
+  return useApi(() => doctorChildRequestService.getSentPendingRequests(), []);
 }
 
 export function useSendConnectionRequest() {

@@ -1,16 +1,13 @@
-import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { appointmentService, type CreateAppointmentRequest } from '../services/appointmentService';
 import type { AppointmentStatus } from '../types/common';
 
 export function useAppointments() {
-  const fetchFn = useCallback(() => appointmentService.getAll(), []);
-  return useApi(fetchFn);
+  return useApi(() => appointmentService.getAll(), []);
 }
 
 export function useChildAppointments(childId: number) {
-  const fetchFn = useCallback(() => appointmentService.getForChild(childId), [childId]);
-  return useApi(fetchFn);
+  return useApi(() => appointmentService.getForChild(childId), [childId]);
 }
 
 export function useCreateAppointment() {

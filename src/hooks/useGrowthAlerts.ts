@@ -1,10 +1,8 @@
-import { useCallback } from 'react';
 import { useApi, useMutation } from './useApi';
 import { growthAlertService } from '../services/growthAlertService';
 
 export function useGrowthAlerts(childId: number) {
-  const fetchFn = useCallback(() => growthAlertService.getAlerts(childId), [childId]);
-  return useApi(fetchFn);
+  return useApi(() => growthAlertService.getAlerts(childId), [childId]);
 }
 
 export interface AcknowledgeGrowthAlertPayload {
