@@ -6,7 +6,7 @@ The web frontend for the Electronic Child Health Records (ECHR) system. Parents 
 
 - **React 19** and **TypeScript**
 - **Vite 8** for development and production builds
-- **Mantine 9** for UI components, forms and hooks
+- **Mantine 9** for UI components and hooks
 - **React Router 7** for client-side routing
 - **Axios** for HTTP, with cookie credentials and a response interceptor
 - **Recharts** for growth charts
